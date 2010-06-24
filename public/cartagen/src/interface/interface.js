@@ -17,6 +17,11 @@ var Interface = {
 		Mouse.window_x = Event.pointerX(event)
 		Mouse.window_y = Event.pointerY(event)
 	},
+	tooltipFollow: function(e) {
+		var x = Event.pointerX(e)
+		// Mouse.window_y = Event.pointerY(e)
+		$('tooltip').style.left = x+'px'
+	},
 	/**
  	 * Creates listeners for mouseover and mouseout events for buttons
  	 * on the toolbar; must run every time you change the toolbar.
@@ -30,6 +35,7 @@ var Interface = {
 				$$('.tooltip').each(function(tooltip) {
 					tooltip.remove()
 				})
+				document.stopObserving('mousemove', Interface.tooltipFollow)
 			}
 		})
 	},
@@ -44,6 +50,7 @@ var Interface = {
 		$$('body')[0].insert('<div class="tooltip" id="tooltip">'+name+'</div>')
 		// console.log('hey there '+Mouse.window_x+' '+$('tooltip').style.left)
 		$('tooltip').style.left = (Mouse.window_x)+'px'
+		document.observe('mousemove', Interface.tooltipFollow)
 	},
 	display_iframe: function() {
 		if ($('iframe_code') != undefined) {

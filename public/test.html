@@ -6,7 +6,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
 	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" /> 
 	<meta name="apple-mobile-web-app-capable" content="yes" /> 
-	<title>Cartagen: test</title> 
+	<title>Mapping Tool</title> 
 	<link rel="stylesheet" href="cartagen/style.css" type="text/css" media="screen" title="no title" charset="utf-8"> 
 	<link rel="stylesheet" href="knitter.css" type="text/css" media="screen" title="no title" charset="utf-8"> 
 	<!--[if IE]><script type="text/javascript" src="cartagen/excanvas.js"></script><![endif]--> 
@@ -124,7 +124,7 @@
     	<div class="toolbar"> 
             <a name='Move an image' class='first' href="javascript:void(0);" onClick="Tool.change('Pan');"><img src="images/tools/stock-tool-move-22.png" /></a> 
             <a name='Trace a shape' class='silk' href="javascript:void(0);" onClick="Tool.change('Pen');Tool.Pen.new_shape()"><img src="images/tools/stock-tool-pencil-22.png" /></a>
-            <a name='Create a landmark' class='last' href="javascript:void(0);" onClick="Tool.change('Landmark');"><img src="images/tools/stock-tool-smudge-22.png" /></a> 
+            <a name='Create a landmark' class='last' href="javascript:void(0);" onClick="Tool.change('Landmark');LandmarkEditor.begin()"><img src="images/tools/stock-tool-smudge-22.png" /></a> 
     	</div> 
     	<div class="toolbar"> 
             <a name='Save current location' class='first silk' href="javascript:void(0);" onClick="Knitter.save_current_location()"><img src="images/silk-grey/map.png" /></a> 
@@ -336,12 +336,16 @@ debug: {
 </div> 
 <div id="canvas"></div> 
 
-<div id="popup" style="display: inline; position: absolute; top: 46px; z-index: 2; width: 0px; height: 0px;">
+<div id="zoombar" style="display: inline; position: fixed; top: 46px; z-index: 2; width: 10px; height: 30px; background: #fff; text-align: center;" onselectstart="return false">
+<a onclick="Map.zoom_in()" style="cursor: pointer">+</a><br />
+<a onclick="Map.zoom_out()" style="cursor: pointer">-</a>
 <!--
 <div style="text-align: right;"><span onclick="this.parentNode.parentNode.style.display='none'">X</span></div>
 This is a popup for a landmark.</div>
 -->
 </div>
+
+<div id="cursorbox" style="position: absolute; display: none; z-index: 2;"><img id="cursor" src="blank.gif" /></div>
 
 <script type="text/javascript"> 
 var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");

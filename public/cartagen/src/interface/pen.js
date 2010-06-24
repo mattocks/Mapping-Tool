@@ -48,6 +48,7 @@ Tool.Pen = {
 		$l('Pen mousemove')
 	}.bindAsEventListener(Tool.Pen),
 	dblclick: function() {
+		alert('closed')
 		$l('Pen dblclick')
 		// Tool.Pen.mode = 'inactive'
 		// Did we end inside the first control point of the polygon?
@@ -56,13 +57,52 @@ Tool.Pen = {
 			Tool.Pen.mode = 'inactive'
 			Tool.change('Pan') //Hi!!
 		}
+		/*
+		var logger = ''
+		Tool.Pen.shapes.last().points.each(function(p){
+			logger += p.y + ','
+		})
+		console.log(logger)
+		*/
 		// complete and store polygon
-		
+		Tool.Pen.save(Tool.Pen.shapes.last())
 	}.bindAsEventListener(Tool.Pen),
 	new_shape: function() {
 		Tool.change("Pen")
 		Tool.Pen.mode='draw'
 		Tool.Pen.shapes.push(new Tool.Pen.Shape([]))	
+	},
+	/*
+	 * Saves a shape to the server
+	 */
+	save: function(shape){
+		var points = shape.points
+		var logger = ''
+		shape.points.each(function(p){
+			logger += Projection.x_to_lon(-1*p.x) + ',' + Projection.y_to_lat(p.y) + ' '
+		})
+		
+		new Ajax.Request('landmark.php', {
+	 		method: 'get',
+	  		parameters: {
+				points: logger,
+				/*
+				lon: Projection.x_to_lon(-1*Map.pointer_x()),
+				lat: Projection.y_to_lat(Map.pointer_y()),
+				label: label1,
+				desc: desc1,
+				icon: $('cursor').src.substring($('cursor').src.lastIndexOf('/')+1),
+				*/
+				
+	  		},
+	  		onSuccess: function(response) {
+				var id = response.responseText
+				//Tool.Landmark.points.push(new Tool.Landmark.MyPoint(Map.pointer_x(), Map.pointer_y(), 5, labelName, id))
+	  		},
+			onFailure: function() {
+				alert('No connection to central server')
+			}
+		})
 	},
 	Shape: Class.create({
 		initialize: function(nodes) {
@@ -88,7 +128,7 @@ Tool.Pen = {
 			this.dragging=false
 		},
 		mousedown: function() {
-			if (Geometry.is_point_in_poly(this.points, Map.pointer_x(), Map.pointer_y())&&Tool.active !='Pen') {
+			if (Geometry.is_point_in_poly(this.points, Map.pointer_x(), Map.pointer_y()) && Tool.active !='Pen') {
 				this.active = true
 				this.color='#f00'
 				console.log('Clicked shape')
@@ -229,7 +269,6 @@ Tool.Pen = {
 			return (Geometry.distance(this.x, this.y, Map.pointer_x(), Map.pointer_y()) < this.r)
 		},
 		base: function() {
-			// do stuff
 			this.color = '#200'
 			this.dragging = false
 		},
@@ -242,7 +281,6 @@ Tool.Pen = {
 			}
 		},
 		hover: function() {
-			// do stuff
 			this.color = '#900'
 			this.dragging = false
 		},

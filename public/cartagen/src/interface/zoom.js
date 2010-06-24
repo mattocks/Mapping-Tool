@@ -9,7 +9,7 @@ var Zoom = {
 		
 	},
 	width: 20,
-	height:0.4,
+	height: 0.4,
 	draw: function() {
 		
 		// Glop.height*0.3
