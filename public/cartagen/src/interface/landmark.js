@@ -26,18 +26,18 @@ Tool.Landmark = {
 			var over_point = false
 			var over_text = false
 			Landmark.landmarks.each(function(point){
-				if (point.value.mouse_inside()) {
+				if (point.value.obj.mouse_inside()) {
 					over_point = true
 					throw $break
 				}
-				if (point.value.mouse_inside_text()) {
+				if (point.value.obj.mouse_inside_text()) {
 					over_text = true
 					throw $break
 				}
 				console.log(over_point)
 			})
 			if (!over_point && !over_text) { // if you didn't click on an existing landmark
-				LandmarkEditor.create()
+				LandmarkEditor.create(0)
 			}
 			else { // done dragging the point elsewhere
 				LandmarkEditor.move()
@@ -58,8 +58,8 @@ Tool.Landmark = {
 	// makes the cursor turn into a pointer over the text of a landmark
 	check: function(e){
 		var over = false
-		Landmark.landmarks.each(function(point){
-			if (point.value.mouse_inside_text() || point.value.mouse_inside() || point.value.mouse_over_edit()) {
+		Landmark.landmarks.each(function(l){
+			if (l.value.obj.mouse_inside_text() || l.value.obj.mouse_inside() || l.value.obj.mouse_over_edit()) {
 				over = true
 				throw $break
 			}

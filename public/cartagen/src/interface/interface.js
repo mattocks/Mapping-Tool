@@ -5,12 +5,14 @@
 //= require "zoom"
 //= require "tool"
 //= require "select"
+//= require "landmark"
+//= require "landmark_point"
+//= require "landmark_area"
 //= require "pen"
 //= require "pan"
 //= require "warp"
-//= require "landmark"
 /**
- * @namespace Misc. UI methods that do not related to user-submitted data
+ * @namespace Misc. UI methods that do not relate to user-submitted data
  */
 var Interface = {
 	mousemove: function(event) {

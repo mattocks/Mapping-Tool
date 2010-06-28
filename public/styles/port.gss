@@ -12,7 +12,8 @@ node: {
 	fillStyle: "#ddd",
 	strokeStyle: "#090",
 	lineWidth: 0,
-	radius: 1
+	radius: 1,
+	fontScale: "fixed"
 },
 way: {
 	strokeStyle: "#ccc",

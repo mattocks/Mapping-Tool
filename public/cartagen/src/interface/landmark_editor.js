@@ -3,7 +3,15 @@
  */
 LandmarkEditor = {
 	begin: function(){
-		Modalbox.show('<span>Select an icon for your landmark.<br /><img src="pushpin1.gif" onclick="LandmarkEditor.changeCursor(this.src)" /> <img src="pushpin5.gif" onclick="LandmarkEditor.changeCursor(this.src)" /></span>', {title: 'Create a landmark'})
+		var icons = ["pushpin1.gif", "pushpin5.gif"]
+		var tags = ''
+		icons.each(function(i){
+			tags+='<img src="'+i+'" onclick="LandmarkEditor.changeCursor(\''+i+'\')" /> '
+		})
+		Modalbox.show('<span>Select an icon for your landmark.<br />'+tags+'</span>', {title: 'Create a landmark'})
+	},
+	beginArea: function(){
+		Modalbox.show('<span>Draw an area to outline your landmark. To finish outlining, click on the first point (a hand cursor will appear).</span><br /><input type="button" value="OK" onclick="Modalbox.hide();Tool.Pen.new_shape()" />', {title: 'Create a landmark'})
 	},
 	changeCursor: function(img){
 		$('cursor').src = img
@@ -16,7 +24,7 @@ LandmarkEditor = {
 		var x = Event.pointerX(e)
 		var y = Event.pointerY(e)
 		$('cursorbox').style.display = 'inline'
-		$('cursorbox').style.left = (x+1)+'px'
+		$('cursorbox').style.left = (x-$('cursor').width)+'px'
 		$('cursorbox').style.top = (y-$('cursor').height)+'px'
 	},
 
@@ -25,13 +33,21 @@ LandmarkEditor = {
 		$('main').stopObserving('mousemove', LandmarkEditor.moveCursor)
 		$('cursorbox').stopObserving('mousemove', LandmarkEditor.moveCursor)
 	},
-	create: function(){
-		Modalbox.show('Enter a label<br /><form id="lndmrkfrm" onsubmit="LandmarkEditor.newPoint();Modalbox.hide();LandmarkEditor.resetCursor();return false"><input type="text" id="landmarker" /><br /><br /><textarea id="desc" name="desc" style="height: 200px; width: 400px;"></textarea><br /><input type="submit" value="Make" /><input type="button" value="Cancel" onclick="Modalbox.hide()" /></form>', {title: 'Create a landmark'})
+	create: function(type){
+		var action
+		if (type == 1){
+			action = 'newArea()'
+		}
+		else{
+			action = 'newPoint()'
+		}
+		Modalbox.show('Enter a label<br /><form id="lndmrkfrm" onsubmit="LandmarkEditor.'+action+';Modalbox.hide();LandmarkEditor.resetCursor();return false"><input type="text" id="landmarker" /><br /><br /><textarea id="desc" name="desc" style="height: 200px; width: 400px;"></textarea><br /><input type="submit" value="Make" /><input type="button" value="Cancel" onclick="Modalbox.hide();Events.mouseup()" /></form>', {title: 'Create a landmark'})
 	},
 	newPoint : function(){
 			// stores the landmark in the database
 			var label1 = $('landmarker').value
 			var desc1 = $('desc').value
+			var cursorID = $('cursor').src.substring($('cursor').src.lastIndexOf('/')+1)
 			new Ajax.Request('landmark.php', {
 		 		method: 'get',
 		  		parameters: {
@@ -39,18 +55,52 @@ LandmarkEditor = {
 					lat: Projection.y_to_lat(Map.pointer_y()),
 					label: label1,
 					desc: desc1,
-					icon: $('cursor').src.substring($('cursor').src.lastIndexOf('/')+1),
+					icon: cursorID,
 		  		},
 		  		onSuccess: function(response) {
 					var id = response.responseText
 					//Tool.Landmark.points.push(new Tool.Landmark.MyPoint(Map.pointer_x(), Map.pointer_y(), 5, labelName, id))
-					Landmark.landmarks.set(id, new Landmark.Data(Map.pointer_x(), Map.pointer_y(), 5, label1, desc1, id))
+					Landmark.landmarks.set(id, new Landmark.Data({"x": Map.pointer_x(), "y": Map.pointer_y()}, label1, desc1, cursorID, id))
 		  		},
 				onFailure: function() {
 					alert('No connection to central server')
 				}
 			})
 		Tool.change('Pan')
+	},
+	/*
+	 * Saves a shape to the server
+	 */
+	newArea: function(){
+		var shape = Tool.Pen.current_shape
+		var points = shape.points
+		var label1 = $('landmarker').value
+		var desc1 = $('desc').value
+		var logger = ''
+		shape.points.each(function(p){
+			logger += Projection.x_to_lon(-1*p.x) + ',' + Projection.y_to_lat(p.y) + ' '
+		})
+		
+		new Ajax.Request('landmark.php', {
+	 		method: 'get',
+	  		parameters: {
+				points: logger,
+				label: label1,
+				desc: desc1,
+				
+	  		},
+	  		onSuccess: function(response) {
+				var id = response.responseText
+				Landmark.landmarks.set(id, new Landmark.Data(shape, label1, desc1, 'blank.gif', id))
+				//Tool.Landmark.points.push(new Tool.Landmark.MyPoint(Map.pointer_x(), Map.pointer_y(), 5, labelName, id))
+	  		},
+			onFailure: function() {
+				alert('No connection to central server')
+			}
+		})
+		Tool.Pen.mode = 'inactive'
+		Tool.change('Pan') 
+		Events.mouseup()
 	},
 	move: function() {
 		new Ajax.Request('landmark.php', {

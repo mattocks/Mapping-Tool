@@ -137,8 +137,8 @@ $C = {
 	},
 	/**
 	 * Alias of canvas.translate
-	 * @param {Number} x Number of pixels to tranlate in the x direction
-	 * @param {Number} y Number of pixels to tranlate in the y direction
+	 * @param {Number} x Number of pixels to translate in the x direction
+	 * @param {Number} y Number of pixels to translate in the y direction
 	 */
 	translate: function(x,y) {
 		// if ($C.frozen) return

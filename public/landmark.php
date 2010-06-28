@@ -13,23 +13,48 @@ if (!mysql_select_db("cartagen", $con)) {
 if ($_GET["retrieve"]) {
 	$result = mysql_query("SELECT * FROM main", $con);
 	while ($row = mysql_fetch_array($result)) {
-		if ($row['type'] == 0){
 		$id = $row['id'];
+		if ($row['type'] == 0){
 		$lon = $row['lon'];
 		$lat = $row['lat'];
+		$icon = $row['icon'];
 		$label = str_replace(array("'", "\\", "\r\n"), array("\\'", "\\\\", "\\n"), $row['label']);
 		$desc = str_replace(array("\\", "'", "\r\n", "\n"), array("\\\\", "\\'", "\\n", "\\n"), $row['desc']);
-		echo "Landmark.landmarks.set($id, new Landmark.Data(Projection.lon_to_x($lon), Projection.lat_to_y($lat), 5, '$label', '$desc', $id))\n";
+		//$json_str = "{\"x\": Projection.lon_to_x($lon), \"y\": Projection.lat_to_y($lat), \"label\": \"$label\", \"desc\": \"$desc\", \"icon\": \"$icon\", \"id\": $id}";
+		echo "Landmark.landmarks.set($id, new Landmark.Data({\"x\": Projection.lon_to_x($lon), \"y\": Projection.lat_to_y($lat)}, '$label', '$desc', '$icon', $id))\n";
 		}
 		else{
-		echo "Tool.Pen.shapes.push(new Tool.Pen.Shape([]))\n";
+		/*
+		$points = $row['points'];
+		$list = str_replace(" ", "], [", trim($points));
+		$list = "[" . $list . "]";
+		//echo "Tool.Pen.shapes.push(new Tool.Pen.Shape([$list]))\n";
+		//echo "Tool.Pen.shapes.set($id, new Tool.Pen.Shape([$list], $id))\n";
+		*/
+		/*
+		echo "Landmark.Area.shapes.push(new Landmark.Area.Shape())\n";
 		$points = $row['points'];
 		$point = explode(" ", trim($points));
 		foreach ($point as $i){
 			$p = explode(",", $i);
 			$x = $p[0];
 			$y = $p[1];
-			echo "Tool.Pen.shapes.last().new_point(Projection.lon_to_x($x), Projection.lat_to_y($y))\n";
+			echo "Landmark.Area.shapes.last().new_point(Projection.lon_to_x($x), Projection.lat_to_y($y))\n";
+		}
+		*/
+		$lon = $row['lon'];
+		$lat = $row['lat'];
+		$icon = $row['icon'];
+		$label = str_replace(array("'", "\\", "\r\n"), array("\\'", "\\\\", "\\n"), $row['label']);
+		$desc = str_replace(array("\\", "'", "\r\n", "\n"), array("\\\\", "\\'", "\\n", "\\n"), $row['desc']);
+		echo "Landmark.landmarks.set($id, new Landmark.Data(new Landmark.Area.Shape(), '$label', '$desc', '$icon', $id))\n";
+		$points = $row['points'];
+		$point = explode(" ", trim($points));
+		foreach ($point as $i){
+			$p = explode(",", $i);
+			$x = $p[0];
+			$y = $p[1];
+			echo "Landmark.landmarks.get($id).obj.new_point(Projection.lon_to_x($x), Projection.lat_to_y($y))\n";
 		}
 		}
 	}
@@ -51,7 +76,10 @@ else if ($_GET['remove']) {
 // creates a new shape
 else if ($_GET['points']) {
 	$points = $_GET['points'];
-	if(mysql_query("INSERT INTO `main` (`type`, `points`) VALUES (1, '$points')", $con)){
+	$label=mysql_real_escape_string($_GET["label"]);
+	$desc=mysql_real_escape_string($_GET['desc']);
+	$icon=$_GET['icon'];
+	if(mysql_query("INSERT INTO `main` (`type`, `points`, `label`, `desc`, `icon`) VALUES (1, '$points', '$label', '$desc', '$icon')", $con)){
 		echo "success";
 	}
 	else {

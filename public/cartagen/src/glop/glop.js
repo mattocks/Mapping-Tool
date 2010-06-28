@@ -126,7 +126,7 @@ var Glop = {
 		/**
 		 * @name Glop#glop:draw
 		 * @event
-		 * Fired each frame between glop:predraw and glop:postdraw. SHould be used
+		 * Fired each frame between glop:predraw and glop:postdraw. Should be used
 		 * to draw features on the canvas. If the 'no_draw' property of the event
 		 * is set to true, GLOP will not raw the objects array.
 		 */
@@ -143,6 +143,7 @@ var Glop = {
 		 * Fired at the end of each frame, after features are drawn.
 		 */
 		Glop.fire('glop:postdraw')
+		Glop.fire('glop:descriptions')
 	},
 	/**
 	 * Adjusts size of canvas element to match browser window size
