@@ -1,41 +1,34 @@
-//= require "landmark_data"
-
 /**
  * @namespace Landmark stuff
  */
 
-Landmark.Point =  Class.create({
-		initialize: function(data) {
-			this.x = data.x
-			this.y = data.y
-			//this.x = x
-			//this.y = y
+Point = Class.create(Landmark.Landmark, {
+		initialize: function($super,x,y,label,desc,icon,id) {
+			$super(label,desc,icon,id)
+			this.x = x
+			this.y = y
 			this.r = 5
-			this.label = data.label
-			this.desc = data.desc
-			this.icon = data.icon
-			//this.descView = ['','','','']
 			this.color = '#200'
-			this.id = data.id
 			this.dragging = false
 			this.expanded = false
-			//this.deleted = false
-			this.descRendered = false
-			Glop.observe('glop:postdraw', this.draw.bindAsEventListener(this))
-			Glop.observe('glop:descriptions', this.drawDesc.bindAsEventListener(this))
-			//Glop.observe('mousedown', this.click.bindAsEventListener(this)) /*moved to landmark_data*/
+			this.eventA = this.draw.bindAsEventListener(this)
+			Glop.observe('glop:postdraw', this.eventA)
+			this.eventB = this.drawDesc.bindAsEventListener(this)
+			Glop.observe('glop:descriptions', this.eventB)
+			this.eventC = this.mousedown.bindAsEventListener(this)
+			Glop.observe('mousedown', this.eventC)
 		},
 		draw: function() {
 			//console.log('called draw in point '+this.id)
-			if(!this.deleted){
 			$C.save()
 			$C.line_width(3/Map.zoom)
 			$C.translate(this.x, this.y)
 			$C.fill_style("#333")
 			//$C.opacity(0.6)
+			if(Landmark.mode == 'dragging'){
 			$C.stroke_style(this.color)
 			$C.stroke_circ(0, 0, this.r)
-			var width
+			}
 			var imag = new Image()
 			imag.src = this.icon
 			$C.canvas.drawImage(imag, -imag.width, -imag.height)
@@ -72,53 +65,44 @@ Landmark.Point =  Class.create({
 			else {
 				this.base()
 			}
-			}
-		},
-		drawDesc: function(){
-				//$C.save()
-				if(this.expanded){
-				// description open
-					$C.opacity(1)
-					//$C.translate(this.x, this.y)
-				Landmark.landmarks.get(this.id).showDescription()
-				}
-				else{
-				// stuff to do when description is closed
-				}
-				//$C.restore()
 		},
 		mouse_inside: function() { // should be renamed or revised for clarity
-			return (Geometry.distance(this.x, this.y, Map.pointer_x(), Map.pointer_y()) < this.r + 5)
+			if(Landmark.mode == 'dragging'){
+				return (this.mouse_inside_text()||(Geometry.distance(this.x, this.y, Map.pointer_x(), Map.pointer_y()) < this.r + 5)) && !Landmark.mouse_over_desc()
+			}
+			return (Geometry.distance(this.x, this.y, Map.pointer_x(), Map.pointer_y()) < this.r + 5) && !Landmark.mouse_over_desc()
 		},
-		/*
-		mouse_inside_text: function() {
-			var left = this.x + 5/Map.zoom
-			var right = this.x + (10 + $C.measure_text('Arial', 18, this.label))/Map.zoom
-			var top = this.y - 33/Map.zoom
-			var bottom = this.y - 5/Map.zoom
-			return Map.pointer_x() > left && Map.pointer_x() < right && Map.pointer_y() > top && Map.pointer_y() < bottom // && !this.expanded
-		},
-		*/
 		// temporarily sees if it is over the pushpin marker
 		mouse_inside_text: function() {
 			//var imag = new Image()
 			//imag.src = this.icon
-			var left = this.x - 200
+			var left = this.x - 160
 			var right = this.x
-			var top = this.y - 200
+			var top = this.y - 160
 			var bottom = this.y
-			return Map.pointer_x() > left && Map.pointer_x() < right && Map.pointer_y() > top && Map.pointer_y() < bottom // && !this.expanded
+			return Map.pointer_x() > left && Map.pointer_x() < right && Map.pointer_y() > top && Map.pointer_y() < bottom && !Landmark.mouse_over_desc() // && !this.expanded
 		},
-		mouse_over_edit: function() {
-			var left = this.x + 104/Map.zoom
-			var right = this.x + 255/Map.zoom
-			var top = this.y - 255/Map.zoom
-			var bottom = this.y - 150/Map.zoom
-			var over = Map.pointer_x() > left && Map.pointer_x() < right && Map.pointer_y() > top && Map.pointer_y() < bottom && this.expanded
-			if (over) {
-				console.log('over')
+		mousedown: function($super) {
+			Landmark.current = this.id
+			if (this.mouse_inside()) {  //&& Tool.active!='Landmark') {
+				this.oldx = this.x
+				this.oldy = this.y
+				this.color = '#f00'
+				//console.log('clicked my point with label ' + this.label)
 			}
-			return over
+			else if (this.mouse_inside_text() && Landmark.mode != 'dragging'){
+				this.expanded = !this.expanded
+				//console.log(this.desc)
+			}
+			else if (Landmark.mode == 'dragging'){
+				//Tool.change('Landmark')
+			}
+			else if (this.mouse_over_edit()) {
+				LandmarkEditor.edit()
+			}
+			else {
+				$super()
+			}
 		},
 		base: function() {
 			this.color = '#200'
@@ -130,6 +114,7 @@ Landmark.Point =  Class.create({
 			this.dragging = false
 		},
 		drag: function() {
+			this.expanded = false
 			//console.log('dragging!!!')
 			if (!this.dragging) {
 				this.dragging = true
@@ -137,8 +122,8 @@ Landmark.Point =  Class.create({
 				this.drag_offset_y = Map.pointer_y() - this.y
 			}
 			this.color = '#f00'
-			this.x=Map.pointer_x()
-			this.y=Map.pointer_y()
+			this.x=Map.pointer_x() - this.drag_offset_x
+			this.y=Map.pointer_y() - this.drag_offset_y
 		},
 		r: function() {
 			this.color = '#00f'

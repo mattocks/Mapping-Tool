@@ -106,15 +106,34 @@ var Geometry = {
 	        && (c = !c);
 	    return c;
 	},
+
+	is_point_in_line: function(poly, x, y){
+		// currently under construction. fuzziness varies with slope of line and is inconsistent
+		var c = false;
+		var e = 30; //error for the "fuzziness" of the line
+		for(var i=0; i<poly.length - 1; i++){
+			var x1 = poly[i].x;
+	        	var y1 = poly[i].y;
+			var x2 = poly[i+1].x;
+			var y2 = poly[i+1].y;
+			var m = (y2-y1)/(x2-x1)
+			//console.log(m)
+			if (Math.abs((y-y1) - m*(x-x1)) < e && x >= Math.min(x1, x2) - e && x <= Math.max(x1, x2) + e && y >= Math.min(y1, y2) - e && y <= Math.max(y1, y2) + e){
+				c = true;
+				break;
+			}
+		}
+		return c;
+	},
 	
 	/**
-	 * Returns the intersection of a line and the line pependicular to it that intersects a point.
+	 * Returns the intersection of a line and the line perpendicular to it that intersects a point.
 	 * @param {x}  x-coordinate of the point
 	 * @param {y}  y-coordinate of the point
-	 * @param {x0} x-coordate of the first endpoint of the line
-	 * @param {y0} y-coordate of the first endpoint of the line
-	 * @param {x1} x-coordate of the second endpoint of the line
-	 * @param {y1} y-coordate of the second endpoint of the line
+	 * @param {x0} x-coordinate of the first endpoint of the line
+	 * @param {y0} y-coordinate of the first endpoint of the line
+	 * @param {x1} x-coordinate of the second endpoint of the line
+	 * @param {y1} y-coordinate of the second endpoint of the line
 	 *
 	 * @return Object with x and y properties
 	 * @type Object

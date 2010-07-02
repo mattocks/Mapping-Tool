@@ -5,11 +5,14 @@
 //= require "zoom"
 //= require "tool"
 //= require "select"
-//= require "landmark"
+//= require "point_tool"
+//= require "landmark_class"
 //= require "landmark_point"
-//= require "landmark_area"
-//= require "pen"
+//= require "landmark_region"
+//= require "landmark_path"
+//= require "region_tool"
 //= require "pan"
+//= require "path_tool"
 //= require "warp"
 /**
  * @namespace Misc. UI methods that do not relate to user-submitted data
@@ -23,6 +26,7 @@ var Interface = {
 		var x = Event.pointerX(e)
 		// Mouse.window_y = Event.pointerY(e)
 		$('tooltip').style.left = x+'px'
+		$('tooltip').style.top = '46px'
 	},
 	/**
  	 * Creates listeners for mouseover and mouseout events for buttons
@@ -51,7 +55,9 @@ var Interface = {
 		})
 		$$('body')[0].insert('<div class="tooltip" id="tooltip">'+name+'</div>')
 		// console.log('hey there '+Mouse.window_x+' '+$('tooltip').style.left)
+		$('tooltip').style.position = 'absolute'
 		$('tooltip').style.left = (Mouse.window_x)+'px'
+		$('tooltip').style.top = '46px'
 		document.observe('mousemove', Interface.tooltipFollow)
 	},
 	display_iframe: function() {
@@ -129,7 +135,7 @@ var Interface = {
 	 * Displays 'Loading map data...' until more than 75 percent of the map data is loaded.
 	 */
 	display_loading_message: function(percent) {
-		$$('body')[0].insert('<div onClick="$(\'loading_message\').hide();" id="loading_message" style="position:absolute;z-index:8;top:25%;width:100%;text-align:center;-webkit-user-select:none;-moz-user-select:none;"><div style="width:200px;margin:auto;background:rgba(255,255,255,0.8);font-family:Lucida Grande,Lucida Sans Console,Georgia,sans-serif;font-size:16px;padding:14px;-moz-border-radius:10px;-webkit-border-radius:10px;"><p><img src="/images/spinner.gif" style="margin-bottom:12px;" /><br />Loading map data...</div></div>')
+		$$('body')[0].insert('<div onClick="$(\'loading_message\').hide();" id="loading_message" style="position:absolute;z-index:8;top:25%;width:100%;text-align:center;-webkit-user-select:none;-moz-user-select:none;"><div style="width:200px;margin:auto;background:rgba(255,255,255,0.8);font-family:Lucida Grande,Lucida Sans Console,Georgia,sans-serif;font-size:16px;padding:14px;-moz-border-radius:10px;-webkit-border-radius:10px;"><p><img src="images/spinner.gif" style="margin-bottom:12px;" /><br />Loading map data...</div></div>')
 	},
 	/**
 	 * Prompts the user to select a bbox, then downloads that bbox

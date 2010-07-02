@@ -90,7 +90,7 @@ Tool.Pen = {
 		Tool.change("Pen")
 		Tool.Pen.mode='draw'
 		//Tool.Pen.shapes.push(new Tool.Pen.Shape([]))	
-		Tool.Pen.current_shape = new Landmark.Area.Shape()
+		Tool.Pen.current_shape = new Region.Shape()
 	},
 	/*
 	// Moved into landmark_area.js

@@ -59,8 +59,12 @@ Tool.Warp = {
 	 * Used to select objects in Warper
 	 */
 	mousedown: function() {
+		if(!Landmark.mouse_over_anything()){
+			Tool.change('Pan')
+		}
 	}.bindAsEventListener(Tool.Warp),
 	mouseup: function() {
+		LandmarkEditor.move()
 		$l('Warp mouseup')
 		if (Warper.active_image) {
 			if (Warper.active_image.active_point) {

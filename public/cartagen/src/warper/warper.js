@@ -89,7 +89,9 @@ var Warper = {
 		if (inside_image) {
 			// 'true' forces a change, in case you have an image selected and are selecting a second one
 			Tool.change('Warp',!same_image)
-		} else if (!Tool.hover && Tool.active == 'Warp') Tool.change('Pan')
+		} else if (!Tool.hover && Tool.active == 'Warp') {
+			//Tool.change('Pan') // changed recently
+		}
 		}
 	},
 	/**

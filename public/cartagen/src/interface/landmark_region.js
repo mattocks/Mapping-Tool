@@ -2,7 +2,7 @@
  *@namespace represents an area of a landmark
  */
 
-Path = {
+Region = {
 	Shape: Class.create(Landmark.Landmark, {
 		initialize: function() {
 			this.points = []
@@ -20,14 +20,11 @@ Path = {
 			Glop.observe('mousedown', this.eventC)
 		},
 		setup: function(label,desc,icon,id,color){
-			this.color = color
 			this.label = label
 			this.desc = desc
 			this.icon = icon
 			this.id = id
 			this.color = color
-			//this.drawn = true
-			//$super(label,desc,icon,id)
 		},
 		new_point: function(x,y) {
 			this.points.push(new Landmark.ControlPoint(x, y, 5, this))
@@ -42,7 +39,7 @@ Path = {
 				}
 			})
 			}
-			return Geometry.is_point_in_line(this.points, Map.pointer_x(), Map.pointer_y()) && !Landmark.mouse_over_desc() && !a
+			return Geometry.is_point_in_poly(this.points, Map.pointer_x(), Map.pointer_y()) && !Landmark.mouse_over_desc() && !a
 		},
 		mouse_inside_text: function() {
 			//var imag = new Image()
@@ -51,21 +48,21 @@ Path = {
 			var right = this.x
 			var top = this.y - 200
 			var bottom = this.y
-			return Map.pointer_x() > left && Map.pointer_x() < right && Map.pointer_y() > top && Map.pointer_y() < bottom && !Landmark.mouse_over_desc() // && !this.expanded
+			return Map.pointer_x() > left && Map.pointer_x() < right && Map.pointer_y() > top && Map.pointer_y() < bottom // && !this.expanded
 		},
 		base: function(){
 			//this.color="#222"
 			this.dragging=false
 		},
 		mousedown: function($super) {
-			if (this.mouse_inside() && Tool.active !='Path') {
+			if (this.mouse_inside() && Tool.active !='Pen') {
 				Landmark.current = this.id
 				//this.active = true
 				//this.color='#f00'
 				if(Landmark.mode != 'dragging'){
 					this.expanded = !this.expanded
 				}
-				if(this.expanded){
+				if(this.expanded && this.x==null & this.y==null){
 					this.x = Map.pointer_x()
 					this.y = Map.pointer_y()
 				}
@@ -90,7 +87,7 @@ Path = {
 				Landmark.current = this.id
 				LandmarkEditor.edit()
 			}
-			else if (Tool.active!='Path') {
+			else if (Tool.active!='Pen') {
 				this.active = false
 				//this.color='#000'
 			}
@@ -113,7 +110,7 @@ Path = {
 				if (this.dragging){
 					this.drag_started=true
 					//console.log('Trying to drag')
-					Tool.Path.mode='drag'
+					Tool.Pen.mode='drag'
 					for (var i=0; i<this.points.length; i++){
 						this.points[i].x=this.points[i].old_x + (Map.pointer_x()-this.first_click_x)
 						this.points[i].y=this.points[i].old_y + (Map.pointer_y()-this.first_click_y)
@@ -139,22 +136,24 @@ Path = {
 			}
 			
 				$C.save()
+				//$C.stroke_style('#000')
 				$C.stroke_style(this.color)
-				if (this.active) $C.line_width(3)
-				else $C.line_width(3)
+				$C.fill_style(this.color)
+				if (this.active) $C.line_width(2)
+				else $C.line_width(2)
 				$C.begin_path()
 				if (this.points.length>0){
 					$C.move_to(this.points[0].x, this.points[0].y)		
 					this.points.each(function(point) {
 						$C.line_to(point.x, point.y)
-					})
-					//if (this.drawn){			
-						//$C.line_to(this.points[0].x, this.points[0].y) // counterintuitive to have a line from last to first point, until shape closes
-					//}
+					})			
+					$C.line_to(this.points[0].x, this.points[0].y)
+
 				}
-				$C.opacity(0.5)
+				$C.opacity(0.7)
 				$C.stroke()
-				//$C.fill() // this is the difference between an area and a path! perhaps a small flag (variable) could make some quick distinctions
+				$C.opacity(0.3)
+				$C.fill()
 				$C.restore()
 		},
 	}),

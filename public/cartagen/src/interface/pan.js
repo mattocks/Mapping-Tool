@@ -9,7 +9,9 @@ Tool.Pan = {
 	        Map.rotate_old = Map.rotate
 	}.bindAsEventListener(Tool.Pan),
 	mouseup: function() {
-
+		if(Landmark.mode == 'dragging'){
+			Tool.change('Warp')
+		}
 	}.bindAsEventListener(Tool.Pan),
 	mousemove: function() {
 		var lon = Projection.x_to_lon(-1*Map.pointer_x())

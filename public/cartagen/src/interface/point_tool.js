@@ -1,10 +1,9 @@
-//= require "landmark_data"
-
 /**
  * @namespace The 'Landmark' tool and associated methods.
  */
 
 Tool.Landmark = {
+	mode: 'create',
 	//points: new Hash(),
 	// currentDragging: null,
 	drag: function() {
@@ -26,20 +25,20 @@ Tool.Landmark = {
 			var over_point = false
 			var over_text = false
 			Landmark.landmarks.each(function(point){
-				if (point.value.obj.mouse_inside()) {
+				if (point.value.mouse_inside()) {
 					over_point = true
 					throw $break
 				}
-				if (point.value.obj.mouse_inside_text()) {
+				if (point.value.mouse_inside_text()) {
 					over_text = true
 					throw $break
 				}
 				console.log(over_point)
 			})
-			if (!over_point && !over_text) { // if you didn't click on an existing landmark
+			if (!over_point && !over_text && Landmark.mode != 'dragging') { // if you didn't click on an existing landmark
 				LandmarkEditor.create(0)
 			}
-			else { // done dragging the point elsewhere
+			else if (Landmark.mode == 'dragging') { // done dragging the point elsewhere
 				LandmarkEditor.move()
 			}
 	}.bindAsEventListener(Tool.Landmark),
@@ -50,26 +49,9 @@ Tool.Landmark = {
 		$l('Landmark dblclick')
 		if (true) {
 			//Tool.Landmark.mode2 = 'inactive'
-			//Tool.change('Pan') //Hi!!
+			//Tool.change('Pan')
 		}
 
 	}.bindAsEventListener(Tool.Landmark),
-
-	// makes the cursor turn into a pointer over the text of a landmark
-	check: function(e){
-		var over = false
-		Landmark.landmarks.each(function(l){
-			if (l.value.obj.mouse_inside_text() || l.value.obj.mouse_inside() || l.value.obj.mouse_over_edit()) {
-				over = true
-				throw $break
-			}
-		})
-		if (over) {
-			$('main').style.cursor = 'pointer'
-		}
-		else{
-			$('main').style.cursor = 'default'
-		}
-	},
 	
 }
