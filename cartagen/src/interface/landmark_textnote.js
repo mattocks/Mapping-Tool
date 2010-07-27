@@ -1,7 +1,7 @@
 //= require "landmark_image"
 Textnote = Class.create(Img, {
-	initialize: function($super,x,y,label,desc,icon,id){
-		$super(x,y,label,desc,icon,id)
+	initialize: function($super,x,y,label,desc,icon,id,timestamp){
+		$super(x,y,label,desc,icon,id,timestamp)
 		this.noteRendered = false
 		this.noteView = ['','','','']
 	},

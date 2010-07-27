@@ -20,7 +20,8 @@ else if(mysql_query("INSERT INTO `landmarks` (`map`, `type`, `points`, `label`, 
 	$result = mysql_query("SELECT * FROM `landmarks` ORDER BY id DESC LIMIT 1", $con);
 	while ($row = mysql_fetch_array($result)){
 		$id =  $row['id'];
-		echo $id;
+		$timestamp = $row['timestamp'];
+		echo "$id,$timestamp"; // so javascript can add these parameters to the new landmark
 	}
 	// update timestamp for map
 	$x = mysql_query("SELECT `map` FROM `landmarks` WHERE `id` = $id");

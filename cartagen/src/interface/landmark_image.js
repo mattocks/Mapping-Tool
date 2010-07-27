@@ -3,7 +3,7 @@
  */
 
 Img = Class.create(Landmark.Landmark, {
-	initialize: function($super,x,y,label,desc,icon,id) {
+	initialize: function($super,x,y,label,desc,icon,id,timestamp) {
 		//$super(label,desc,icon,id)
 		this.x = x
 		this.y = y
@@ -14,6 +14,7 @@ Img = Class.create(Landmark.Landmark, {
 		this.color = '#200'
 		this.dragging = false
 		this.expanded = false
+		this.timestamp = timestamp
 		this.img = new Image()
 		this.img.src = this.icon
 		this.tab = 'img' // for tab view

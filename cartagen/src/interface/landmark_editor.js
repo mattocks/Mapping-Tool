@@ -163,13 +163,16 @@ LandmarkEditor = {
 				mapid: Landmark.map,
 	  		},
 	  		onSuccess: function(response) {
-				var id = response.responseText.trim();
-				Landmark.landmarks.set(id, new Point(Map.pointer_x(), Map.pointer_y(), label1, desc1, LandmarkEditor.temp_icon, id))
-				console.log(LandmarkEditor.temp_icon)
+				var r = response.responseText.trim().split(",");
+				var id = r[0];
+				var timestamp = r[1];
+				Landmark.landmarks.set(id, new Point(Map.pointer_x(), Map.pointer_y(), label1, desc1, LandmarkEditor.temp_icon, id, timestamp))
+				//console.log(LandmarkEditor.temp_icon)
 				//Landmark.landmarks.set(id, new Point(Map.pointer_x(), Map.pointer_y(), label1, desc1, color1, id))
 				//LandmarkEditor.resetImg()
 	  		},
 			onFailure: function() {
+				console.log('failed')
 				var id = LandmarkEditor.idd++ // local id created
 				Landmark.landmarks.set(id, new Point(Map.pointer_x(), Map.pointer_y(), label1, desc1, color1, id))
 				//LandmarkEditor.resetImg()
@@ -196,8 +199,10 @@ LandmarkEditor = {
 				mapid: Landmark.map,
 	  		},
 	  		onSuccess: function(response) {
-				var id = response.responseText.trim();
-				Landmark.landmarks.set(id, new Textnote(Map.pointer_x(), Map.pointer_y(), label1, desc1, cursorID, id))
+				var r = response.responseText.trim().split(",");
+				var id = r[0];
+				var timestamp = r[1];
+				Landmark.landmarks.set(id, new Textnote(Map.pointer_x(), Map.pointer_y(), label1, desc1, cursorID, id, timestamp))
 				LandmarkEditor.resetImg()
 	  		},
 			onFailure: function() {
@@ -259,8 +264,10 @@ LandmarkEditor = {
 				mapid: Landmark.map,
 	  		},
 	  		onSuccess: function(response) {
-				var id = response.responseText.trim()
-				shape.setup(label1, desc1, id, color1)
+				var r = response.responseText.trim().split(",");
+				var id = r[0];
+				var timestamp = r[1];
+				shape.setup(label1, desc1, id, color1, [], timestamp)
 				Landmark.landmarks.set(id, shape)
 	  		},
 			onFailure: function() {

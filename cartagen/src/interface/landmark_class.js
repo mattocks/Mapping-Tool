@@ -137,12 +137,13 @@ Landmark = {
 			this.tags = (!tags) ? [] : tags
 			//$('holder').insert('<div onclick="Landmark.goTo('+this.id+')" id="goto'+this.id+'">'+this.label+'</div>')		
 		},
-		setup: function(label,desc,id,color,tags){
+		setup: function(label,desc,id,color,tags,timestamp){
 			this.color = color
 			this.label = label
 			this.desc = desc
 			this.id = id
 			this.color = color
+			this.timestamp = timestamp
 			this.active = false
 			this.tags = (!tags) ? [] : tags
 			//$('holder').insert('<div onclick="Landmark.goTo('+this.id+')" id="goto'+this.id+'">'+this.label+'</div>')

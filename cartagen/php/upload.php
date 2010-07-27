@@ -17,6 +17,7 @@ if(mysql_query("INSERT INTO `landmarks` (`map`, `type`, `points`, `label`, `desc
 	$result = mysql_query("SELECT * FROM `landmarks` ORDER BY id DESC LIMIT 1", $con);
 	while ($row = mysql_fetch_array($result)){
 		$id = $row['id'];
+		$timestamp = $row['timestamp'];
 		$filename = $id.$ext;
 		//echo $filename;
 		list($lon, $lat) = explode(",", $points);
@@ -64,7 +65,7 @@ if(mysql_query("INSERT INTO `landmarks` (`map`, `type`, `points`, `label`, `desc
 		// update timestamp for map
 		mysql_query("UPDATE `maps` SET `timestamp` = NOW() WHERE `id` = $map");
 	//} 
-	echo "<script type=\"text/javascript\">alert('yay');parent.Landmark.landmarks.set($id, new parent.Img(parent.Projection.lon_to_x($lon), parent.Projection.lat_to_y($lat), '$label','$desc','upload/$id.jpg',$id));parent.Modalbox.hide();parent.Tool.change('Pan');</script>";
+	echo "<script type=\"text/javascript\">alert('yay');parent.Landmark.landmarks.set($id, new parent.Img(parent.Projection.lon_to_x($lon), parent.Projection.lat_to_y($lat), '$label','$desc','upload/$id.jpg',$id,'$timestamp'));parent.Modalbox.hide();parent.Tool.change('Pan');</script>";
 }
 else {
 	echo "<script>alert('noo')</script>Could not insert values into database";

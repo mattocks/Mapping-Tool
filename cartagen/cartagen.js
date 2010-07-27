@@ -8410,11 +8410,13 @@ LandmarkEditor = {
 				mapid: Landmark.map,
 	  		},
 	  		onSuccess: function(response) {
-				var id = response.responseText.trim();
-				Landmark.landmarks.set(id, new Point(Map.pointer_x(), Map.pointer_y(), label1, desc1, LandmarkEditor.temp_icon, id))
-				console.log(LandmarkEditor.temp_icon)
+				var r = response.responseText.trim().split(",");
+				var id = r[0];
+				var timestamp = r[1];
+				Landmark.landmarks.set(id, new Point(Map.pointer_x(), Map.pointer_y(), label1, desc1, LandmarkEditor.temp_icon, id, timestamp))
 	  		},
 			onFailure: function() {
+				console.log('failed')
 				var id = LandmarkEditor.idd++ // local id created
 				Landmark.landmarks.set(id, new Point(Map.pointer_x(), Map.pointer_y(), label1, desc1, color1, id))
 			}
@@ -8437,8 +8439,10 @@ LandmarkEditor = {
 				mapid: Landmark.map,
 	  		},
 	  		onSuccess: function(response) {
-				var id = response.responseText.trim();
-				Landmark.landmarks.set(id, new Textnote(Map.pointer_x(), Map.pointer_y(), label1, desc1, cursorID, id))
+				var r = response.responseText.trim().split(",");
+				var id = r[0];
+				var timestamp = r[1];
+				Landmark.landmarks.set(id, new Textnote(Map.pointer_x(), Map.pointer_y(), label1, desc1, cursorID, id, timestamp))
 				LandmarkEditor.resetImg()
 	  		},
 			onFailure: function() {
@@ -8499,8 +8503,10 @@ LandmarkEditor = {
 				mapid: Landmark.map,
 	  		},
 	  		onSuccess: function(response) {
-				var id = response.responseText.trim()
-				shape.setup(label1, desc1, id, color1)
+				var r = response.responseText.trim().split(",");
+				var id = r[0];
+				var timestamp = r[1];
+				shape.setup(label1, desc1, id, color1, [], timestamp)
 				Landmark.landmarks.set(id, shape)
 	  		},
 			onFailure: function() {
@@ -8665,6 +8671,14 @@ MapEditor = {
 		})
 		Glop.trigger_draw(2)
 	},
+	refresh: function(){
+		new Ajax.Request('cartagen/php/refresh.php', {
+			method: 'get',
+			parameters: {
+				map: Landmark.map,
+			},
+		})
+	},
 	center: function(){
 		new Ajax.Request('cartagen/php/editmap.php', {
 		 	method: 'get',
@@ -8710,10 +8724,17 @@ MapEditor = {
 document.observe("dom:loaded", function() {
 	if(location.search.toQueryParams().map){
 		MapEditor.load(location.search.toQueryParams().map)
+		new PeriodicalExecuter(function(pe) {
+			MapEditor.refresh()
+		}, 10);
 	}
 	else{
-		if(location.href.indexOf('maps.html') == -1)
+		if(location.href.indexOf('maps.html') == -1){
 			MapEditor.load(1)
+			new PeriodicalExecuter(function(pe) {
+				MapEditor.refresh()
+			}, 10);
+		}
 	}
 })
 
@@ -8844,12 +8865,13 @@ Landmark = {
 			this.desc = desc
 			this.tags = (!tags) ? [] : tags
 		},
-		setup: function(label,desc,id,color,tags){
+		setup: function(label,desc,id,color,tags,timestamp){
 			this.color = color
 			this.label = label
 			this.desc = desc
 			this.id = id
 			this.color = color
+			this.timestamp = timestamp
 			this.active = false
 			this.tags = (!tags) ? [] : tags
 		},
@@ -8959,7 +8981,7 @@ Landmark = {
 }
 
 Point = Class.create(Landmark.Landmark, {
-	initialize: function($super,x,y,label,desc,icon,id) {
+	initialize: function($super,x,y,label,desc,icon,id,timestamp) {
 		this.x = x
 		this.y = y
 		this.label = label
@@ -8971,6 +8993,7 @@ Point = Class.create(Landmark.Landmark, {
 		this.r = 5
 		this.dragging = false
 		this.expanded = false
+		this.timestamp = timestamp
 		this.eventA = this.draw.bindAsEventListener(this)
 		Glop.observe('glop:points', this.eventA)
 		this.eventB = this.drawDesc.bindAsEventListener(this)
@@ -9383,7 +9406,7 @@ Path = Class.create(Landmark.Landmark, {
 })
 
 Img = Class.create(Landmark.Landmark, {
-	initialize: function($super,x,y,label,desc,icon,id) {
+	initialize: function($super,x,y,label,desc,icon,id,timestamp) {
 		this.x = x
 		this.y = y
 		this.label = label
@@ -9393,6 +9416,7 @@ Img = Class.create(Landmark.Landmark, {
 		this.color = '#200'
 		this.dragging = false
 		this.expanded = false
+		this.timestamp = timestamp
 		this.img = new Image()
 		this.img.src = this.icon
 		this.tab = 'img' // for tab view
@@ -9539,8 +9563,8 @@ Img = Class.create(Landmark.Landmark, {
 	}
 })
 Textnote = Class.create(Img, {
-	initialize: function($super,x,y,label,desc,icon,id){
-		$super(x,y,label,desc,icon,id)
+	initialize: function($super,x,y,label,desc,icon,id,timestamp){
+		$super(x,y,label,desc,icon,id,timestamp)
 		this.noteRendered = false
 		this.noteView = ['','','','']
 	},

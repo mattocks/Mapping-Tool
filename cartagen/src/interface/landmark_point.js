@@ -3,7 +3,7 @@
  */
 
 Point = Class.create(Landmark.Landmark, {
-	initialize: function($super,x,y,label,desc,icon,id) {
+	initialize: function($super,x,y,label,desc,icon,id,timestamp) {
 		//$super(label,desc,icon,id)
 		this.x = x
 		this.y = y
@@ -17,6 +17,7 @@ Point = Class.create(Landmark.Landmark, {
 		this.r = 5
 		this.dragging = false
 		this.expanded = false
+		this.timestamp = timestamp
 		this.eventA = this.draw.bindAsEventListener(this)
 		Glop.observe('glop:points', this.eventA)
 		this.eventB = this.drawDesc.bindAsEventListener(this)

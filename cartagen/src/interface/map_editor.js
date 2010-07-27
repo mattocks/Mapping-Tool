@@ -58,6 +58,15 @@ MapEditor = {
 		//$('mapper').insert('<div id=\'holder\'></div>')
 		Glop.trigger_draw(2)
 	},
+	refresh: function(){
+		new Ajax.Request('cartagen/php/refresh.php', {
+			method: 'get',
+			parameters: {
+				map: Landmark.map,
+			},
+			//onSuccess
+		})
+	},
 	center: function(){
 		new Ajax.Request('cartagen/php/editmap.php', {
 		 	method: 'get',
@@ -103,9 +112,16 @@ MapEditor = {
 document.observe("dom:loaded", function() {
 	if(location.search.toQueryParams().map){
 		MapEditor.load(location.search.toQueryParams().map)
+		new PeriodicalExecuter(function(pe) {
+			MapEditor.refresh()
+		}, 10);
 	}
 	else{
-		if(location.href.indexOf('maps.html') == -1)
+		if(location.href.indexOf('maps.html') == -1){
 			MapEditor.load(1)
+			new PeriodicalExecuter(function(pe) {
+				MapEditor.refresh()
+			}, 10);
+		}
 	}	
 })
