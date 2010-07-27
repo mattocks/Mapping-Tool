@@ -87,7 +87,7 @@ var Geometry = {
 		return !(box2left > box1right || box2right < box1left || box2top > box1bottom || box2bottom < box1top)
 	},
 	/**
-	 * Determines of a point is in a polygon. This should be rewritten at some point, as the source
+	 * Determines if a point is in a polygon. This should be rewritten at some point, as the source
 	 * is really nasty.
 	 * @param {Node[]} poly Array of nodes that make up the polygon
 	 * @param {Number} x    X-coordinate of the point to check for
@@ -116,7 +116,7 @@ var Geometry = {
 	        	var y1 = poly[i].y;
 			var x2 = poly[i+1].x;
 			var y2 = poly[i+1].y;
-			var m = (y2-y1)/(x2-x1)
+			var m = (y2-y1)/(x2-x1);
 			//console.log(m)
 			if (Math.abs((y-y1) - m*(x-x1)) < e && x >= Math.min(x1, x2) - e && x <= Math.max(x1, x2) + e && y >= Math.min(y1, y2) - e && y <= Math.max(y1, y2) + e){
 				c = true;
@@ -193,7 +193,7 @@ var Geometry = {
 	},
 
 	/**
-	 * Finds the area of a polygon
+	 * Finds the area of a polygon using map units
 	 * @param {Node[]}  nodes    Array of nodes that make up the polygon 
 	 * @param {Boolean} [signed] If true, returns a signed area, else returns a positive area.
 	 *                           Defaults to false.
@@ -212,8 +212,82 @@ var Geometry = {
 		if (signed) return area/2
 		else return Math.abs(area/2)
 	},
+	// real area...this is harder than I thought with the conversions. not yet implemented. this is wrong.
+	real_poly_area: function(nodes) {
+		var area = 0
+		nodes.each(function(node,index) {
+			if (index < nodes.length-1) next = nodes[index+1]
+			else next = nodes[0]
+			if (index > 0) last = nodes[index-1]
+			else last = nodes[nodes.length-1]
+			area += Projection.x_to_lon(last.x)*Projection.lat_to_y(node.y)-Projection.x_to_lon(node.x)*Projection.lat_to_y(last.y)+
+			Projection.x_to_lon(node.x)*Projection.lat_to_y(next.y)-Projection.x_to_lon(next.x)*Projection.lat_to_y(node.y)
+		})
+		return Math.abs(area/2)
+	},
+	
+	/**
+	 * Calculates the perimeter of a polygon. Uses map units.
+	 * @param {Node[]} nodes Array of nodes
+	 * @return Perimeter of polygon
+	 * @type Number
+	 */
+	poly_perimeter: function(nodes){
+		var perimeter = 0
+		nodes.each(function(node,index) {
+			if (index < nodes.length-1){
+				next = nodes[index+1]
+			}
+			else {
+				next = nodes[0]
+			}
+			perimeter += Geometry.distance(node.x, node.y, next.x, next.y)
+		})
+		return perimeter
+	},
+	/**
+	 * Calculates the length of a path landmark. Uses real distance measurements, not local map measurements. Also can calculate perimeter of a Region.
+	 * @param {Node[]} nodes Array of nodes
+	 * @param {boolean} enclosed true if the path is closed (as in a Region); false if not (as in a Path)
+	 * @return Length of path
+	 * @type Number
+	 */
+	line_length: function(nodes, enclosed){
+		var len = 0
+		var next
+		nodes.each(function(node,index) {
+			if (index < nodes.length-1){
+				next = nodes[index+1]
+				//len += Geometry.distance(node.x, node.y, next.x, next.y)
+				len += Geometry.real_dist_from_coords(Projection.y_to_lat(node.y), Projection.x_to_lon(node.x),
+				Projection.y_to_lat(next.y), Projection.x_to_lon(next.x))
+			}
+			else if (enclosed){
+				next = nodes[0]
+				len += Geometry.real_dist_from_coords(Projection.y_to_lat(node.y), Projection.x_to_lon(node.x),
+				Projection.y_to_lat(next.y), Projection.x_to_lon(next.x))
+			}	
+		})
+		return Math.round(len)
+	},
 	distance: function(x,y,x2,y2) {
 		return Math.sqrt(Math.abs(x-x2)*Math.abs(x-x2)+Math.abs(y-y2)*Math.abs(y-y2))
+	},
+	/**
+	 * Calculates the actual distance from two latitude/longitude coordinates on the map
+	 * Adapted from http://www.movable-type.co.uk/scripts/latlong.html
+	 */
+	real_dist_from_coords: function(lat1, lon1, lat2, lon2){
+		var R = 6371; // km
+		var dLat = (lat2-lat1) * Math.PI/180;
+		var dLon = (lon2-lon1) * Math.PI/180;
+		var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+		Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * 
+		Math.sin(dLon/2) * Math.sin(dLon/2); 
+		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+		var d = R * c; // in kilometers
+		return d * 1000; // for meters
+		//return d * 3280.8399 // for feet
 	},
 	/**
 	 * Compared two ways based on area

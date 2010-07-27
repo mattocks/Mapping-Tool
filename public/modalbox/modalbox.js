@@ -120,6 +120,7 @@ Modalbox.Methods = {
 				$(this.MBwindow).hide();
 				this._deinit();
 			}
+			//Landmark.remove_temp_shape();
 		} else throw("Modalbox is not initialized.");
 	},
 	

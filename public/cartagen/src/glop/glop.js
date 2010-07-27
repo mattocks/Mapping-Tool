@@ -143,7 +143,9 @@ var Glop = {
 		 * Fired at the end of each frame, after features are drawn.
 		 */
 		Glop.fire('glop:postdraw')
+		Glop.fire('glop:points')
 		Glop.fire('glop:descriptions')
+		Glop.fire('glop:dragging') // for textnotes and clipart landmarks etc...
 	},
 	/**
 	 * Adjusts size of canvas element to match browser window size

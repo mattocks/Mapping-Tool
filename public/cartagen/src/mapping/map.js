@@ -15,6 +15,7 @@ var Map = {
 		this.y = Projection.lat_to_y(Config.lat)
 		Glop.observe('glop:predraw', this.draw.bindAsEventListener(this))
 		this.draw()
+		
 	},
 	/**
 	 * Updates the map properties. Runs every frame.
@@ -35,7 +36,7 @@ var Map = {
 	 * Allows map to be zoomed in
 	 */
 	zoom_in: function() {
-		if (Map.zoom <= 0.92){
+		if (Map.zoom <= 1.92){
 			Map.zoom+=0.1
 			console.log(Map.zoom)
 			Glop.trigger_draw()
@@ -137,7 +138,8 @@ var Map = {
 	 * Current zoom level
 	 * @type Number
 	 */
-	 zoom: 0.5
+	 zoom: 0.5,
+	max_zoom: 2.25 // level at which landmarks appear full-sized on map
 }
 
 // bind to events

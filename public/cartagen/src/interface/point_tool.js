@@ -36,11 +36,13 @@ Tool.Landmark = {
 				console.log(over_point)
 			})
 			if (!over_point && !over_text && Landmark.mode != 'dragging') { // if you didn't click on an existing landmark
-				LandmarkEditor.create(0)
+				LandmarkEditor.create(3)
 			}
+			/*
 			else if (Landmark.mode == 'dragging') { // done dragging the point elsewhere
 				LandmarkEditor.move()
 			}
+			*/
 	}.bindAsEventListener(Tool.Landmark),
 	mousemove: function() {
 		$l('Landmark mousemove')

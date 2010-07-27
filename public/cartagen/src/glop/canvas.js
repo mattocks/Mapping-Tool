@@ -147,9 +147,9 @@ $C = {
 	
 	/**
 	 * Alias of canvas.scale
-	 * @param {Number} x Number of pixels to stretch/shring in the x 
+	 * @param {Number} x Number of pixels to stretch/shrink in the x 
 	 *                   direction
-	 * @param {Number} y Number of pixels to stretch/shring in the y 
+	 * @param {Number} y Number of pixels to stretch/shrink in the y 
 	 *                   direction
 	 */
 	scale: function(x,y) {
@@ -200,6 +200,21 @@ $C = {
 		$C.begin_path()
 		$C.arc(x, y, r, 0, 2*Math.PI, true)
 		$C.stroke()
+	},
+	/**
+	 * Draws an ellipse on the canvas
+	 * Adapted from http://bytes.com/topic/javascript/answers/551097-drawing-ellipses-canvas
+	 */
+	ellipse: function (cx, cy, r1, r2, startAngle, endAngle) {
+		$C.canvas.save();
+		//$C.canvas.translate(cx, cy);
+		$C.begin_path();
+		$C.canvas.scale(r1, r2);
+		$C.canvas.arc(0, 0, 1, startAngle, endAngle, true);
+		$C.canvas.restore();
+		$C.canvas.lineWidth = 2;
+		//$C.stroke();
+		//$C.fill();
 	},
 	/**
 	 * Alias of canvas.strokeRect (unfilled rectangle)
@@ -347,7 +362,7 @@ $C = {
 	},
 	/**
 	 * Draws text on the canvas. Fonts are not supported in all
-	 * broswers.
+	 * browsers.
 	 * @param {String} font Font to use
 	 * @param {Number} size Size, in pts, of text
 	 * @param {Number} x    X-coord to start drawing at

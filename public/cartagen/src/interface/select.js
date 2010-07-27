@@ -56,7 +56,7 @@ Tool.Select = {
 
 			var query = min_lon + ',' + min_lat + ',' + max_lon + ',' + max_lat
 
-			window.open('/api/0.6/map.json?bbox=' + query, 'Cartagen data')
+			window.open('api/0.6/map.json?bbox=' + query, 'Cartagen data')
 
 			var lon = (Map.bbox[0] + Map.bbox[2]) / 2
 			var lat = (Map.bbox[1] + Map.bbox[3]) / 2

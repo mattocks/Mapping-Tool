@@ -57,6 +57,8 @@
 
 /* **** END PROTOTYPE-GRAPHIC **** */
 
+
+
 /* **** BEGIN GEOHASH **** */
 
 //= require <../lib/geohash>

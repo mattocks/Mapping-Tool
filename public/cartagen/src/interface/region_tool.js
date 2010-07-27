@@ -1,7 +1,7 @@
 /**
- * @namespace The 'Pen' tool and associated methods.
+ * @namespace The 'Region' tool and associated methods.
  */
-Tool.Pen = {
+Tool.Region = {
 	/**
 	 * The tool mode can be 'drawing' when the user is in the process of adding 
 	 * points to the polygon, or 'inactive' when a polygon has not yet begun.
@@ -10,51 +10,55 @@ Tool.Pen = {
 	/**
 	 * The polygon currently being drawn. 
 	 */
-	current_poly: null,
-	//shapes: [],
 	current_shape: null,
 	drag: function() {
-		$l('Pen dragging')
+		$l('Region dragging')
 	},
 	activate: function() {
-		$l('Pen activated')
+		$l('Region activated')
+		Tool.Region.mode = 'inactive'
 	},
 	deactivate: function() {
-		$l('Pen deactivated')
+		if(Landmark.temp_shape){
+			if(!Landmark.shape_created){
+				Landmark.temp_shape.remove()
+			}
+		}
+		$l('Region deactivated')
 	},
 	mousedown: function() {
-		console.log('mousedown in pen')
-		if (Tool.Pen.mode == 'inactive') {
+		console.log('mousedown in Region')
+		if (Tool.Region.mode == 'inactive') {
 		} 
-		else if (Tool.Pen.mode == 'draw') {
+		else if (Tool.Region.mode == 'draw') {
 			var over_point = false
-			Tool.Pen.current_shape.points.each(function(point){ //Tool.Pen.shapes.last().points.each(function(point){
+			Landmark.temp_shape.points.each(function(point){
 				if (point.mouse_inside()) over_point = true
 				console.log(point.mouse_inside())
 			})
 			if (!over_point) { // if you didn't click on an existing node
-				Tool.Pen.current_shape.new_point(Map.pointer_x(), Map.pointer_y()) //Tool.Pen.shapes.last().new_point(Map.pointer_x(), Map.pointer_y())
-				Tool.Pen.current_shape.active = true //Tool.Pen.shapes.last().active = true
+				Landmark.temp_shape.new_point(Map.pointer_x(), Map.pointer_y())
+				Landmark.temp_shape.active = true
 			}
-			else if (Tool.Pen.current_shape.points[0].mouse_inside()){
+			else if (Landmark.temp_shape.points[0].mouse_inside()){
 				// complete and store polygon
 				LandmarkEditor.create(1)
 			}
 		}
-		else if (Tool.Pen.mode == 'drag'){
-			Tool.Pen.current_shape.active = true //Tool.Pen.shapes.last().active=true
+		else if (Tool.Region.mode == 'drag'){
+			Landmark.temp_shape.active = true
 		}
 		
-	}.bindAsEventListener(Tool.Pen),
+	}.bindAsEventListener(Tool.Region),
 	mouseup: function() {
-		$l('Pen mouseup')
-	}.bindAsEventListener(Tool.Pen),
+		$l('Region mouseup')
+	}.bindAsEventListener(Tool.Region),
 	mousemove: function() {
-		$l('Pen mousemove')
+		$l('Region mousemove')
 		var hovering_over_first_point = false
-		if (Tool.Pen.current_shape != null){
-			if (Tool.Pen.current_shape.points.length > 0){
-				if (Tool.Pen.current_shape.points[0].mouse_inside()){
+		if (Landmark.temp_shape != null){
+			if (Landmark.temp_shape.points.length > 0){
+				if (Landmark.temp_shape.points[0].mouse_inside()){
 					hovering_over_first_point = true
 				}
 			}
@@ -65,234 +69,30 @@ Tool.Pen = {
 		else{
 			$('main').style.cursor = 'default'
 		}
-	}.bindAsEventListener(Tool.Pen),
+	}.bindAsEventListener(Tool.Region),
 	dblclick: function() {
-		alert('saving')
-		$l('Pen dblclick')
-		// Tool.Pen.mode = 'inactive'
+		//alert('saving')
+		//$l('Region dblclick')
+		// Tool.Region.mode = 'inactive'
 		// Did we end inside the first control point of the polygon?
 		if (true) {
 			// close the poly
-			Tool.Pen.mode = 'inactive'
-			Tool.change('Pan') //Hi!!
+			//Tool.Region.mode = 'inactive'
+			//Tool.change('Pan') //Hi!!
 		}
 		/*
 		var logger = ''
-		Tool.Pen.shapes.last().points.each(function(p){
+		Tool.Region.shapes.last().points.each(function(p){
 			logger += p.y + ','
 		})
 		console.log(logger)
 		*/
 		// complete and store polygon
 		//LandmarkEditor.create(1)
-	}.bindAsEventListener(Tool.Pen),
+	}.bindAsEventListener(Tool.Region),
 	new_shape: function() {
-		Tool.change("Pen")
-		Tool.Pen.mode='draw'
-		//Tool.Pen.shapes.push(new Tool.Pen.Shape([]))	
-		Tool.Pen.current_shape = new Region.Shape()
+		Tool.change("Region")
+		Tool.Region.mode='draw'	
+		Landmark.temp_shape = new Region()
 	},
-	/*
-	// Moved into landmark_area.js
-	ControlPoint: Class.create({
-		initialize: function(x,y,r,parent) {
-			this.x = x
-			this.y = y
-			this.r = r
-			this.parent_shape = parent
-			this.color = '#200'
-			this.dragging = false
-			Glop.observe('glop:postdraw', this.draw.bindAsEventListener(this))
-			Glop.observe('mousedown', this.click.bindAsEventListener(this))
-		},
-		// this gets called every frame:
-		draw: function() {
-			// transform to 1:1 scale pixelwise (the map is not at this scale by default)
-			// first, save the transformation matrix:
-			if (this.parent_shape.active) {
-				$C.save()
-					$C.line_width(3/Map.zoom)
-					// go to the object's location:
-					$C.translate(this.x,this.y)
-					// draw the object:
-					$C.fill_style("#333")
-					$C.opacity(0.6)
-					if (this.parent_shape.locked) {
-						$C.begin_path()
-						$C.move_to(-6/Map.zoom,-6/Map.zoom)
-						$C.line_to(6/Map.zoom,6/Map.zoom)
-						$C.move_to(-6/Map.zoom,6/Map.zoom)
-						$C.line_to(6/Map.zoom,-6/Map.zoom)
-						$C.stroke()
-					} else {
-						if (this.mouse_inside()) $C.circ(0, 0, this.r)
-						$C.stroke_circ(0, 0, this.r)
-					}
-				$C.restore()
-
-			}
-			
-			//var nodestring = ''
-			//nodes.each(function(node) {
-			//	nodestring += '(' + node[0] + ', ' + node[1] + ')\n'
-			//})
-			
-			if (this.dragging && Mouse.down) {
-				//Tool.change('Warp')
-				this.drag()
-			} 
-			else if (this.mouse_inside()) {
-				if (Mouse.down) {
-					this.drag()
-				}
-				else {
-					this.hover()
-				}
-			}
-			else {
-				this.base()
-			}
-		},
-		mouse_inside: function() {
-			return (Geometry.distance(this.x, this.y, Map.pointer_x(), Map.pointer_y()) < this.r)
-		},
-		base: function() {
-			this.color = '#200'
-			this.dragging = false
-		},
-		click: function() {
-			if (Geometry.distance(this.x, this.y, Map.pointer_x(), Map.pointer_y()) < this.r  && Tool.active!='Pen') {
-				this.color = '#f00'
-				console.log('clicked control point')
-				this.parent_shape.active = true
-
-			}
-		},
-		hover: function() {
-			this.color = '#900'
-			this.dragging = false
-		},
-		drag: function() {
-			if (this.parent_shape.active){  //&& Geometry.distance(this.x, this.y, Map.pointer)) {
-				if (!this.dragging) {
-					this.dragging = true
-					this.drag_offset_x = Map.pointer_x() - this.x
-					this.drag_offset_y = Map.pointer_y() - this.y
-				}
-				this.color = '#f00'
-				this.x=Map.pointer_x()
-				this.y=Map.pointer_y()
-			}
-		},
-		r: function() {
-			this.color = '#00f'
-		}
-	}),
-	
-	Shape: Class.create({
-		initialize: function(nodes) {
-			this.points = []//$A(
-			this.active = false
-			
-			this.dragging=false
-			this.color='#222'
-			
-			Glop.observe('glop:postdraw', this.draw.bindAsEventListener(this))
-			Glop.observe('mousedown', this.mousedown.bindAsEventListener(this))
-		},
-		new_point: function(x,y) {
-			this.points.push(new Tool.Pen.ControlPoint(x, y, 5, this))
-		},
-		mouse_inside: function(){
-			if (Geometry.is_point_in_poly(this.points, Map.pointer_x(), Map.pointer_y())){
-				console.log('Mouse in point')
-			}
-			return Geometry.is_point_in_poly(this.points, Map.pointer_x(), Map.pointer_y())
-		},
-		base: function(){
-			this.color="#222"
-			this.dragging=false
-		},
-		mousedown: function() {
-			if (Geometry.is_point_in_poly(this.points, Map.pointer_x(), Map.pointer_y()) && Tool.active !='Pen') {
-				this.active = true
-				this.color='#f00'
-				console.log('Clicked shape')
-				this.points.each(function(point) {
-					point.old_x = point.x
-					point.old_y = point.y
-				})
-				this.first_click_x=Map.pointer_x()
-				this.first_click_y=Map.pointer_y()
-				if (this.active){
-					if (!this.dragging){
-						this.dragging=true
-						Tool.change('Warp')
-					}
-				}
-			} 
-			else if (Tool.active!='Pen') {
-				this.active = false
-				this.color='#000'
-			}
-		},
-		hover: function(){
-			this.color='#900'
-			this.dragging=false
-			console.log('Hover')
-		},	
-		draw: function() {
-			if (this.mouse_inside()){
-				if (this.dragging){
-					this.drag_started=true
-					console.log('Trying to drag')
-					Tool.Pen.mode='drag'
-					for (var i=0; i<this.points.length; i++){
-						this.points[i].x=this.points[i].old_x + (Map.pointer_x()-this.first_click_x)
-						this.points[i].y=this.points[i].old_y + (Map.pointer_y()-this.first_click_y)
-					}
-					this.color = '#f00'
-				}
-				else if (!Mouse.down){
-					this.hover()
-				}
-			}
-			if (this.drag_started && Mouse.down){
-				for (var i=0; i<this.points.length; i++){
-					this.points[i].x=this.points[i].old_x + (Map.pointer_x()-this.first_click_x)
-					this.points[i].y=this.points[i].old_y + (Map.pointer_y()-this.first_click_y)
-				}
-				this.color = '#f00'
-			}
-			if (!Mouse.down){
-				this.drag_started=false
-			}
-			else{
-				this.base()
-			}
-			
-				$C.save()
-				$C.stroke_style('#000')
-				$C.fill_style(this.color)
-				if (this.active) $C.line_width(2)
-				else $C.line_width(0)
-				$C.begin_path()
-				if (this.points.length>0){
-					$C.move_to(this.points[0].x, this.points[0].y)		
-					this.points.each(function(point) {
-						$C.line_to(point.x, point.y)
-					})			
-					$C.line_to(this.points[0].x, this.points[0].y)
-
-				}
-				$C.opacity(0.4)
-				$C.stroke()
-				$C.opacity(0.2)
-				$C.fill()
-				$C.restore()
-		}
-	})
-	*/
-	
-	
 }

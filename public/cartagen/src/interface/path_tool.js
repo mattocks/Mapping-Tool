@@ -1,5 +1,5 @@
 /**
- * @namespace The 'Path' tool and associated methods. Essentially a copy of 'Pen' tool for areas.
+ * @namespace The 'Path' tool and associated methods. Essentially a copy of 'Region' tool for areas.
  */
 Tool.Path = {
 	/**
@@ -18,8 +18,14 @@ Tool.Path = {
 	},
 	activate: function() {
 		$l('Path activated')
+		Tool.Path.mode = 'inactive'
 	},
 	deactivate: function() {
+		if(Landmark.temp_shape){
+			if(Landmark.shape_created==false){
+				Landmark.temp_shape.remove()
+			}
+		}
 		$l('Path deactivated')
 	},
 	mousedown: function() {
@@ -28,30 +34,30 @@ Tool.Path = {
 		} 
 		else if (Tool.Path.mode == 'draw') {
 			var over_point = false
-			Tool.Path.current_shape.points.each(function(point){
+			Landmark.temp_shape.points.each(function(point){
 				if (point.mouse_inside()) {
 					over_point = true
-					//Tool.Path.current_shape.drawn = true
+					//Landmark.temp_shape.drawn = true
 					LandmarkEditor.create(2)
 				}
 				console.log(point.mouse_inside())
 				
 			})
 			if (!over_point) { // if you didn't click on an existing node
-				Tool.Path.current_shape.new_point(Map.pointer_x(), Map.pointer_y())
-				Tool.Path.current_shape.active = true
+				Landmark.temp_shape.new_point(Map.pointer_x(), Map.pointer_y())
+				Landmark.temp_shape.active = true
 			}
 			// I plan to rewrite this
-			else if (Tool.Path.current_shape.points[0].mouse_inside()){
+			else if (Landmark.temp_shape.points[0].mouse_inside()){
 				console.log('clicked first point')
-				Tool.Path.current_shape.points.push(Tool.Path.current_shape.points[0])
-				//Tool.Path.current_shape.drawn = true
+				Landmark.temp_shape.points.push(Landmark.temp_shape.points[0])
+				//Landmark.temp_shape.drawn = true
 				//LandmarkEditor.create(2)
 			}
 			
 		}
 		else if (Tool.Path.mode == 'drag'){
-			Tool.Path.current_shape.active = true
+			Landmark.temp_shape.active = true
 		}
 		
 	}.bindAsEventListener(Tool.Path),
@@ -62,9 +68,9 @@ Tool.Path = {
 		$l('Path mousemove')
 		/*
 		var hovering_over_first_point = false
-		if (Tool.Path.current_shape != null){
-			if (Tool.Path.current_shape.points.length > 0){
-				if (Tool.Path.current_shape.points[0].mouse_inside()){
+		if (Landmark.temp_shape != null){
+			if (Landmark.temp_shape.points.length > 0){
+				if (Landmark.temp_shape.points[0].mouse_inside()){
 					hovering_over_first_point = true
 				}
 			}
@@ -90,7 +96,7 @@ Tool.Path = {
 		}
 		
 		var logger = ''
-		Tool.Path.shapes.last().points.each(function(p){
+		Tool.Paths.last().points.each(function(p){
 			logger += p.y + ','
 		})
 		console.log(logger)
@@ -102,6 +108,6 @@ Tool.Path = {
 	new_shape: function() {
 		Tool.change("Path")
 		Tool.Path.mode='draw'	
-		Tool.Path.current_shape = new Path.Shape()
+		Landmark.temp_shape = new Path()
 	},
 }

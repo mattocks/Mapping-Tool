@@ -170,8 +170,12 @@ var Importer = {
 		Importer.requested_plots++
 		var finished = false
 		// var req = new Ajax.Request('/api/0.6/map.json?bbox='+_lng1+","+_lat1+','+_lng2+','+_lat2,{
-		var req = new Ajax.Request('/api/0.6/geohash/'+key+'.json',{
+		// var req = new Ajax.Request('api/0.6/geohash/'+key+'.json',{
+		var req = new Ajax.Request('cartagen/php/geturl.php', {
 			method: 'get',
+			parameters: {
+				url: 'http://cartagen.org/api/0.6/geohash/'+key+'.json'
+			},
 			onSuccess: function(result) {
 				finished = true
 				// $l('loaded '+_lat1+'&lng1='+_lng1+'&lat2='+_lat2+'&lng2='+_lng2)
@@ -244,14 +248,16 @@ var Importer = {
 					if (!Object.isUndefined(node)) data.nodes.push(node)
 				}
 			})
-			if (way.tag instanceof Array) {
-				way.tag.each(function(tag) {
-					data.tags.set(tag.k,tag.v)
-					if (tag.v == 'coastline') data.coastline = true
-				})
-			} else {
-				data.tags.set(way.tag.k,way.tag.v)
-				if (tag.v == 'coastline') data.coastline = true
+			if (way.tag){
+				if (way.tag instanceof Array) {
+					way.tag.each(function(tag) {
+						data.tags.set(tag.k,tag.v)
+						if (tag.v == 'coastline') data.coastline = true
+					})
+				} else {
+					data.tags.set(way.tag.k,way.tag.v)
+					if (way.tag.v == 'coastline') data.coastline = true
+				}
 			}
 			new Way(data)
 		}

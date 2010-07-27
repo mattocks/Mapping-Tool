@@ -95,6 +95,8 @@ var Events = {
 				Map.zoom = (Map.zoom * 1) + (delta/80)
 			}
 			if (Map.zoom < Config.zoom_out_limit) Map.zoom = Config.zoom_out_limit
+			console.log(Map.zoom)
+			Zoombar.setPosition()
 		}
 		Glop.trigger_draw(5)
 		event.preventDefault()
