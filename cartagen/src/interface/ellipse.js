@@ -25,7 +25,7 @@ Ellipse = Class.create(Region, {
 	},
 	make_ellipse: function(){
 		for(var i=0;i<this.points.length;i++){
-			if(this.points[i]==Tool.Warp.obj){
+			if(this.points[i]==Tool.Editor.obj){
 				if(Tool.Ellipse.currentX == null && Tool.Ellipse.currentY == null){
 					Tool.Ellipse.which_pt = i
 					Tool.Ellipse.currentX = this.points[i].x
@@ -82,9 +82,9 @@ Ellipse = Class.create(Region, {
 		else{
 			this.base()
 		}
-		if (Tool.Warp.over_point){
-			if(Tool.active == 'Warp'){
-				if(Tool.Warp.obj.parent_shape == this){	
+		if (Tool.Editor.over_point){
+			if(Tool.active == 'Editor'){
+				if(Tool.Editor.obj.parent_shape == this){	
 					this.make_ellipse()
 				}			
 			}
@@ -93,7 +93,7 @@ Ellipse = Class.create(Region, {
 			}
 			this.finished = false
 		}
-		else if ((Tool.active == 'Ellipse'||Tool.active == 'Warp')&&!Mouse.down){
+		else if ((Tool.active == 'Ellipse'||Tool.active == 'Editor')&&!Mouse.down){
 			this.points.each(function(point){
 				point.hidden = false
 			})

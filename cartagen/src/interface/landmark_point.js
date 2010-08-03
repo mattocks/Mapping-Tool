@@ -109,10 +109,8 @@ Point = Class.create(Landmark.Landmark, {
 	mousedown: function($super) {
 		if (this.mouse_inside()) {  //&& Tool.active!='Landmark') {
 			Landmark.current = this.id
-			Tool.Warp.over = true
-			if(Tool.Warp.obj == null){
-				Tool.Warp.obj = this
-			}
+			Tool.Editor.over = true
+			LandmarkEditor.setCurrent(this)
 			this.oldx = this.x
 			this.oldy = this.y
 			if(Landmark.mode != 'dragging'){

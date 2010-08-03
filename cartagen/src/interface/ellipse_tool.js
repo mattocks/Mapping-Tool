@@ -20,9 +20,11 @@ Tool.Ellipse = {
 	activate: function() {
 		$l('Ellipse activated')
 		Tool.Ellipse.mode = 'inactive'
+		Landmark.shape_created = false
 	},
 	deactivate: function() {
 		$l('Ellipse deactivated')
+		Landmark.remove_temp_shape()
 	},
 	mousedown: function() {
 		if (Tool.Ellipse.mode == 'inactive') {
@@ -54,12 +56,12 @@ Tool.Ellipse = {
 		
 	}.bindAsEventListener(Tool.Ellipse),
 	mouseup: function() {
-		Tool.Warp.over = false
-		Tool.Warp.over_point = false
+		Tool.Editor.over = false
+		Tool.Editor.over_point = false
 		$l('Ellipse mouseup')
 		Tool.Ellipse.which_pt = null
 		Landmark.temp_shape.active = true
-		Tool.Warp.obj = null
+		Tool.Editor.obj = null
 		Tool.Ellipse.currentX = null
 		Tool.Ellipse.currentY = null
 	}.bindAsEventListener(Tool.Ellipse),

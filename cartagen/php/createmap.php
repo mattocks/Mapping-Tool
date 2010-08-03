@@ -6,9 +6,10 @@ include("connection.php");
 $title = mysql_real_escape_string(stripslashes($_GET['title']));
 $desc = mysql_real_escape_string(stripslashes($_GET['desc']));
 $author = mysql_real_escape_string(stripslashes($_GET['author']));
+$location = mysql_real_escape_string(stripslashes($_GET["location"]));
 include("locator.php");
 $coords = $lon.','.$lat;
-if (mysql_query("INSERT INTO `maps` (`title`, `desc`, `author`, `coords`) VALUES ('$title', '$desc', '$author', '$coords')", $con)) {
+if (mysql_query("INSERT INTO `maps` (`title`, `desc`, `author`, `location`, `coords`) VALUES ('$title', '$desc', '$author', '$location', '$coords')", $con)) {
 	$result = mysql_query("SELECT * FROM `maps` ORDER BY id DESC LIMIT 1", $con);
 	while ($row = mysql_fetch_array($result)){
 		$id = $row['id'];
@@ -22,6 +23,6 @@ if (mysql_query("INSERT INTO `maps` (`title`, `desc`, `author`, `coords`) VALUES
 	}
 }
 else {
-	echo "alert('Could not create new map')";
+	echo "Could not create new map: " . mysql_error();
 }
 ?>

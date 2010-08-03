@@ -14,11 +14,13 @@
 //= require "landmark_path"
 //= require "landmark_textnote"
 //= require "landmark_image"
+//= require "landmark_audio"
 //= require "ellipse"
 //= require "rectangle"
 //= require "region_tool"
 //= require "pan"
 //= require "path_tool"
+//= require "editor_tool"
 //= require "warp"
 //= require "measure_tool"
 //= require "freeform_tool"
@@ -26,8 +28,10 @@
 //= require "ellipse_tool"
 //= require "textnote_tool"
 //= require "image_tool"
+//= require "audio_tool"
 //= require "zoombar"
 //= require "search_landmarks"
+//= require "scale"
 
 /**
  * @namespace Misc. UI methods that do not relate to user-submitted data

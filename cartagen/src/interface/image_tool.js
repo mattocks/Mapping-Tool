@@ -35,7 +35,7 @@ Tool.Image = {
 				}
 			})
 			if (!over_point && !over_text && Landmark.mode != 'dragging') { // if you didn't click on an existing landmark
-				LandmarkEditor.beginCustomImg()
+				LandmarkEditor.create(7)
 			}
 	}.bindAsEventListener(Tool.Image),
 	mousemove: function() {

@@ -16,14 +16,12 @@ Tool.Region = {
 	},
 	activate: function() {
 		$l('Region activated')
-		Tool.Region.mode = 'inactive'
+		Tool.Region.mode = 'draw'	
+		Landmark.temp_shape = new Region()
+		Landmark.shape_created = false
 	},
 	deactivate: function() {
-		if(Landmark.temp_shape){
-			if(!Landmark.shape_created){
-				Landmark.temp_shape.remove()
-			}
-		}
+		Landmark.remove_temp_shape()
 		$l('Region deactivated')
 	},
 	mousedown: function() {
@@ -91,8 +89,6 @@ Tool.Region = {
 		//LandmarkEditor.create(1)
 	}.bindAsEventListener(Tool.Region),
 	new_shape: function() {
-		Tool.change("Region")
-		Tool.Region.mode='draw'	
-		Landmark.temp_shape = new Region()
+
 	},
 }

@@ -2,16 +2,20 @@ var Search = {
 	toggle: function(){
 		if($('mapper').style.display == 'inline'){
 			$('mapper').style.display = 'none'
-			$('search').style.background = ''
+			//$('search').style.background = ''
 		}
 		else if($('mapper').style.display == 'none'){
-			$('mapper').style.display = 'inline'
-			$('search').style.background = '#888'
-			$('search').style.background = '-webkit-gradient(linear, 0% 0%, 0% 100%, from(#222), to(#555))'
+			Search.openBar()
+			//$('search').style.background = '#888'
+			//$('search').style.background = '-webkit-gradient(linear, 0% 0%, 0% 100%, from(#222), to(#555))'
 		}
+	},
+	openBar: function(){
+		$('mapper').style.display = 'inline'
 	},
 	// currently searches for landmarks in this map. if desired, can be used to search in other maps as well.
 	searchLandmarks: function(){
+		Search.openBar()
 		Search.clear()
 		var found = false
 		var color = 'rgb(245, 245, 245)'
@@ -39,5 +43,5 @@ var Search = {
 	},
 }
 document.observe("dom:loaded", function(){
-	document.body.insert('<div id="mapper" style="position: absolute; display: none; z-index: 2; top: 48px; width: 200px; height: 80%; background-color: white; overflow:auto; right: 0px; left: auto"><div style="position: relative; left: 190px; top: 5px; width:7px;"><span style="cursor: pointer;" onclick="Search.toggle()">X</span></div></div>');
+	document.body.insert('<div id="mapper" style="position: absolute; display: none; z-index: 2; top: 47px; width: 200px; bottom: 0px; background-color: white; overflow:auto; right: 0px; left: auto"><div style="position: relative; left: 190px; top: 5px; width:7px;"><span style="cursor: pointer;" onclick="Search.toggle()">X</span></div></div>');
 })

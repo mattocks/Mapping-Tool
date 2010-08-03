@@ -49,7 +49,7 @@ Path = Class.create(Landmark.Landmark, {
 	mousedown: function($super) {
 		if (this.mouse_inside() && Tool.active !='Path') {
 			Landmark.current = this.id
-			Tool.Warp.over = true
+			Tool.Editor.over = true
 			//this.active = true
 			//this.color='#f00'
 			if(Landmark.mode != 'dragging'){
@@ -75,8 +75,8 @@ Path = Class.create(Landmark.Landmark, {
 					this.dragging=true
 				}
 			}
-			if(Tool.Warp.obj == null){
-				Tool.Warp.obj = this
+			if(!Landmark.mouse_over_point_landmark()){
+				LandmarkEditor.setCurrent(this)
 			}
 		} 
 		else if (this.mouse_over_edit()) {
@@ -126,7 +126,6 @@ Path = Class.create(Landmark.Landmark, {
 		else{
 			this.base()
 		}
-		
 			$C.save()
 			$C.stroke_style(this.color)
 			if (this.active) $C.line_width(3)

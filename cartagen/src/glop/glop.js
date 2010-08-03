@@ -146,6 +146,7 @@ var Glop = {
 		Glop.fire('glop:points')
 		Glop.fire('glop:descriptions')
 		Glop.fire('glop:dragging') // for textnotes and clipart landmarks etc...
+		Scale.show()
 	},
 	/**
 	 * Adjusts size of canvas element to match browser window size

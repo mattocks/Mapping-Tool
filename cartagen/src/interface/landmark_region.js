@@ -24,15 +24,15 @@ Region = Class.create(Landmark.Landmark, {
 	},
 	mouse_inside: function(){
 		var a = false
-		if(Landmark.mode == 'dragging'){
+		if(Landmark.mode == 'dragging' || this.active){
 			this.points.each(function(p){
-				if(p.mouse_inside() && this.active){
+				if(p.mouse_inside() /*&& this.active*/){
 					a = true
 					throw $break
 				}
 			})
 		}
-		return Geometry.is_point_in_poly(this.points, Map.pointer_x(), Map.pointer_y()) && !Landmark.mouse_over_desc() && !a && Tool.active != 'Measure'
+		return Geometry.is_point_in_poly(this.points, Map.pointer_x(), Map.pointer_y()) && !Landmark.mouse_over_desc() && !a && Tool.active != 'Measure' && !Landmark.action_performed && !Landmark.mouse_over_point_landmark()
 	},
 	mouse_inside_text: function() {
 		return false
@@ -44,9 +44,9 @@ Region = Class.create(Landmark.Landmark, {
 	mousedown: function($super) {
 		if (this.mouse_inside() && Tool.active !='Region') {
 			Landmark.current = this.id
-			Tool.Warp.over = true
+			Tool.Editor.over = true
 			//this.color='#f00'
-			if(Landmark.mode != 'dragging'){
+			if(Landmark.mode != 'dragging' && Tool.active == 'Pan'){
 				this.expanded = !this.expanded
 			}
 			if(this.expanded && this.x==null & this.y==null){
@@ -77,18 +77,20 @@ Region = Class.create(Landmark.Landmark, {
 				}
 			
 			})
-			if(Tool.Warp.obj == null && !over_point){
-				Tool.Warp.obj = this
+			if(!Landmark.mouse_over_point_landmark()){
+				LandmarkEditor.setCurrent(this)
 			}
 		} 
 		else if (this.mouse_over_edit()) {
 			Landmark.current = this.id
 			LandmarkEditor.edit()
 		}
+		/*
 		else if (Tool.active!='Region') {
 			this.active = false
 			//this.color='#000'
 		}
+		*/
 		$super()
 	},
 	hover: function(){
@@ -97,7 +99,7 @@ Region = Class.create(Landmark.Landmark, {
 		//console.log('Hover')
 	},
 	drag: function(){
-		if(Tool.Warp.obj == this){
+		if(Tool.Editor.obj == this){
 			this.drag_started=true
 			Tool.Region.mode='drag'
 			for (var i=0; i<this.points.length; i++){

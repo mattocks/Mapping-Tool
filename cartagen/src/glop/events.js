@@ -73,6 +73,7 @@ var Events = {
 	        Mouse.release_frame = Glop.frame
 	        Mouse.dragging = false
 	        User.update()
+		Landmark.action_performed = false
 	},
 	/**
 	 * Triggered when the mouse wheel is used
@@ -90,9 +91,9 @@ var Events = {
 		}
 		if (delta && !Config.live_gss) {
 			if (delta <0) {
-				Map.zoom = (Map.zoom * 1) + (delta/80)
+				Map.zoom = Math.min((Map.zoom * 1) + (delta/80), Map.max_zoom)
 			} else {
-				Map.zoom = (Map.zoom * 1) + (delta/80)
+				Map.zoom = Math.min((Map.zoom * 1) + (delta/80), Map.max_zoom)
 			}
 			if (Map.zoom < Config.zoom_out_limit) Map.zoom = Config.zoom_out_limit
 			console.log(Map.zoom)

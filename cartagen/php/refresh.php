@@ -45,6 +45,7 @@ echo "
 		})
 	}
 	Landmark.mapTimestamp = ts;
+	Glop.trigger_draw(2);
 }
 ";
 ?>

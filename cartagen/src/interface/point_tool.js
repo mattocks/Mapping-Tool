@@ -13,14 +13,17 @@ Tool.Landmark = {
 		$l('Landmark activated')
 	},
 	deactivate: function() {
+
 		$l('Landmark deactivated')
 	},
 	mousedown: function() {
-		console.log('mousedown in landmark')
+		//console.log('mousedown in landmark')
 	}.bindAsEventListener(Tool.Landmark),
 	mouseup: function() {
 		$l('Landmark mouseup')
-		console.log('mouseup in landmark')
+		LandmarkEditor.create(3)
+		//console.log('mouseup in landmark')
+			/*
 			// could be implemented as one and the same rather than separately
 			var over_point = false
 			var over_text = false
@@ -38,6 +41,8 @@ Tool.Landmark = {
 			if (!over_point && !over_text && Landmark.mode != 'dragging') { // if you didn't click on an existing landmark
 				LandmarkEditor.create(3)
 			}
+			*/
+
 			/*
 			else if (Landmark.mode == 'dragging') { // done dragging the point elsewhere
 				LandmarkEditor.move()

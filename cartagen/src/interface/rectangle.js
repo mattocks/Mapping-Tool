@@ -1,11 +1,17 @@
 //= require "landmark_region"
 
 Rectangle = Class.create(Region, {
+	initialize: function($super){
+		$super()
+		this.eventD = this.mouseup.bindAsEventListener(this)
+		Glop.observe('mouseup', this.eventD)
+	},
 	make_rectangle: function(){
 		for(var i=0;i<this.points.length;i++){
-			if(this.points[i]==Tool.Warp.obj){
+			if(this.points[i]==Tool.Editor.obj){
 				if(this.pt == null){
 					this.pt = i // keep track here for now
+					//console.log(this.pt)
 				}
 			}
 			else{
@@ -34,6 +40,11 @@ Rectangle = Class.create(Region, {
 			this.points[2].y = this.points[3].y
 		}	
 	},
+	mouseup: function(){
+		this.make_rectangle()
+		console.log(this.pt)
+		this.pt = null
+	},
 	draw: function() {
 		if (this.mouse_inside()){
 			if (this.dragging){
@@ -55,18 +66,18 @@ Rectangle = Class.create(Region, {
 		else{
 			this.base()
 		}
-		if (Tool.Warp.over_point){
-			if(Tool.active == 'Warp'){
-				if(Tool.Warp.obj.parent_shape == this){	
+		if (Tool.Editor.over_point){
+			if(Tool.active == 'Editor'){
+				if(Tool.Editor.obj.parent_shape == this){	
 					this.make_rectangle()
 				}			
 			}
 			else if(Tool.active == 'Rectangle'){
 				this.make_rectangle()
 			}
-			this.finished = false
+			//this.finished = false
 		}
-		else if ((Tool.active == 'Rectangle'||Tool.active == 'Warp')&&!Mouse.down){
+		else if ((Tool.active == 'Rectangle'||Tool.active == 'Editor')&&!Mouse.down){
 			this.points.each(function(point){
 				point.hidden = false
 			})
@@ -100,6 +111,7 @@ Rectangle = Class.create(Region, {
 	},
 	remove: function($super){
 		$super()
+		Glop.stopObserving('mouseup', this.eventD)
 		this.points.each(function(p){
 			Glop.stopObserving('glop:postdraw', p.eventA)
 			Glop.stopObserving('mousedown', p.eventB)

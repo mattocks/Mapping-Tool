@@ -17,7 +17,10 @@ function sql_to_js($string){
 	return str_replace(array("\\", "'", "\r\n", "\n"), array("\\\\", "\\'", "\\n", "\\n"), $string);
 }
 function sql_to_html($string){
-	return str_replace(array("&", "\r\n", "\n", "<", ">"), array("&amp;", "<br />", "<br />", "&lt;", "&gt;"), $string);
+	return str_replace(array("&", "<", ">", "\r\n", "\n"), array("&amp;", "&lt;", "&gt;", "<br />", "<br />"), $string);
+}
+function sql_to_textarea($string){
+	return str_replace(array("&", "<", ">"), array("&amp;", "&lt;", "&gt;"), $string);
 }
 function load_landmark($row){
 	$type = $row['type'];
@@ -27,7 +30,7 @@ function load_landmark($row){
 	$desc = sql_to_js($row['desc']);
 	$icon = $row['icon'];
 	$timestamp = $row['timestamp'];
-	if ($type == 3 || $type == 7 || $type == 8) {
+	if ($type == 3 || $type == 7 || $type == 9/* || $type == 8*/) {
 		$points = $row['points'];
 		list($lon, $lat) = explode(",", $points);
 		switch ($type){
@@ -37,9 +40,14 @@ function load_landmark($row){
 			case 7:
 				echo "Landmark.landmarks.set($id, new Img(Projection.lon_to_x($lon), Projection.lat_to_y($lat), '$label', '$desc', 'upload/$icon', $id, '$timestamp'))\n";
 			break;
+			case 9:
+				echo "Landmark.landmarks.set($id, new Audio(Projection.lon_to_x($lon), Projection.lat_to_y($lat), '$label', '$desc', $id, '$timestamp'))\n";
+				break;
+			/*
 			case 8:
 				echo "Landmark.landmarks.set($id, new Textnote(Projection.lon_to_x($lon), Projection.lat_to_y($lat), '$label', '$desc', '$icon', $id, '$timestamp'))\n";
 			break;
+			*/
 				
 		}
 	}
@@ -58,6 +66,9 @@ function load_landmark($row){
 		}
 		else if ($type == 6) {
 			echo "Landmark.landmarks.set($id, new Ellipse())\n";
+		}
+		else if ($type == 8) {
+			echo "Landmark.landmarks.set($id, new Textnote())\n";
 		}
 		$points = $row['points'];
 		$point = explode(" ", trim($points));

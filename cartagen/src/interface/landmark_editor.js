@@ -5,6 +5,9 @@ LandmarkEditor = {
 	event: null,
 	img: null,
 	idd: 0, // an internal id counter for landmarks that cannot be saved to the server
+	color_choices: ['rgb(0, 0, 0)','rgb(255, 255, 255)','rgb(255, 0, 0)','rgb(0, 255, 0)','rgb(0, 0, 255)'],
+	icon_choices: ['pushpin1.gif', 'pushpin5.gif'],
+	past_actions: [], // stores the past 10 actions, or states of landmarks that have been sent to the server. does not apply to newly created landmarks
 	beginCustomImg: function(){
 		/*
 		var pts = Projection.x_to_lon(-1*Map.pointer_x())+','+Projection.y_to_lat(Map.pointer_y())
@@ -65,56 +68,99 @@ LandmarkEditor = {
 	create: function(type){
 		var action = 'LandmarkEditor.newArea('+type+')' // default
 		Landmark.shape_created = false
-		var colorstr = 'Color: '+LandmarkEditor.colors(true)+'<input type="hidden" id="color" value="'+LandmarkEditor.colors(true,'0')+'" />'
+		var colorstr = 'Color: '+LandmarkEditor.colors(true)+'<input type="hidden" id="color" value="'+LandmarkEditor.color_choices[0]+'" />'
 		var options = colorstr // default
 		var r = 'false' // return r upon form submission
+		var target = 'submitframe'
+		var title = 'Create a landmark'
 		switch(type){
 			case 1: // region
+				title = 'Creating a polygon'
 				break
 			case 2: // path
+				title = 'Creating a path'
 				break
 			case 3: // point
+				title = 'Creating a point'
 				var icons = ['pushpin1.gif', 'pushpin5.gif'];
 				options = '';
+				/*
 				icons.each(function(i){
-					options += '<img src=\"'+i+'\" onclick=\"LandmarkEditor.temp_icon=\''+i+'\';\" style=\"cursor:pointer;\"/> '
+					options += '<img src="'+i+'" onclick="LandmarkEditor.temp_icon=\''+i+'\';"  style="cursor:pointer;"/> '
 				});
+				*/
+				options = LandmarkEditor.icons(true)
 				action = 'LandmarkEditor.newPoint()'
+				Landmark.shape_created = null
 				break
 			case 4: // freeform
+				title = 'Creating a freeform shape'
 				break
 			case 5: // rectangle
+				title = 'Creating a rectangle'
 				break
 			case 6: // ellipse
+				title = 'Creating an ellipse'
 				break
 			case 7: // image
+				title = 'Uploading an image'
 				options = '<input type="file" name="image" /><br />'
 				r = 'true'
 				action = ''
+				Landmark.shape_created = null
 				break
-			// no 7 custom image not created here
 			case 8: // text note
+				title = 'Creating a text note'
 				options = ''
-				action = 'LandmarkEditor.newTextnote()'
+				break
+			case 9: // audio
+				title = 'Creating an audio recording'
+				options = '<iframe src="nanogong-recorder.html" name="nanogong_recorder" style="border:0px;width:180px;height:40px"></iframe>'
+				action = 'LandmarkEditor.newAudio()'
+				target = 'nanogong_recorder'
+				Landmark.shape_created = null
 				break
 		}
 		if(action!='') action += ';'
 		var pts = Projection.x_to_lon(-1*Map.pointer_x())+','+Projection.y_to_lat(Map.pointer_y());
-		Modalbox.show(Tooltips.enter_label+'<br /><form id="lndmrkfrm" method="post" action="cartagen/php/upload.php" onsubmit="'+action+'Modalbox.hide();return '+r+'" target="submitframe" enctype="multipart/form-data"><input type="text" id="landmarker" /><br /><br /><textarea id="desc" name="desc" style="height: 200px; width: 400px;"></textarea><br />'+options+'<br /><input type="hidden" name="mapid" value="'+Landmark.map+'" /><input type="hidden" name="points" value="'+pts+'" /><input type="submit" value="Make" /><input type="button" value="Cancel" onclick="Modalbox.hide();Landmark.temp_shape.remove();Tool.change(\'Pan\');Events.mouseup()" /></form><iframe name="submitframe" style="display:none"></iframe>', {title: 'Create a landmark', beforeHide: Landmark.remove_temp_shape})
+		Modalbox.show(Tooltips.enter_label+'<br /><form id="lndmrkfrm" method="post" action="cartagen/php/upload.php" onsubmit="'+action+'Modalbox.hide();return '+r+'" target="'+target+'" enctype="multipart/form-data"><input type="text" id="landmarker" /><br /><br /><textarea id="desc" name="desc" style="height: 200px; width: 400px;"></textarea><br />'+options+'<br /><input type="hidden" name="mapid" value="'+Landmark.map+'" /><input type="hidden" name="points" value="'+pts+'" /><input type="submit" value="Make" /><input type="button" value="Cancel" onclick="Modalbox.hide();Events.mouseup()" /></form><iframe name="submitframe" style="display:none"></iframe>', {title: title, beforeHide: function(){Landmark.remove_temp_shape; Tool.change('Pan')} }) // Landmark.temp_shape.remove();Tool.change(\'Pan\'); extra cancel stuff
+	},
+	icons: function(initial) {
+		var icons = LandmarkEditor.icon_choices
+		LandmarkEditor.temp_icon = icons[0]
+		var iconstring = ''
+		cid = 0
+		icons.each(function(i) {
+			var s = 'border: 2px solid rgba(0, 0, 0, 0)'
+			if ((cid == 0 && initial) || (!initial && i == Landmark.landmarks.get(Landmark.current).img.src)) {
+				s = "border: 2px inset rgb(0, 0, 255)"
+			}
+			iconstring += '<img id="i'+cid+'" style="padding: 1px; '+s+'" src="'+i+'" onclick="LandmarkEditor.setIcon('+cid+')" />'
+			cid++
+		})
+		return iconstring
+	},
+	setIcon: function(id) {
+		for (var i = 0; i < LandmarkEditor.icon_choices.length; i++) {
+			if (i == id) {colors = ['rgb(0, 0, 0)','rgb(255, 255, 255)','rgb(255, 0, 0)','rgb(0, 255, 0)','rgb(0, 0, 255)']
+				$('i'+i).style.border = '2px inset rgb(0, 0, 255)'
+				LandmarkEditor.temp_icon = $('i'+i).src.substring($('i'+i).src.lastIndexOf('/')+1)
+			}
+			else {
+				$('i'+i).style.border = '2px solid rgba(0, 0, 0, 0)'
+			}
+		}
+		console.log(LandmarkEditor.temp_icon)
 	},
 	/**
 	 * Allows colors of landmarks to be edited.
 	 * @param {initial} Set to true when a landmark is being created; false if landmark exists
-	 * @param {index} Retrieves a certain color out of the list of colors
 	 * @return table of color choices
-	 */
-	colors: function(initial, index) {
-		var colors = ['rgb(0, 0, 0)','rgb(255, 255, 255)','rgb(255, 0, 0)','rgb(0, 255, 0)','rgb(0, 0, 255)']
-		if (index) {
-			return colors[index]
-		}
+	 */Color: '+LandmarkEditor.colors(false)+'<input type="hidden" id="color" value="'+Landmark.landmarks.get(Landmark.current).color+'" />
+	colors: function(initial) {
+		var colors = LandmarkEditor.color_choices
 		var colorstring = '<table><tr>'
-		cid = 0
+		var cid = 0
 		colors.each(function(c) {
 			if ((cid == 0 && initial) || (!initial && c == Landmark.landmarks.get(Landmark.current).color)) {
 				c += "; border: 2px inset blue"
@@ -129,7 +175,7 @@ LandmarkEditor = {
 	 * Helper function for above. Used to select the color for the landmark.
 	 */
 	setColor: function(id) {
-		for (var i = 0; i < 5; i++) {
+		for (var i = 0; i < LandmarkEditor.color_choices.length; i++) {
 			if (i == id) {
 				$('c'+i).style.border = '2px inset blue'
 				$('color').value = $('c'+i).style.backgroundColor
@@ -140,17 +186,32 @@ LandmarkEditor = {
 		}
 		console.log($('color').value)
 	},
+	newAudio: function(){
+		var label1 = $('landmarker').value
+		var desc1 = $('desc').value
+		var pts = Projection.x_to_lon(-1*Map.pointer_x())+','+Projection.y_to_lat(Map.pointer_y())
+		var qs = '?points='+pts+'&label='+label1+'&desc='+desc1+'&mapid='+Landmark.map;
+		var ret = window.nanogong_recorder.document.getElementById('nanogong').sendGongRequest("PostToForm", "cartagen/php/uploadaudio.php"+qs, "voicefile", "", "temp");
+		if (ret == null){
+                	alert("Failed to submit the voice recording");
+		}
+		else if (ret == ""){
+			alert("Empty response text");
+		}
+		else{
+			console.log(ret);
+			var r = ret.trim().split(",");
+			var id = r[0];
+			var timestamp = r[1];
+			Landmark.landmarks.set(id, new Audio(Map.pointer_x(), Map.pointer_y(), label1, desc1, id, timestamp))
+		}
+	},
 	/**
 	 * Sets a new point landmark in the database. Also draws it on the map.
 	 */
 	newPoint: function(){
-		// stores the landmark in the database
 		var label1 = $('landmarker').value
 		var desc1 = $('desc').value
-		//var color1 = $('color').value
-		//var 
-		//var cursorID = LandmarkEditor.img.substring(LandmarkEditor.img.lastIndexOf('/')+1)
-		//var cursorID = $('cursor').src.substring($('cursor').src.lastIndexOf('/')+1)
 		new Ajax.Request('cartagen/php/createlandmark.php', {
 	 		method: 'post',
 	  		parameters: {
@@ -181,9 +242,11 @@ LandmarkEditor = {
 		//Tool.change('Pan')
 	},
 	newTextnote: function(){
+		LandmarkEditor.newArea(5, true)
+		/*
 		var label1 = $('landmarker').value
 		var desc1 = $('desc').value
-		var color1 = $('color').value
+		//var color1 = $('color').value
 		var cursorID = 'stickynotecrop-small.jpg'
 		//console.log(cursorID)
 		//var cursorID = $('cursor').src.substring($('cursor').src.lastIndexOf('/')+1)
@@ -195,7 +258,7 @@ LandmarkEditor = {
 				label: label1,
 				desc: desc1,
 				icon: 'stickynotecrop-small.jpg',
-				color: color1,
+				color: '',
 				mapid: Landmark.map,
 	  		},
 	  		onSuccess: function(response) {
@@ -212,6 +275,7 @@ LandmarkEditor = {
 			}
 		})
 		//Tool.change('Pan')
+		*/
 	},
 	/*
 	 * Saves a polygon or path to the server
@@ -220,35 +284,17 @@ LandmarkEditor = {
 	newArea: function(t){
 		var shape = Landmark.temp_shape
 		Landmark.shape_created = true
-		/*
-		switch(t){
-		case 1:
-			shape = Tool.Region.current_shape
-			Tool.Region.mode = 'inactive'
-			break
-		case 2:
-			shape = Tool.Path.current_shape
-			Tool.Path.mode = 'inactive'
-			break
-		case 4:
-			shape = Tool.Freeform.current_shape
-			Tool.Freeform.mode = 'inactive'
-			break
-		case 5:
-			shape = Tool.Rectangle.current_shape
-			Tool.Rectangle.mode = 'inactive'
-			break
-		case 6:
-			shape = Tool.Ellipse.current_shape
-			Tool.Ellipse.mode = 'inactive'
-			break
-		}
-		*/
 		shape.dragging = false
 		var points = shape.points
 		var label1 = $('landmarker').value
 		var desc1 = $('desc').value
-		var color1 = $('color').value
+		var color1
+		if(t==8){
+			color1 = shape.color
+			shape.noteRendered = false
+		}
+		else
+			color1 = $('color').value
 		var logger = ''
 		shape.points.each(function(p){
 			logger += Projection.x_to_lon(-1*p.x) + ',' + Projection.y_to_lat(p.y) + ' '
@@ -276,7 +322,7 @@ LandmarkEditor = {
 				Landmark.landmarks.set(id, shape)
 			}
 		})
-		Tool.change('Pan')
+		//Tool.change('Pan')
 		Landmark.shape_created = null
 		Events.mouseup()
 	},
@@ -292,32 +338,60 @@ LandmarkEditor = {
 				pts += Projection.x_to_lon(-1*p.x) + ',' + Projection.y_to_lat(p.y) + ' '
 			})
 		}
-		else if(Landmark.landmarks.get(Landmark.current) instanceof Point || Landmark.landmarks.get(Landmark.current) instanceof Img){
+		else {
 			pts = Projection.x_to_lon(-1*Landmark.landmarks.get(Landmark.current).x)+','+Projection.y_to_lat(Landmark.landmarks.get(Landmark.current).y)
 		}
 		new Ajax.Request('cartagen/php/editlandmark.php', {
-				method: 'get',
-		 		parameters: {
+			method: 'post',
+	 		parameters: {
 				id: Landmark.current,
 				points: pts,
-		 		},
+	 		},
 			onSuccess: function(response) {
+				console.log(response.responseText)
 			}
 		})
-		//Tool.change('Pan')
-		//Landmark.mode = 'create'
-		//Landmark.landmarks.get(Landmark.current).dragEnabled = false
+		if(lndmrk instanceof Textnote)
+			lndmrk.noteRendered = false
 	},
 	moveit: function(){
 		Tool.change('Landmark')
 		Landmark.mode = 'dragging'
-		//Landmark.landmarks.get(Landmark.current).dragEnabled = true
+	},
+	clearLastFromUndo: function(){
+		if(LandmarkEditor.past_actions.length > 0){
+			LandmarkEditor.past_actions.pop()
+		}
+	},
+	setCurrent: function(o){
+		if(Tool.Editor.obj == null){
+			Tool.Editor.obj = o
+			if(Landmark.mode == 'dragging'){
+				if(o instanceof ControlPoint){
+					LandmarkEditor.past_actions.push(o.parent_shape)
+				}
+				else{
+					LandmarkEditor.past_actions.push(o)
+					for(var prop in o) {
+					   	if(o.hasOwnProperty(prop))
+							LandmarkEditor.past_actions.last()[prop] = o[prop];
+					}
+					
+				}
+			}
+		}
 	},
 	/**
 	 * Opens a Modalbox window for editing the contents of the landmark itself.
 	 */
 	edit: function(){
-		Modalbox.show('Edit this landmark<br /><form id="lndmrkfrm" onsubmit="LandmarkEditor.editData();Modalbox.hide();Events.mouseup();return false"><input type="text" id="newName" value="' + Landmark.landmarks.get(Landmark.current).label + '"/><br /><br /><textarea id="newDesc" name="newDesc" style="height: 200px; width: 400px;">' + Landmark.landmarks.get(Landmark.current).desc + '</textarea><br />Color: '+LandmarkEditor.colors(false)+'<input type="hidden" id="color" value="'+Landmark.landmarks.get(Landmark.current).color+'" /><br /><input type="submit" value="Edit" /><input type="button" value="Cancel" onclick="Modalbox.hide();Events.mouseup()" /><input type="button" value="Delete" onclick="LandmarkEditor.remove();Modalbox.hide();Events.mouseup()" /></form>', {title: 'Edit this landmark'})
+		var colorstr = 'Color: '+LandmarkEditor.colors(false)+'<input type="hidden" id="color" value="'+Landmark.landmarks.get(Landmark.current).color+'" />'
+		var options = colorstr
+		var lndmrk = Landmark.landmarks.get(Landmark.current)
+		if(!(lndmrk instanceof Region || lndmrk instanceof Path) || lndmrk instanceof Textnote){
+			options = ''
+		}
+		Modalbox.show('Edit this landmark<br /><form id="lndmrkfrm" onsubmit="LandmarkEditor.editData();Modalbox.hide();Events.mouseup();return false"><input type="text" id="newName" value="' + lndmrk.label + '"/><br /><br /><textarea id="newDesc" name="newDesc" style="height: 200px; width: 400px;">' + lndmrk.desc + '</textarea><br />'+options+'<br /><input type="submit" value="Edit" /><input type="button" value="Cancel" onclick="Modalbox.hide();Events.mouseup()" /><input type="button" value="Delete" onclick="LandmarkEditor.remove();Modalbox.hide();Events.mouseup()" /></form>', {title: 'Edit this landmark', beforeHide: LandmarkEditor.clearLastFromUndo})
 	},
 	/**
 	 * When called, takes the information from the editing window and sends it to the server
@@ -329,7 +403,7 @@ LandmarkEditor = {
 		//console.log(color1)
 		console.log(desc1)
 		new Ajax.Request('cartagen/php/editlandmark.php', {
-			method: 'get',
+			method: 'post',
 			parameters: {
 				id: Landmark.current,
 				label: label1,
@@ -342,6 +416,7 @@ LandmarkEditor = {
 				curLandmark.desc = desc1
 				curLandmark.color = color1
 				curLandmark.descRendered = false
+				curLandmark.noteRendered = false
 				console.log(response.responseText)
 	 		},
 			onFailure: function(){
@@ -362,28 +437,11 @@ LandmarkEditor = {
 	remove: function() {
 		if(confirm('Are you sure you want to delete this landmark entirely? Press OK to continue or Cancel to stop.')){
 			new Ajax.Request('cartagen/php/editlandmark.php', {
-		 		method: 'get',
+		 		method: 'post',
 		  		parameters: {
 					remove: Landmark.current,
 		  		},
 			})
-			/*
-			var lndmrk = Landmark.landmarks.get(Landmark.current)
-			if(lndmrk instanceof Point){
-				Glop.stopObserving('glop:points', lndmrk.eventA)
-			}
-			else{
-				Glop.stopObserving('glop:postdraw', lndmrk.eventA)
-			}
-			Glop.stopObserving('glop:descriptions', lndmrk.eventB)
-			Glop.stopObserving('mousedown', lndmrk.eventC)
-			if(lndmrk instanceof Region||lndmrk instanceof Path){
-				lndmrk.points.each(function(p){
-					Glop.stopObserving('glop:postdraw', p.eventA)
-					Glop.stopObserving('mousedown', p.eventB)
-				})
-			}
-			*/
 			Landmark.landmarks.get(Landmark.current).remove()
 			Landmark.landmarks.unset(Landmark.current)
 			//$('goto'+Landmark.current).remove()

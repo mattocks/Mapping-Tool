@@ -18,14 +18,12 @@ Tool.Path = {
 	},
 	activate: function() {
 		$l('Path activated')
-		Tool.Path.mode = 'inactive'
+		Landmark.shape_created = false
+		Tool.Path.mode='draw'	
+		Landmark.temp_shape = new Path()
 	},
 	deactivate: function() {
-		if(Landmark.temp_shape){
-			if(Landmark.shape_created==false){
-				Landmark.temp_shape.remove()
-			}
-		}
+		Landmark.remove_temp_shape()
 		$l('Path deactivated')
 	},
 	mousedown: function() {
@@ -92,7 +90,7 @@ Tool.Path = {
 		if (true) {
 			// close the poly
 			Tool.Path.mode = 'inactive'
-			Tool.change('Pan') //Hi!!
+			Tool.change('Pan')
 		}
 		
 		var logger = ''

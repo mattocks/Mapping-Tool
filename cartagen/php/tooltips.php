@@ -2,8 +2,8 @@
 //error_reporting(E_ALL);
 header('Content-type: text/javascript');
 include("captions.php");
-function add_toolbar($id){
-	echo "\$('toolbars').insert('<div class=\"toolbar\" id=\"$id\"></div>');\n";
+function add_toolbar($id, $style = ''){
+	echo "\$('toolbars').insert('<div class=\"toolbar\" id=\"$id\" style=\"$style\"></div>');\n";
 }
 function add_toolbar_item($toolbar, $tooltip, $class, $action, $img){
 	global $tooltips;
@@ -51,21 +51,27 @@ add_toolbar('mapTools');
 add_toolbar_item('mapTools', "pan", 'first', "Tool.change('Pan')", "images/tools/stock-tool-move-22.png");
 add_toolbar_item('mapTools', 'centerMap', 'silk', "MapEditor.center()", "images/silk-grey/drive_edit.png");
 add_toolbar_item('mapTools', 'move', 'silk', "Landmark.toggleMove()", "images/tools/stock-tool-align-22.png");
+add_toolbar_item('mapTools', 'undo', 'silk', "alert('Undo button is coming soon')", "images/silk-grey/arrow_undo.png");
 add_toolbar_item('mapTools', 'measure', 'last silk', "Tool.Measure.new_shape()", "images/silk-grey/calculator.png");
 
-add_toolbar('searchTools');
-add_toolbar_item('searchTools', 'search', 'first last silk', "Search.toggle()", "images/silk-grey/magnifier.png");
+//add_toolbar('searchTools');
+//add_toolbar_item('searchTools', 'search', 'first last silk', "Search.toggle()", "images/silk-grey/magnifier.png");
 
 add_toolbar('landmarkTools');
 add_toolbar_item('landmarkTools', 'uploadImg', 'first silk', "Tool.change('Image');Tooltips.beginImg()", "images/silk-grey/image_add.png");
 add_toolbar_item('landmarkTools', 'freeform', 'silk', "Tool.change('Freeform');Tooltips.beginFreeform()", "images/tools/stock-tool-paintbrush-22.png");
-add_toolbar_item('landmarkTools', 'path', 'silk', "Tool.change('Path');Tooltips.beginPath();Tool.Path.new_shape()", "images/tools/stock-tool-pencil-22.png");
-add_toolbar_item('landmarkTools', 'region', 'silk', "Tool.change('Region');Tooltips.beginRegion();Tool.Region.new_shape()", "images/silk-grey/shape_handles.png");
+add_toolbar_item('landmarkTools', 'path', 'silk', "Tool.change('Path');Tooltips.beginPath()", "images/tools/stock-tool-pencil-22.png");
+add_toolbar_item('landmarkTools', 'region', 'silk', "Tool.change('Region');Tooltips.beginRegion()", "images/silk-grey/shape_handles.png");
 add_toolbar_item('landmarkTools', 'rectangle', 'silk', "Tooltips.beginRectangle();Tool.change('Rectangle')", "images/tools/stock-tool-rect-select-22.png");
 add_toolbar_item('landmarkTools', 'ellipse', 'silk', "Tooltips.beginEllipse();Tool.change('Ellipse')", "images/tools/stock-tool-ellipse-select-22.png");
 // add_toolbar_item('landmarkTools', 'clipart', 'silk', "Tooltips.beginClipart();Tool.change(?)", "images/??"); // clipart tool not implemented
 add_toolbar_item('landmarkTools', 'point', 'silk', "Tool.change('Landmark');Tooltips.beginPoint()", "images/tools/stock-tool-smudge-22.png");
-add_toolbar_item('landmarkTools', 'textnote', 'last silk', "Tool.change('Textnote');Tooltips.textnote()", "images/silk-grey/text_smallcaps.png");
+add_toolbar_item('landmarkTools', 'textnote', 'silk', "Tool.change('Textnote');Tooltips.textnote()", "images/silk-grey/text_smallcaps.png");
+add_toolbar_item('landmarkTools', 'audio', 'silk', "Tool.change('Audio');Tooltips.beginAudio()", "images/silk-grey/sound.png");
+add_toolbar_item('landmarkTools', 'video', 'last silk', "alert('Video is coming soon')", "images/silk-grey/webcam.png");
+
+add_toolbar('searchTools', 'position: absolute; right: 5px; left: auto; ');
+echo "\$('searchTools').insert('<form onsubmit=\"Search.searchLandmarks();return false\"><input type=\"text\" id=\"searchbox\" name=\"searchbox\" style=\"width:100px;height:14pt;font-size:12pt;\"/> <input type=\"submit\" value=\"".$tooltips['gosearch']."\" style=\"height:25px;font-size:12pt;\"/><form>');\n";
 
 
 echo "Interface.setup_tooltips();\n";
@@ -77,6 +83,7 @@ add_instructions('beginEllipse', 'ellipse');
 add_instructions('beginRectangle', 'rectangle');
 add_instructions('beginImg', 'uploadImg');
 add_instructions('beginPoint', 'point');
+add_instructions('beginAudio', 'audio');
 /*
 // slightly different interface for clipart landmark
 echo "Tooltips.beginPoint=function(){var icons = ['pushpin1.gif', 'pushpin5.gif'];
@@ -92,7 +99,7 @@ echo "Tooltips.beginPoint=function(){var icons = ['pushpin1.gif', 'pushpin5.gif'
 echo "Tooltips.move = \"".$tooltips['move']."\";\nTooltips.moving = \"".$tooltips['moving']."\";\n";
 
 // search interface
-echo "\$('mapper').insert('<form onsubmit=\"Search.searchLandmarks();return false\">".$instructions['search']."<br /><input type=\"text\" id=\"searchbox\" name=\"searchbox\" style=\"width:100px;height:14pt;font-size:12pt;\"/> <input type=\"submit\" value=\"".$tooltips['gosearch']."\" style=\"height:25px;font-size:12pt;\"/><form>');\n";
+//echo "\$('mapper').insert('<form onsubmit=\"Search.searchLandmarks();return false\">".$instructions['search']."<br /><input type=\"text\" id=\"searchbox\" name=\"searchbox\" style=\"width:100px;height:14pt;font-size:12pt;\"/> <input type=\"submit\" value=\"".$tooltips['gosearch']."\" style=\"height:25px;font-size:12pt;\"/><form>');\n";
 
 echo "Tooltips.enter_label = \"".$tooltips['label']."\";\n";
 

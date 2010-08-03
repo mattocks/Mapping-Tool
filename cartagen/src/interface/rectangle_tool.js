@@ -18,13 +18,10 @@ Tool.Rectangle = {
 	activate: function() {
 		$l('Rectangle activated')
 		Tool.Rectangle.mode = 'inactive'
+		Landmark.shape_created = false
 	},
 	deactivate: function() {
-		if(Landmark.temp_shape){
-			if(!Landmark.shape_created){
-				Landmark.temp_shape.remove()
-			}
-		}
+		Landmark.remove_temp_shape()
 		$l('Rectangle deactivated')
 	},
 	mousedown: function() {
@@ -44,6 +41,7 @@ Tool.Rectangle = {
 				if (point.mouse_inside()) {
 					over_point = true
 					Landmark.temp_shape.pt = i
+					//console.log(Landmark.temp_shape.pt)
 					throw $break
 				}
 			})
@@ -55,15 +53,15 @@ Tool.Rectangle = {
 	}.bindAsEventListener(Tool.Rectangle),
 	mouseup: function() {
 		$l('Rectangle mouseup')
-		if(Tool.Warp.obj instanceof ControlPoint){
-			if(Tool.Warp.obj.parent_shape.finished){
-				Tool.Warp.obj.parent_shape.pt = null
+		if(Tool.Editor.obj instanceof ControlPoint){
+			if(Tool.Editor.obj.parent_shape.finished){
+				//Tool.Editor.obj.parent_shape.pt = null
 			}
 		}
 		Landmark.temp_shape.active = true
-		Tool.Warp.obj = null
-		Tool.Warp.over = false
-		Tool.Warp.over_point = false
+		Tool.Editor.obj = null
+		Tool.Editor.over = false
+		Tool.Editor.over_point = false
 		Landmark.temp_shape.points.each(function(p){
 			p.hidden = false
 		})

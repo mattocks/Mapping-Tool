@@ -117,7 +117,7 @@ document.observe("dom:loaded", function() {
 		}, 10);
 	}
 	else{
-		if(location.href.indexOf('maps.html') == -1){
+		if(location.href.indexOf('maps.html') != -1){
 			MapEditor.load(1)
 			new PeriodicalExecuter(function(pe) {
 				MapEditor.refresh()

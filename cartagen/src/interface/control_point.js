@@ -32,6 +32,7 @@ ControlPoint = Class.create({
 			$C.translate(this.x,this.y)
 			// draw the object:
 			$C.fill_style("#333")
+			$C.stroke_style(this.color)
 			$C.opacity(0.6)
 			if (this.parent_shape.locked) {
 				$C.begin_path()
@@ -41,22 +42,18 @@ ControlPoint = Class.create({
 				$C.line_to(6/Map.zoom,-6/Map.zoom)
 				$C.stroke()
 			} else {
-				if (this.mouse_inside()) $C.circ(0, 0, this.r)
-				$C.stroke_circ(0, 0, this.r)
+				if (this.mouse_inside()) $C.circ(0, 0, this.r/Map.zoom)
+				$C.stroke_circ(0, 0, this.r/Map.zoom)
 			}
 			$C.restore()
 		}
-		
-		/* var nodestring = ''
-		nodes.each(function(node) {
-			nodestring += '(' + node[0] + ', ' + node[1] + ')\n'
-		})*/
-		
 		if (this.dragging && Mouse.down) {
+			//console.log(this.color)
 			//Tool.change('Warp')
 			this.drag()
 		} 
 		else if (this.mouse_inside()) {
+			//console.log(this.color)
 			if (Mouse.down) {
 				this.drag()
 			}
@@ -69,7 +66,7 @@ ControlPoint = Class.create({
 		}
 	},
 	mouse_inside: function() {
-		return (Geometry.distance(this.x, this.y, Map.pointer_x(), Map.pointer_y()) < this.r) && !Landmark.mouse_over_desc()
+		return (Geometry.distance(this.x, this.y, Map.pointer_x(), Map.pointer_y()) < this.r/Map.zoom) && !Landmark.mouse_over_desc()
 	},
 	mouse_inside_text: function(){
 	},
@@ -83,10 +80,8 @@ ControlPoint = Class.create({
 			//console.log('clicked control point')
 			this.parent_shape.active = true
 			Landmark.current = this.parent_shape.id
-			Tool.Warp.over_point = true
-			if(Tool.Warp.obj == null){
-				Tool.Warp.obj = this
-			}
+			Tool.Editor.over_point = true
+			LandmarkEditor.setCurrent(this)
 		}
 	},
 	hover: function() {
@@ -94,8 +89,8 @@ ControlPoint = Class.create({
 		this.dragging = false
 	},
 	drag: function() {
-		//console.log(Tool.Warp.obj)
-		if (this.parent_shape.active && Tool.Warp.obj == this /*&& Geometry.distance(this.x, this.y, Map.pointer)*/) {
+		//console.log(Tool.Editor.obj)
+		if (this.parent_shape.active && Tool.Editor.obj == this /*&& Geometry.distance(this.x, this.y, Map.pointer)*/) {
 			if (!this.dragging) {
 				this.dragging = true
 				this.drag_offset_x = Map.pointer_x() - this.x

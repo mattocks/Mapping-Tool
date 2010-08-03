@@ -16,13 +16,11 @@ Tool.Freeform = {
 	},
 	activate: function() {
 		$l('Freeform activated')
+		Tool.Freeform.mode='inactive'
+		Landmark.shape_created = false
 	},
 	deactivate: function() {
-		if(Landmark.temp_shape){
-			if(!Landmark.shape_created){
-				Landmark.temp_shape.remove()
-			}
-		}
+		Landmark.remove_temp_shape()
 		$l('Freeform deactivated')
 	},
 	mousedown: function() {
@@ -62,8 +60,6 @@ Tool.Freeform = {
 	dblclick: function() {
 		$l('Freeform dblclick')
 	}.bindAsEventListener(Tool.Freeform),
-	new_shape: function() {
-		Tool.change("Freeform")
-		Tool.Freeform.mode='inactive'	
+	new_shape: function() {	
 	},
 }

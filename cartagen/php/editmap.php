@@ -25,7 +25,7 @@ if ($_GET['mapid']){
 else if ($_GET['removemap']){
 	mysql_query("DELETE FROM `maps` WHERE `id` = " . $_GET['removemap']);
 	if($_GET["redirect"]){
-		header("Location: ../../maps.php");
+		header("Location: ../../");
 	}
 }
 ?>

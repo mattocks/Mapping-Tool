@@ -13,23 +13,21 @@ Landmark = {
 	mapDesc: null,
 	temp_shape: null,
 	obj: null,
+	action_performed: false, // for clicking
+	shape_created: null,
 	remove_temp_shape: function(){
-		if(Landmark.temp_shape){
+		console.log(Landmark.temp_shape)
+		console.log(''+Landmark.shape_created)
+		if(Landmark.temp_shape != null){
 			if(Landmark.shape_created == false){
 				Landmark.temp_shape.remove()
 				Landmark.shape_created = null
 				Events.mouseup()
+				Glop.trigger_draw(2)
 			}
 			Landmark.temp_shape = null
 		}
-	},
-	toggleLeft: function(){
-		if($('mapper').style.left=='0px'){
-			$('mapper').style.left='-184px'
-		}
-		else{
-			$('mapper').style.left='0px'
-		}
+		//console.log('removing temp shape')
 	},
 	goTo: function(id){
 		var lndmrk = Landmark.landmarks.get(id)
@@ -52,7 +50,8 @@ Landmark = {
 	check: function(e){
 		var over = false
 		Landmark.landmarks.each(function(l){
-			if (l.value.mouse_inside_text() || l.value.mouse_inside() || l.value.mouse_over_edit() || l.value.mouse_over_X()) {
+			if ((l.value.mouse_inside_text() || l.value.mouse_inside() || l.value.mouse_over_edit() || l.value.mouse_over_X())
+			&& (Tool.active == 'Pan' || Tool.active == 'Editor')) {
 				over = true
 				throw $break
 			}
@@ -72,6 +71,7 @@ Landmark = {
 				throw $break
 			}
 		})
+		//console.log(t)
 		return t
 	},
 	// is the mouse over anything but a point of a shape
@@ -100,9 +100,22 @@ Landmark = {
 		})
 		return t
 	},
+	// is the mouse over a point landmark? these have higher priority and float above regions, paths, etc
+	mouse_over_point_landmark: function(){
+		var t = false
+		Landmark.landmarks.each(function(l){
+			if(!(l.value instanceof Region || l.value instanceof Path)){
+				if(l.value.mouse_inside()){
+					t = true
+					throw $break
+				}
+			}
+		})
+		return t
+	},
 	toggleMove: function(){
 		if (Landmark.mode == 'default') {
-			Tool.change('Warp')
+			Tool.change('Editor')
 			Landmark.mode = 'dragging'
 			Landmark.landmarks.each(function(l){
 				l.value.active = true
@@ -180,6 +193,7 @@ Landmark = {
 		mousedown: function(){
 			if (this.mouse_over_X()){
 				this.expanded = false
+				Landmark.action_performed = true
 			}
 		},
 		drawDesc: function() {
@@ -245,11 +259,11 @@ Landmark = {
 			$C.draw_text('Arial', 12, 'black', 10, -82, this.descView[1])
 			$C.draw_text('Arial', 12, 'black', 10, -62, this.descView[2])
 			$C.draw_text('Arial', 12, 'black', 10, -42, this.descView[3])
-			if(this instanceof Region){
+			if((this instanceof Region) && !(this instanceof Textnote)){
 				//$C.draw_text('Arial', 10, 'black', 10, -18, 'Area: '+Math.round(Geometry.poly_area(this.points))+'; perimeter: '+Geometry.line_length(this.points, true)+' feet')
 				$C.draw_text('Arial', 10, 'black', 10, -18, 'Perimeter: '+Geometry.line_length(this.points, false)+' meters')
 			}
-			else if (this instanceof Path){
+			else if (this instanceof Path && this.type != 'Freeform'){
 				$C.draw_text('Arial', 10, 'black', 10, -18, 'Length: '+Geometry.line_length(this.points, false)+' meters')
 			}
 			//var imag = new Image()

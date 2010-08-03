@@ -10,6 +10,7 @@
  * 6: ellipse
  * 7: custom image
  * 8: textnote
+ * 9: audio
  */
 header('Content-type: text/javascript');
 include("connection.php");
