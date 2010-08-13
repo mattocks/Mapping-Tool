@@ -6,7 +6,7 @@ Tool.Freeform = {
 	 * The tool mode can be 'drawing' when the user is in the process of adding 
 	 * points to the polygon, or 'inactive' when a polygon has not yet begun.
 	 */
-	mode: 'inactive', //'draw','inactive','drag'
+	mode: 'inactive', //'draw','inactive'
 	/**
 	 * The polygon currently being drawn. 
 	 */
@@ -25,10 +25,11 @@ Tool.Freeform = {
 	},
 	mousedown: function() {
 		//console.log('mousedown in Freeform')
-		
+		Landmark.temp_shape = new Path('Freeform')
 	}.bindAsEventListener(Tool.Freeform),
 	mouseup: function() {
 		$l('Freeform mouseup')
+		/*
 		if (Tool.Freeform.mode == 'inactive'){
 			Landmark.temp_shape = new Path('Freeform')
 			Tool.Freeform.mode = 'draw'
@@ -42,20 +43,34 @@ Tool.Freeform = {
 			console.log(len)
 			LandmarkEditor.create(4)
 		}
-		Landmark.temp_shape.new_point(Map.pointer_x(), Map.pointer_y())
+		*/
+		if(Tool.Freeform.mode == 'draw'){
+			Tool.Freeform.mode = 'inactive'
+			var len = 0
+			Landmark.temp_shape.points.each(function(p){
+				len += (Projection.x_to_lon(-1*p.x) + '' + Projection.y_to_lat(p.y)).length
+			})
+			console.log(len)
+			LandmarkEditor.create(4)
+		}
+		//Landmark.temp_shape.new_point(Map.pointer_x(), Map.pointer_y())
 	}.bindAsEventListener(Tool.Freeform),
 	mousemove: function() {
 		$l('Freeform mousemove')
 		console.log('mouse was moved!')
 		if (Tool.Freeform.mode == 'inactive') {
+			if(Mouse.down)
+				Tool.Freeform.mode = 'draw'
 		} 
 		else if (Tool.Freeform.mode == 'draw') {
 			Landmark.temp_shape.new_point(Map.pointer_x(), Map.pointer_y())
 			Landmark.temp_shape.active = true
 		}
+		/*
 		else if (Tool.Freeform.mode == 'drag'){
 			Landmark.temp_shape.active = true
 		}
+		*/
 	}.bindAsEventListener(Tool.Freeform),
 	dblclick: function() {
 		$l('Freeform dblclick')

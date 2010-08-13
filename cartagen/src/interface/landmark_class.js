@@ -11,9 +11,13 @@ Landmark = {
 	map: null,
 	mapTitle: null,
 	mapDesc: null,
+	mapX: null,
+	mapY: null,
+	mapZoom: null,
 	temp_shape: null,
 	obj: null,
 	action_performed: false, // for clicking
+	highlighted: null, // which id is currently highlighted
 	shape_created: null,
 	remove_temp_shape: function(){
 		console.log(Landmark.temp_shape)
@@ -28,6 +32,16 @@ Landmark = {
 			Landmark.temp_shape = null
 		}
 		//console.log('removing temp shape')
+	},
+	highlight: function(id){
+		Landmark.landmarks.get(id).highlighted = true
+		Landmark.highlighted = id
+	},
+	unhighlight: function(){
+		if(Landmark.highlighted != null){
+			Landmark.landmarks.get(Landmark.highlighted).highlighted = false
+		}
+		Landmark.highlighted = null
 	},
 	goTo: function(id){
 		var lndmrk = Landmark.landmarks.get(id)
@@ -44,25 +58,27 @@ Landmark = {
 			Map.y = lndmrk.y
 		}
 		lndmrk.expanded = true
+		Landmark.unhighlight()
+		Landmark.highlight(id)
 		Glop.trigger_draw(2)
 	},
-	// makes the cursor turn into a pointer over a landmark
+	/**
+	 * makes the cursor turn into a pointer over a landmark
+	 */
 	check: function(e){
 		var over = false
 		Landmark.landmarks.each(function(l){
-			if ((l.value.mouse_inside_text() || l.value.mouse_inside() || l.value.mouse_over_edit() || l.value.mouse_over_X())
+			if ((l.value.mouse_inside() || l.value.mouse_over_edit() || l.value.mouse_over_X())
 			&& (Tool.active == 'Pan' || Tool.active == 'Editor')) {
 				over = true
 				throw $break
 			}
 		})
-		if (over) {
-			$('main').style.cursor = 'pointer'
-		}
-		else {
-			$('main').style.cursor = 'default'
-		}
+		$('main').style.cursor = over ? 'pointer' : 'default'
 	},
+	/**
+	 * checks if the mouse is over any description
+	 */
 	mouse_over_desc: function(){
 		var t = false
 		Landmark.landmarks.each(function(l){
@@ -71,10 +87,11 @@ Landmark = {
 				throw $break
 			}
 		})
-		//console.log(t)
 		return t
 	},
-	// is the mouse over anything but a point of a shape
+	/**
+	 * Checks if the mouse is over anything but a point of a shape
+	 */
 	mouse_over_anything: function(){
 		var t = false
 		Landmark.landmarks.each(function(l){
@@ -85,7 +102,9 @@ Landmark = {
 		})
 		return t
 	},
-	// is the mouse over the point of a shape
+	/**
+	 * Is the mouse over the point of a shape
+	 */
 	mouse_over_point: function(){
 		var t = false
 		Landmark.landmarks.each(function(l){
@@ -100,7 +119,9 @@ Landmark = {
 		})
 		return t
 	},
-	// is the mouse over a point landmark? these have higher priority and float above regions, paths, etc
+	/**
+	 * is the mouse over a point landmark? these have higher priority and float above regions, paths, etc
+	 */
 	mouse_over_point_landmark: function(){
 		var t = false
 		Landmark.landmarks.each(function(l){
@@ -249,7 +270,22 @@ Landmark = {
 			//console.log('drawing desc for ' + this.id)
 			$C.scale(1/Map.zoom, 1/Map.zoom)
 			$C.canvas.fillStyle = 'rgb(255, 255, 255)'
-			$C.rect(5, -259, 250, 253)
+			var left_bound = 5
+			var right_bound = 255
+			var upper_bound = -259
+			var lower_bound = -6
+			$C.rect(left_bound, upper_bound, right_bound - left_bound, lower_bound - upper_bound)
+			// draw a border
+			$C.stroke_style('rgb(100, 100, 100)')
+			$C.begin_path()
+			$C.move_to(left_bound, upper_bound)
+			$C.line_to(right_bound, upper_bound)
+			$C.line_to(right_bound, lower_bound)
+			$C.line_to(left_bound, lower_bound)
+			$C.canvas.closePath()
+			$C.line_width(2)
+			$C.stroke()
+			// upper right text controls
 			$C.draw_text('Arial', 18, 'black', 10, -236, this.label)
 			$C.draw_text('Arial', 10, '#00D', 210, -246, 'Edit')
 			$C.draw_text('Arial', 10, '#00D', 242, -246, 'X')
@@ -259,16 +295,12 @@ Landmark = {
 			$C.draw_text('Arial', 12, 'black', 10, -82, this.descView[1])
 			$C.draw_text('Arial', 12, 'black', 10, -62, this.descView[2])
 			$C.draw_text('Arial', 12, 'black', 10, -42, this.descView[3])
-			if((this instanceof Region) && !(this instanceof Textnote)){
-				//$C.draw_text('Arial', 10, 'black', 10, -18, 'Area: '+Math.round(Geometry.poly_area(this.points))+'; perimeter: '+Geometry.line_length(this.points, true)+' feet')
+			if((this instanceof Region) && !(this instanceof Textnote) && !(this instanceof Ellipse)){
 				$C.draw_text('Arial', 10, 'black', 10, -18, 'Perimeter: '+Geometry.line_length(this.points, false)+' meters')
 			}
 			else if (this instanceof Path && this.type != 'Freeform'){
 				$C.draw_text('Arial', 10, 'black', 10, -18, 'Length: '+Geometry.line_length(this.points, false)+' meters')
 			}
-			//var imag = new Image()
-			//imag.src = 'pic.jpg'
-			//$C.canvas.drawImage(imag, 10,-200)
 			$C.restore()
 		},
 		remove: function(){

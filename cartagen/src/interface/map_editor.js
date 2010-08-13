@@ -73,7 +73,13 @@ MapEditor = {
 		  	parameters: {
 				mapid: Landmark.map,
 				coords: Projection.x_to_lon(-1*Map.x)+','+Projection.y_to_lat(Map.y),
-		  	}
+				zoom: Map.zoom,
+		  	},
+			onSuccess: function(r){
+				Landmark.mapX = Map.x
+				Landmark.mapY = Map.y
+				Landmark.mapZoom = Map.zoom
+			}
 		})
 	},
 	edit: function(){
@@ -96,6 +102,7 @@ MapEditor = {
 			}
 		})
 	},
+	/*
 	remove: function(id){
 		if(confirm('Are you sure you want to delete this map entirely? Press OK to continue or Cancel to stop.')){
 			new Ajax.Request('cartagen/php/editmap.php', {
@@ -108,6 +115,7 @@ MapEditor = {
 			})
 		}
 	}
+	*/
 }
 document.observe("dom:loaded", function() {
 	if(location.search.toQueryParams().map){
@@ -118,6 +126,7 @@ document.observe("dom:loaded", function() {
 	}
 	else{
 		if(location.href.indexOf('maps.html') != -1){
+			console.log('bad');
 			MapEditor.load(1)
 			new PeriodicalExecuter(function(pe) {
 				MapEditor.refresh()
@@ -125,3 +134,6 @@ document.observe("dom:loaded", function() {
 		}
 	}	
 })
+window.onbeforeunload = function(){
+	new Ajax.Request('cartagen/php/undo.php?destroy=true');
+}

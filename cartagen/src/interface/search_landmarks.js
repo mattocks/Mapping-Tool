@@ -1,34 +1,32 @@
+/*
+ * Contains methods for searching the landmarks in the map.
+*/
 var Search = {
 	toggle: function(){
-		if($('mapper').style.display == 'inline'){
-			$('mapper').style.display = 'none'
-			//$('search').style.background = ''
+		if($('searchresults').style.display == 'inline'){
+			$('searchresults').style.display = 'none'
+			Landmark.unhighlight()
+			Glop.trigger_draw()
 		}
-		else if($('mapper').style.display == 'none'){
+		else if($('searchresults').style.display == 'none'){
 			Search.openBar()
-			//$('search').style.background = '#888'
-			//$('search').style.background = '-webkit-gradient(linear, 0% 0%, 0% 100%, from(#222), to(#555))'
 		}
 	},
 	openBar: function(){
-		$('mapper').style.display = 'inline'
+		$('searchresults').style.display = 'inline'
 	},
-	// currently searches for landmarks in this map. if desired, can be used to search in other maps as well.
 	searchLandmarks: function(){
 		Search.openBar()
 		Search.clear()
 		var found = false
 		var color = 'rgb(245, 245, 245)'
 		var str = $('searchbox').value
-		console.log(str)
 		Landmark.landmarks.each(function(l){
 			var regexstr = new RegExp(str, "i")
-			// /str/i
 			if(l.value.label.search(regexstr) != -1 || l.value.desc.search(regexstr) != -1){
 				found = true
 				$('holder').insert('<div onclick="Landmark.goTo('+l.key+')" id="goto'+l.key+'" style="background-color: '+color+';"><b>'+l.value.label+'</b><br />'+l.value.desc+'</div>')
 				color = (color == 'rgb(230, 230, 230)') ? 'rgb(245, 245, 245)' : 'rgb(230, 230, 230)'
-				//console.log(l.value.id+l.value.label)
 			}
 		})
 		if(!found){
@@ -39,9 +37,9 @@ var Search = {
 		if($('holder') != null){
 			$('holder').remove()
 		}
-		$('mapper').insert('<div id="holder"></div>')
+		$('searchresults').insert('<div id="holder"></div>')
 	},
 }
 document.observe("dom:loaded", function(){
-	document.body.insert('<div id="mapper" style="position: absolute; display: none; z-index: 2; top: 47px; width: 200px; bottom: 0px; background-color: white; overflow:auto; right: 0px; left: auto"><div style="position: relative; left: 190px; top: 5px; width:7px;"><span style="cursor: pointer;" onclick="Search.toggle()">X</span></div></div>');
+	document.body.insert('<div id="searchresults" style="position: absolute; display: none; z-index: 2; top: 47px; width: 200px; bottom: 0px; background-color: white; overflow:auto; right: 0px; left: auto; border-left:3px solid rgb(60, 60, 60)"><div style="position: relative; margin-left: auto; margin-right: 5px; top: 3px; width:7px;"><span style="cursor: pointer;" onclick="Search.toggle()">X</span></div></div>');
 })

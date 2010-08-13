@@ -5,7 +5,4 @@
  */
 
 Tooltips = {
-	beginFreeform: function(){
-		Modalbox.show('<span>Click to begin drawing a freeform shape. Drag the mouse to outline your path. Click again to stop drawing and create a new landmark.</span><br /><input type="button" value="OK" onclick="Modalbox.hide();Tool.Freeform.new_shape()" />', {title: 'Create a freeform path'})
-	},
 }

@@ -12,16 +12,16 @@ Tool.Warp = {
 	 */
 	activate: function() {
 		$('toolbars').insert('<div class=\'toolbar\' id=\'tool_specific\'></div>')
-		$('tool_specific').insert('<a name=\'Delete this image\' class=\'first silk\' id=\'tool_warp_delete\'  href=\'javascript:void(0);\'><img src=\'/images/silk-grey/delete.png\' /></a>')
+		$('tool_specific').insert('<a name=\'Delete this image\' class=\'first silk\' id=\'tool_warp_delete\'  href=\'javascript:void(0);\'><img src=\'images/silk-grey/delete.png\' /></a>')
 			$('tool_warp_delete').observe('mouseup',Tool.Warp.delete_image)
-		$('tool_specific').insert('<a name=\'Lock this image\' class=\'silk\' id=\'tool_warp_lock\' href=\'javascript:void(0);\'><img src=\'/images/silk-grey/lock.png\' /></a>')
+		$('tool_specific').insert('<a name=\'Lock this image\' class=\'silk\' id=\'tool_warp_lock\' href=\'javascript:void(0);\'><img src=\'images/silk-grey/lock.png\' /></a>')
 			$('tool_warp_lock').observe('mouseup',Tool.Warp.lock_image)
 			if (Warper.active_image.locked) $('tool_warp_lock').addClassName('down')
-		$('tool_specific').insert('<a name=\'Rotate/scale this image (r)\' class=\'\' id=\'tool_warp_rotate\' href=\'javascript:void(0);\'><img src=\'/images/tools/stock-tool-rotate-22.png\' /></a>')
+		$('tool_specific').insert('<a name=\'Rotate/scale this image (r)\' class=\'\' id=\'tool_warp_rotate\' href=\'javascript:void(0);\'><img src=\'images/tools/stock-tool-rotate-22.png\' /></a>')
 			$('tool_warp_rotate').observe('mouseup',function(){Tool.Warp.mode = 'rotate'})
-		$('tool_specific').insert('<a name=\'Revert this image to natural size\' class=\'silk\' id=\'tool_warp_revert\' href=\'javascript:void(0);\'><img src=\'/images/silk-grey/arrow_undo.png\' /></a>')
+		$('tool_specific').insert('<a name=\'Revert this image to natural size\' class=\'silk\' id=\'tool_warp_revert\' href=\'javascript:void(0);\'><img src=\'images/silk-grey/arrow_undo.png\' /></a>')
 			$('tool_warp_revert').observe('mouseup',function(){Warper.active_image.set_to_natural_size();})
-		$('tool_specific').insert('<a name=\'Distort this image by dragging corners (w)\' class=\'last\' id=\'tool_warp_default\' href=\'javascript:void(0);\'><img src=\'/images/tools/stock-tool-perspective-22.png\' /></a>')
+		$('tool_specific').insert('<a name=\'Distort this image by dragging corners (w)\' class=\'last\' id=\'tool_warp_default\' href=\'javascript:void(0);\'><img src=\'images/tools/stock-tool-perspective-22.png\' /></a>')
 			$('tool_warp_default').observe('mouseup',function(){Tool.Warp.mode = 'default'})
 	},
 	/**
@@ -30,7 +30,9 @@ Tool.Warp = {
 	deactivate: function() {
 		$('tool_specific').remove()
 		Tool.Warp.mode = 'default'
+		Warper.active_image.save() // maybe
 		Warper.active_object = false
+		//Warper.active_image = null
 	},
 	delete_image: function() {
 		if (confirm('Are you sure you want to delete this image? You cannot undo this action.')) {
@@ -38,8 +40,9 @@ Tool.Warp = {
 				if (image.active && Warper.active_image == image) {
 					Warper.images.splice(index,1)
 					image.cleanup()
-					new Ajax.Request('/warper/delete/'+image.id,{
+					new Ajax.Request('cartagen/php/editlandmark.php',{
 						method:'post',
+						parameters: {remove: image.id}
 					})
 				}
 			})

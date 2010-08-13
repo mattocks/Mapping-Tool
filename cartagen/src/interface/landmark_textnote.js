@@ -2,42 +2,60 @@
 //= require "rectangle"
 
 Textnote = Class.create(Rectangle, {
-	initialize: function($super,x,y,label,desc,icon,id,timestamp){
-		$super(x,y,label,desc,icon,id,timestamp)
+	initialize: function($super, pts, label, desc, id, color, tags, timestamp){
+		$super(pts, label, desc, id, color, tags, timestamp)
 		this.noteRendered = false
-		this.noteView = ['','','','']
-		this.desc=''
+		this.noteView = ['','','','','','','','','','']
+		this.noteLines = 1 // how many lines are in the note
+		this.desc = desc != null ? desc : ''
 	},
 	renderNote: function(){
 		if(this.noteRendered == false){
-			var i = 1
-			var line = 0
-			var start = 0
-			var indexOfLastSpace = this.desc.length
-			this.noteView = ['','','','']
+			var i = 1 // which character we are on
+			var line = 0 // line number
+			var start = 0 // starting index of current line
+			var indexOfLastSpace = this.desc.length // last seen space
+			this.noteView = ['','','','','','','','','','']
 			var reachedEnd = false
 			// base case
 			if(this.desc.length < 3){
-				this.noteView = [this.desc,'','','']
+				this.noteView[0] = this.desc
+				this.noteLines = 1
+				noteMaxWidth = $C.measure_text('Arial', 12, this.desc)
 			}
 			else{
-				while (line < 4 && i < this.desc.length){
+				while (line < this.noteView.length && i < this.desc.length){
 					if ($C.measure_text('Arial', 12, this.desc.substring(start, i)) < this.points[1].x - this.points[0].x){
 						this.noteView[line] = this.desc.substring(start, i+1)
-						if (this.desc.charAt(i) == ' '){
+						if (this.desc.charAt(i) == ' ') {
 							indexOfLastSpace = i
 						}
 					}
 					else {
-						//console.log('indexspace: '+indexOfLastSpace) // 8923
-						//console.log(this.desc.substring(start)) // 8924
+						//console.log('indexspace: '+indexOfLastSpace)
+						//console.log(this.desc.substring(start))
 						this.noteView[line] = this.desc.substring(start, indexOfLastSpace)
-						//console.log(this.noteView[line]) // 8926
+						//console.log(this.noteView[line])
 						start = indexOfLastSpace + 1
 						line++
 					}
 					i++
 				}
+				// figure out the widest line
+				noteMaxWidth = 0
+				for(var j=0;j<this.noteView.length;j++){
+					if(this.noteView[j] == '') break;
+					noteMaxWidth = Math.max($C.measure_text('Arial', 12, this.noteView[j]), noteMaxWidth)
+				}
+				this.noteLines = line + 1
+			}
+			// resize the note to fit the description
+			if(!Mouse.down && this.desc != ''){
+				this.points[2].y = this.points[1].y + 20*this.noteLines
+				this.points[3].y = this.points[0].y + 20*this.noteLines
+				var width = this.points[1].x - this.points[0].x
+				this.points[1].x = this.points[0].x + Math.min(width, noteMaxWidth+5)
+				this.points[2].x = this.points[3].x + Math.min(width, noteMaxWidth+5)
 			}
 			this.noteRendered = true
 		}
@@ -65,7 +83,8 @@ Textnote = Class.create(Rectangle, {
 		}
 		if (Tool.Editor.over_point){
 			if(Tool.active == 'Editor'){
-				if(Tool.Editor.obj.parent_shape == this){	
+				if(Tool.Editor.obj.parent_shape == this){
+					this.noteRendered = false
 					this.make_rectangle()
 				}			
 			}
@@ -85,29 +104,37 @@ Textnote = Class.create(Rectangle, {
 			this.make_rectangle()
 			this.pt = null
 		}
-			$C.save()
-			//$C.stroke_style('#000')
+		$C.save()
+		if (this.active) $C.line_width(2)
+		else $C.line_width(2)
+		var stroke_opacity = 1
+		if(this.highlighted){
+			$C.stroke_style('#00F')
+			$C.line_width(12)
+			stroke_opacity = 1
+		}
+		else{
 			$C.stroke_style(this.color)
-			$C.fill_style(this.color)
-			if (this.active) $C.line_width(2)
-			else $C.line_width(2)
-			$C.begin_path()
-			if (this.points.length>0){
-				$C.move_to(this.points[0].x, this.points[0].y)		
-				this.points.each(function(point) {
-					$C.line_to(point.x, point.y)
-				})			
-				$C.line_to(this.points[0].x, this.points[0].y)
+		}
+		$C.fill_style(this.color)
+		$C.begin_path()
+		if (this.points.length>0){
+			$C.move_to(this.points[0].x, this.points[0].y)		
+			this.points.each(function(point) {
+				$C.line_to(point.x, point.y)
+			})			
+			$C.canvas.closePath()
+			//$C.line_to(this.points[0].x, this.points[0].y)
 
-			}
-			$C.opacity(0.7)
-			$C.stroke()
-			$C.opacity(0.3)
-			$C.fill()
-			this.renderNote()
-			for(var i=0;i<4;i++){
-				$C.draw_text('Arial', 12, 'black', this.points[0].x + 2, this.points[0].y + 15 + 20*i, this.noteView[i])
-			}
-			$C.restore()
+		}
+		$C.opacity(0.9)
+		$C.fill()
+		$C.opacity(stroke_opacity)
+		$C.stroke()
+		this.renderNote()
+		for(var i=0;i<this.noteView.length;i++){
+			$C.draw_text('Arial', 12, 'black', this.points[0].x + 2, this.points[0].y + 15 + 20*i, this.noteView[i])
+		}
+		$C.restore()
 	}
 })

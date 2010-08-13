@@ -106,28 +106,34 @@ Ellipse = Class.create(Region, {
 			this.points[1].y = this.centerY()
 			this.points[3].y = this.centerY()
 		}
-			$C.save()
-			//$C.stroke_style('#000')
+		$C.save()
+		if (this.active) $C.line_width(2)
+		else $C.line_width(2)
+		$C.fill_style(this.color)
+		$C.begin_path()
+		if (this.points.length>0){
+			$C.move_to(this.points[0].x, this.points[0].y)
+			var width = this.width();
+			var height = this.height();
+			var centerX = this.centerX();
+			var centerY = this.centerY();
+			$C.translate(centerX, centerY)
+			$C.ellipse(centerX, centerY, width/2, height/2, 0, Math.PI*2)	
+		}
+		$C.opacity(0.3)
+		$C.fill()
+		var stroke_opacity = 0.7
+		if(this.highlighted){
+			$C.stroke_style('#FF0')
+			$C.line_width(12)
+			stroke_opacity = 1
+		}
+		else{
 			$C.stroke_style(this.color)
-			$C.fill_style(this.color)
-			if (this.active) $C.line_width(2)
-			else $C.line_width(2)
-			$C.begin_path()
-			if (this.points.length>0){
-				$C.move_to(this.points[0].x, this.points[0].y)
-				//$C.stroke_style('black')
-				var width = this.width();
-				var height = this.height();
-				var centerX = this.centerX();
-				var centerY = this.centerY();
-				$C.translate(centerX, centerY)
-				$C.ellipse(centerX, centerY, width/2, height/2, 0, Math.PI*2)	
-			}
-			$C.opacity(0.7)
-			$C.stroke()
-			$C.opacity(0.3)
-			$C.fill()
-			$C.restore()
+		}
+		$C.opacity(stroke_opacity)
+		$C.stroke()
+		$C.restore()
 	},
 	remove: function($super){
 		$super()

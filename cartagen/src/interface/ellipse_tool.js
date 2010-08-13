@@ -27,6 +27,7 @@ Tool.Ellipse = {
 		Landmark.remove_temp_shape()
 	},
 	mousedown: function() {
+		LandmarkEditor.showButtons('ellipsediv', "LandmarkEditor.create(6)")
 		if (Tool.Ellipse.mode == 'inactive') {
 			Tool.Ellipse.mode = 'draw'
 			var x = Map.pointer_x()
@@ -69,7 +70,7 @@ Tool.Ellipse = {
 		$l('Ellipse mousemove')
 	}.bindAsEventListener(Tool.Ellipse),
 	dblclick: function() {
-		LandmarkEditor.create(6)
+		//LandmarkEditor.create(6)
 		$l('Ellipse dblclick')
 	}.bindAsEventListener(Tool.Ellipse),
 	new_shape: function() {

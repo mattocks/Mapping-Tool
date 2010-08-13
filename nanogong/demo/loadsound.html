@@ -1,0 +1,24 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>The NanoGong Applet with a Recorded Voice</title>
+</head>
+<body>
+    <h1>The NanoGong Applet with a Recorded Voice</h1>
+    <p>
+    The NanoGong applet below loads a pre-recorded voice file from a website.
+    The location of the voice file is given by an applet parameter named
+    "SoundFileURL". In this particular case, the value of the parameter is the
+    relative location of the file in the folder.
+    </p>
+    <applet id="applet" archive="../nanogong.jar" code="gong.NanoGong" width="180" height="40">
+        <param name="SoundFileURL" value="sentence.wav" /> 
+    </applet>
+    <p>
+    More information about NanoGong can be obtained from
+    <a alt="NanoGong" href="http://gong.ust.hk/nanogong/" target="_blank">http://gong.ust.hk/nanogong/</a>.
+    </p>
+</body>
+</html>
+

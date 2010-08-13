@@ -2,10 +2,18 @@
 <head>
 <title>Edit a map</title>
 <style type="text/css">
+#maincontent{
+width: 770px;
+margin-left: auto;
+margin-right: auto;
+}
+#creator{
+height: 400px;
+}
 #landmarklist{
-position: absolute;
+position: relative;
 left: 300px;
-top: 10px;
+top: -400px;
 width: 450px;
 }
 .dark{
@@ -20,6 +28,7 @@ font-weight: bold;
 </style>
 </head>
 <body>
+<div id="maincontent">
 <?php
 include("cartagen/php/connection.php");
 if(!($map = $_GET["mapid"])){
@@ -35,8 +44,8 @@ while ($row = mysql_fetch_array($result)) {
 	$desc = sql_to_textarea($row['desc']);
 }
 ?>
-<p><a href="maps.html?map=<?php echo $map; ?>">View this map</a></p>
 <div id="creator">
+<p><a href="maps.html?map=<?php echo $map; ?>">View this map</a></p>
 <p>Edit this map</p>
 <?php if ($_GET['saved'] == 'true'){ echo '<p><span style="background-color: rgb(0,240,0)">Map saved</span></p>'; } ?>
 <form action="cartagen/php/editmap.php" method="get">
@@ -66,17 +75,15 @@ List of landmarks in this map
 $result = mysql_query("SELECT * FROM `landmarks` WHERE `map` = $map");
 $odd = false;
 while ($row = mysql_fetch_array($result)) {
-	//$type = $row['type'];
 	$id = $row['id'];
-	//$color = $row['color'];
 	$label = sql_to_html($row['label']);
 	$desc = sql_to_html($row['desc']);
-	//$icon = $row['icon'];
 	$class = $odd == false ? "light" : "dark";
 	echo "<div class=\"$class\"><p><span class=\"landmarkName\">$label</span></p><p><span class=\"landmarkDesc\">$desc</span></p></div>\n";
 	$odd = !$odd;
 }
 ?>
+</div>
 </div>
 </body>
 </html>

@@ -2,13 +2,18 @@
  *@namespace represents an area of a landmark
  */
 Region = Class.create(Landmark.Landmark, {
-	initialize: function(shape) {
-		this.shape = shape //rectangle for pre-cut shapes; otherwise null
+	initialize: function($super, pts, label, desc, id, color, tags, timestamp) {
+		$super(label,desc,id,tags)
+		this.timestamp = timestamp
+		this.pts = pts != null ? pts : []
 		this.points = []
-		this.active = true
+		this.pts.each(function(node) {
+			this.points.push(new ControlPoint(Projection.lon_to_x(node[0]), Projection.lat_to_y(node[1]), 10, this))
+		}, this)
+		this.active = timestamp != null ? false : true
 		this.expanded = false
 		this.dragging = false
-		this.color = '#222'
+		this.color = color != null ? color : '#222'
 		this.x = null
 		this.y = null
 		this.pt = null
@@ -20,7 +25,7 @@ Region = Class.create(Landmark.Landmark, {
 		Glop.observe('mousedown', this.eventC)
 	},
 	new_point: function(x,y) {
-		this.points.push(new ControlPoint(x, y, 6, this))
+		this.points.push(new ControlPoint(x, y, 10, this))
 	},
 	mouse_inside: function(){
 		var a = false
@@ -33,9 +38,6 @@ Region = Class.create(Landmark.Landmark, {
 			})
 		}
 		return Geometry.is_point_in_poly(this.points, Map.pointer_x(), Map.pointer_y()) && !Landmark.mouse_over_desc() && !a && Tool.active != 'Measure' && !Landmark.action_performed && !Landmark.mouse_over_point_landmark()
-	},
-	mouse_inside_text: function() {
-		return false
 	},
 	base: function(){
 		//this.color="#222"
@@ -85,12 +87,6 @@ Region = Class.create(Landmark.Landmark, {
 			Landmark.current = this.id
 			LandmarkEditor.edit()
 		}
-		/*
-		else if (Tool.active!='Region') {
-			this.active = false
-			//this.color='#000'
-		}
-		*/
 		$super()
 	},
 	hover: function(){
@@ -129,26 +125,34 @@ Region = Class.create(Landmark.Landmark, {
 		else{
 			this.base()
 		}
-			$C.save()
-			//$C.stroke_style('#000')
+		$C.save()
+		$C.fill_style(this.color)
+		if (this.active) $C.line_width(2)
+		else $C.line_width(2)
+		var stroke_opacity = 0.7
+		if(this.highlighted){
+			//255,174,0
+			$C.stroke_style('rgb(255,255,0)')
+			$C.line_width(12)
+			stroke_opacity = 1
+		}
+		else{
 			$C.stroke_style(this.color)
-			$C.fill_style(this.color)
-			if (this.active) $C.line_width(2)
-			else $C.line_width(2)
-			$C.begin_path()
-			if (this.points.length>0){
-				$C.move_to(this.points[0].x, this.points[0].y)		
-				this.points.each(function(point) {
-					$C.line_to(point.x, point.y)
-				})			
-				$C.line_to(this.points[0].x, this.points[0].y)
-
-			}
-			$C.opacity(0.7)
-			$C.stroke()
-			$C.opacity(0.3)
-			$C.fill()
-			$C.restore()
+		}
+		$C.begin_path()
+		if (this.points.length>0){
+			$C.move_to(this.points[0].x, this.points[0].y)		
+			this.points.each(function(point) {
+				$C.line_to(point.x, point.y)
+			})			
+			//$C.line_to(this.points[0].x, this.points[0].y)
+			$C.canvas.closePath()
+		}
+		$C.opacity(0.3)
+		$C.fill()
+		$C.opacity(stroke_opacity)
+		$C.stroke()
+		$C.restore()
 	},
 	remove: function($super){
 		$super()

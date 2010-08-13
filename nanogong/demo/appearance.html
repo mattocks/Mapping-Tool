@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Changing the Appearance of the NanoGong Applet</title>
+</head>
+<body>
+    <h1>Changing the Appearance of the NanoGong Applet</h1>
+    <p>
+    The NanoGong applet shown below does not have three of the usual components
+    on its interface. They are the save button, speed buttons and the audio
+    level indicator. Hiding of any these components (also the record button)
+    can be achieved by setting the corresponding applet parameters. The color
+    of the applet is changed using the color applet parameter. The time display
+    is enabled and will be shown if you hold your mouse over the timeline.
+    </p>
+    <applet id="applet" archive="../nanogong.jar" code="gong.NanoGong" width="95" height="40">
+        <param name="ShowSaveButton" value="false" />
+        <param name="ShowSpeedButton" value="false" />
+        <param name="ShowAudioLevel" value="false" />
+        <param name="Color" value="#C0E0FF" />
+        <param name="ShowTime" value="true" />
+    </applet>
+    <p>
+    More information about NanoGong can be obtained from
+    <a alt="NanoGong" href="http://gong.ust.hk/nanogong/" target="_blank">http://gong.ust.hk/nanogong/</a>.
+    </p>
+</body>
+</html>
+

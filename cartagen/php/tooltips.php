@@ -15,32 +15,8 @@ function add_instructions($var, $tooltip, $action = ''){
 	//$instructions = str_replace("'", "\\'", $instructions);
 	echo "Tooltips.$var = function(){Modalbox.show('".$instructions[$tooltip]."<br /><input type=\"button\" value=\"OK\" onclick=\"Modalbox.hide();$action\" />', {title: '".$tooltips[$tooltip]."'})};\n";
 }
-/*
-add_toolbar('landmarktools');
-add_toolbar_item('landmarktools', "pan", 'first', "Tool.change('Pan')", "images/tools/stock-tool-move-22.png"); // check
-add_toolbar_item('landmarktools', 'rectangle', 'silk', "Tooltips.beginRectangle();Tool.change('Rectangle')", "images/tools/stock-tool-rect-select-22.png"); // check
-add_toolbar_item('landmarktools', 'ellipse', 'silk', "Tooltips.beginEllipse();Tool.change('Ellipse')", "images/tools/stock-tool-ellipse-select-22.png"); //check
-add_toolbar_item('landmarktools', 'region', 'silk', "Tool.change('Region');Tooltips.beginRegion();Tool.Region.new_shape()", "images/silk-grey/shape_handles.png"); //check
-add_toolbar_item('landmarktools', 'path', 'silk', "Tool.change('Path');Tooltips.beginPath();Tool.Path.new_shape()", "images/tools/stock-tool-pencil-22.png"); // check
-add_toolbar_item('landmarktools', 'freeform', 'silk', "Tool.change('Freeform');Tooltips.beginFreeform()", "images/tools/stock-tool-paintbrush-22.png"); // check
-add_toolbar_item('landmarktools', 'point', 'silk', "Tool.change('Landmark');Tooltips.beginPoint()", "images/tools/stock-tool-smudge-22.png"); // check
-add_toolbar_item('landmarktools', 'uploadImg', 'silk', "Tool.change('Image');Tooltips.beginImg()", "images/silk-grey/image_add.png"); // check
-add_toolbar_item('landmarktools', 'move', 'silk', "Landmark.toggleMove()", "images/tools/stock-tool-align-22.png"); //check
-add_toolbar_item('landmarktools', 'search', 'silk', "Landmark.toggleSearch()", "images/silk-grey/magnifier.png"); // check
-add_toolbar_item('landmarktools', 'measure', 'last silk', "Tool.Measure.new_shape()", "images/silk-grey/calculator.png"); // check
-
-add_toolbar('maptools');
-add_toolbar_item('maptools', 'openMap', 'first silk', "Landmark.showLoad()", "images/silk-grey/drive.png"); // check
-add_toolbar_item('maptools', 'newMap', 'silk', "MapEditor.create()", "images/silk-grey/drive_add.png"); // check
-add_toolbar_item('maptools', 'editMap', 'silk', "MapEditor.edit()", "images/silk-grey/drive_edit.png"); // check
-add_toolbar_item('maptools', 'centerMap', 'silk', "MapEditor.center()", "images/silk-grey/drive_edit.png"); // check
-add_toolbar_item('maptools', 'downloadImg', 'silk', "Cartagen.redirect_to_image()", "images/silk-grey/disk.png"); // not yet! probably related to print map
-add_toolbar_item('maptools', 'embed', 'last silk', "Interface.display_knitter_iframe()", "images/silk-grey/page_white_code.png"); // check
-*/
 
 add_toolbar('fileOperationsGroup');
-//add_toolbar_item('fileOperationsGroup', 'newMap', 'first silk', "MapEditor.create()", "images/silk-grey/drive_add.png");
-//add_toolbar_item('fileOperationsGroup', 'openMap', 'silk', "Landmark.showLoad()", "images/silk-grey/drive.png");
 add_toolbar_item('fileOperationsGroup', 'openMap', 'first silk', "MapEditor.showLoad()", "images/silk-grey/drive.png");
 add_toolbar_item('fileOperationsGroup', 'editMap', 'silk', "MapEditor.edit()", "images/silk-grey/drive_edit.png");
 // add_toolbar_item('fileOperationsGroup', 'printMap', 'silk', "print()", "images/??"); // print map not implemented
@@ -51,24 +27,19 @@ add_toolbar('mapTools');
 add_toolbar_item('mapTools', "pan", 'first', "Tool.change('Pan')", "images/tools/stock-tool-move-22.png");
 add_toolbar_item('mapTools', 'centerMap', 'silk', "MapEditor.center()", "images/silk-grey/drive_edit.png");
 add_toolbar_item('mapTools', 'move', 'silk', "Landmark.toggleMove()", "images/tools/stock-tool-align-22.png");
-add_toolbar_item('mapTools', 'undo', 'silk', "alert('Undo button is coming soon')", "images/silk-grey/arrow_undo.png");
+add_toolbar_item('mapTools', 'undo', 'silk', "LandmarkEditor.undo()", "images/silk-grey/arrow_undo_real.png");
 add_toolbar_item('mapTools', 'measure', 'last silk', "Tool.Measure.new_shape()", "images/silk-grey/calculator.png");
 
-//add_toolbar('searchTools');
-//add_toolbar_item('searchTools', 'search', 'first last silk', "Search.toggle()", "images/silk-grey/magnifier.png");
-
 add_toolbar('landmarkTools');
-add_toolbar_item('landmarkTools', 'uploadImg', 'first silk', "Tool.change('Image');Tooltips.beginImg()", "images/silk-grey/image_add.png");
+add_toolbar_item('landmarkTools', 'uploadImg', 'first silk', "/*Tool.change('Image');*/LandmarkEditor.showImgUpload()", "images/silk-grey/image_add.png");
 add_toolbar_item('landmarkTools', 'freeform', 'silk', "Tool.change('Freeform');Tooltips.beginFreeform()", "images/tools/stock-tool-paintbrush-22.png");
 add_toolbar_item('landmarkTools', 'path', 'silk', "Tool.change('Path');Tooltips.beginPath()", "images/tools/stock-tool-pencil-22.png");
 add_toolbar_item('landmarkTools', 'region', 'silk', "Tool.change('Region');Tooltips.beginRegion()", "images/silk-grey/shape_handles.png");
 add_toolbar_item('landmarkTools', 'rectangle', 'silk', "Tooltips.beginRectangle();Tool.change('Rectangle')", "images/tools/stock-tool-rect-select-22.png");
 add_toolbar_item('landmarkTools', 'ellipse', 'silk', "Tooltips.beginEllipse();Tool.change('Ellipse')", "images/tools/stock-tool-ellipse-select-22.png");
-// add_toolbar_item('landmarkTools', 'clipart', 'silk', "Tooltips.beginClipart();Tool.change(?)", "images/??"); // clipart tool not implemented
 add_toolbar_item('landmarkTools', 'point', 'silk', "Tool.change('Landmark');Tooltips.beginPoint()", "images/tools/stock-tool-smudge-22.png");
 add_toolbar_item('landmarkTools', 'textnote', 'silk', "Tool.change('Textnote');Tooltips.textnote()", "images/silk-grey/text_smallcaps.png");
-add_toolbar_item('landmarkTools', 'audio', 'silk', "Tool.change('Audio');Tooltips.beginAudio()", "images/silk-grey/sound.png");
-add_toolbar_item('landmarkTools', 'video', 'last silk', "alert('Video is coming soon')", "images/silk-grey/webcam.png");
+add_toolbar_item('landmarkTools', 'audio', 'last silk', "Tool.change('Audio');Tooltips.beginAudio()", "images/silk-grey/sound.png");
 
 add_toolbar('searchTools', 'position: absolute; right: 5px; left: auto; ');
 echo "\$('searchTools').insert('<form onsubmit=\"Search.searchLandmarks();return false\"><input type=\"text\" id=\"searchbox\" name=\"searchbox\" style=\"width:100px;height:14pt;font-size:12pt;\"/> <input type=\"submit\" value=\"".$tooltips['gosearch']."\" style=\"height:25px;font-size:12pt;\"/><form>');\n";
@@ -81,27 +52,15 @@ add_instructions('beginPath', "path");
 add_instructions('beginRegion', 'region');
 add_instructions('beginEllipse', 'ellipse');
 add_instructions('beginRectangle', 'rectangle');
-add_instructions('beginImg', 'uploadImg');
+add_instructions('beginFreeform', 'freeform');
+//add_instructions('beginImg', 'uploadImg');
 add_instructions('beginPoint', 'point');
 add_instructions('beginAudio', 'audio');
-/*
-// slightly different interface for clipart landmark
-echo "Tooltips.beginPoint=function(){var icons = ['pushpin1.gif', 'pushpin5.gif'];
-		var tags = '';
-		icons.each(function(i){
-			tags += '<img src=\"'+i+'\" onclick=\"LandmarkEditor.changeImg(\''+i+'\');Modalbox.hide()\" style=\"cursor:pointer;\"/> '
-		});
-		Modalbox.show('<span>".$instructions['point']."<br />'+tags+'</span>', {title: 'Create a landmark'})};\n";
-*/
-
 
 // edit mode descriptions
 echo "Tooltips.move = \"".$tooltips['move']."\";\nTooltips.moving = \"".$tooltips['moving']."\";\n";
 
-// search interface
-//echo "\$('mapper').insert('<form onsubmit=\"Search.searchLandmarks();return false\">".$instructions['search']."<br /><input type=\"text\" id=\"searchbox\" name=\"searchbox\" style=\"width:100px;height:14pt;font-size:12pt;\"/> <input type=\"submit\" value=\"".$tooltips['gosearch']."\" style=\"height:25px;font-size:12pt;\"/><form>');\n";
-
 echo "Tooltips.enter_label = \"".$tooltips['label']."\";\n";
-
-//echo "Tooltips.beginSearch=function(){Modalbox.show('<form onsubmit=\"Landmark.searchLandmarks();return false\">".$instructions['search']."<br /><input type=\"text\" id=\"searchbox\" name=\"searchbox\" /> <input type=\"submit\" value=\"".$tooltips['gosearch']."\" /><form>', {title: '".$tooltips['search']."'})};\n"
+echo "Tooltips.enter_description = \"".$tooltips['description']."\";\n";
+echo "Tooltips.color = \"".$tooltips['color']."\";\n";
 ?>

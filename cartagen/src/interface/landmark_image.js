@@ -17,6 +17,7 @@ Img = Class.create(Landmark.Landmark, {
 		this.timestamp = timestamp
 		this.img = new Image()
 		this.img.src = this.icon
+		this.highlighted = false
 		this.tab = 'img' // for tab view
 		this.eventA = this.draw.bindAsEventListener(this)
 		Glop.observe('glop:points', this.eventA)
@@ -25,37 +26,42 @@ Img = Class.create(Landmark.Landmark, {
 		this.eventC = this.mousedown.bindAsEventListener(this)
 		Glop.observe('mousedown', this.eventC)
 	},
+	/*
 	mouse_over_edit: function() {
 		return false
 	},
 	mouse_over_X: function() {
 		return false
 	},
+	*/
 	draw: function() {
 		//console.log('called draw in point '+this.id)
 		$C.save()
 		$C.line_width(3/Map.zoom)
 		$C.translate(this.x, this.y)
 		$C.fill_style("#333")
-		//$C.opacity(0.6)
 		if(Landmark.mode == 'dragging'){
 			$C.stroke_style(this.color)
 			$C.stroke_circ(0, 0, this.r)
 		}
-		//var imag = new Image()
-		//imag.src = this.icon
-		$C.scale(1/Map.max_zoom,1/Map.max_zoom) // picture appears full size at fully zoomed in level
+		$C.scale(1/Config.zoom_in_limit,1/Config.zoom_in_limit) // picture appears full size at fully zoomed in level
 		$C.canvas.drawImage(this.img, -this.img.width/2, -this.img.height/2)
-		if(this.expanded){
-			// description open
-			//Landmark.landmarks.get(this.id).showDescription()
+		if(this.highlighted == true){
+			var left = -this.img.width/2 - 2
+			var right = this.img.width/2 + 2
+			var upper = -this.img.height/2 - 2 
+			var bottom = this.img.height/2 + 2
+			$C.begin_path()
+			$C.move_to(left, upper);
+			$C.line_to(right, upper);
+			$C.line_to(right, bottom);
+			$C.line_to(left, bottom);
+			$C.canvas.closePath()
+			$C.line_width(12)
+			$C.stroke_style('#FF0')
+			$C.stroke();
 		}
-		else{
-			// stuff to do when description is closed
-		}
-		
 		$C.restore()
-
 		if (this.dragging && Mouse.down) {
 			this.drag()
 			//console.log('dragging1')
@@ -69,12 +75,6 @@ Img = Class.create(Landmark.Landmark, {
 			else {
 				this.hover()
 			}
-		}
-		else if (this.mouse_inside_text()){
-			//Landmark.current = this.id
-		}
-		else if (this.mouse_over_edit()){
-			//Landmark.current = this.id
 		}
 		else {
 			this.base()
@@ -106,21 +106,20 @@ Img = Class.create(Landmark.Landmark, {
 		$C.restore()
 	},
 	*/
-	// temporarily sees if it is over the pushpin marker
-	mouse_inside_text: function() {
-		var imag = this.img
-		var left = this.x - imag.width/2/Map.max_zoom
-		var right = this.x + imag.width/2/Map.max_zoom
-		var top = this.y - imag.height/2/Map.max_zoom
-		var bottom = this.y + imag.height/2/Map.max_zoom
-		return Map.pointer_x() > left && Map.pointer_x() < right && Map.pointer_y() > top && Map.pointer_y() < bottom && !Landmark.mouse_over_desc()  && Tool.active != 'Measure' // && !this.expanded
-	},
 	mouse_inside: function() { // should be renamed or revised for clarity
+		var imag = this.img
+		var left = this.x - imag.width/2/Config.zoom_in_limit
+		var right = this.x + imag.width/2/Config.zoom_in_limit
+		var top = this.y - imag.height/2/Config.zoom_in_limit
+		var bottom = this.y + imag.height/2/Config.zoom_in_limit
+		return Map.pointer_x() > left && Map.pointer_x() < right && Map.pointer_y() > top && Map.pointer_y() < bottom && !Landmark.mouse_over_desc()  && Tool.active != 'Measure'
+		/*
 		return this.mouse_inside_text()
 		if(Landmark.mode == 'dragging'){
 			return (this.mouse_inside_text()||(Geometry.distance(this.x, this.y, Map.pointer_x(), Map.pointer_y()) < this.r + 5)) && !Landmark.mouse_over_desc()
 		}
 		return (Geometry.distance(this.x, this.y, Map.pointer_x(), Map.pointer_y()) < this.r + 5) && !Landmark.mouse_over_desc()
+		*/
 	},
 	mousedown: function($super) {
 		if (this.mouse_inside()) {  //&& Tool.active!='Landmark') {
@@ -130,13 +129,18 @@ Img = Class.create(Landmark.Landmark, {
 			this.oldx = this.x
 			this.oldy = this.y
 			this.color = '#f00'
+			if(Landmark.mode != 'dragging'){
+				this.expanded = !this.expanded
+			}
 			//console.log('clicked my point with label ' + this.label)
 		}
-		if (this.mouse_inside_text() && Landmark.mode != 'dragging'){
+		/*
+		if (this.mouse_inside() && Landmark.mode != 'dragging'){
 			Landmark.current = this.id
 			this.expanded = !this.expanded
 			//console.log(this.desc)
 		}
+		*/
 		else if (this.mouse_over_edit()) {
 			Landmark.current = this.id
 			LandmarkEditor.edit()

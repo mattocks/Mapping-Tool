@@ -91,9 +91,9 @@ var Events = {
 		}
 		if (delta && !Config.live_gss) {
 			if (delta <0) {
-				Map.zoom = Math.min((Map.zoom * 1) + (delta/80), Map.max_zoom)
+				Map.zoom = Math.min((Map.zoom * 1) + (delta/80), Config.zoom_in_limit)
 			} else {
-				Map.zoom = Math.min((Map.zoom * 1) + (delta/80), Map.max_zoom)
+				Map.zoom = Math.min((Map.zoom * 1) + (delta/80), Config.zoom_in_limit)
 			}
 			if (Map.zoom < Config.zoom_out_limit) Map.zoom = Config.zoom_out_limit
 			console.log(Map.zoom)

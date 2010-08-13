@@ -20,16 +20,31 @@ $result = mysql_query("SELECT * FROM `landmarks` WHERE `map` = $map");
 while ($row = mysql_fetch_array($result)) {
 	load_landmark($row);
 }
-// loads the map data and centers it at default location
+// loads the map data and centers it at default location and zoom level
 $result2 = mysql_query("SELECT * FROM `maps` WHERE `id` = $map");
 while ($row = mysql_fetch_array($result2)) {
 	$title = sql_to_js($row['title']);
 	$desc = sql_to_js($row['desc']);
 	$timestamp = $row['timestamp'];
 	$points = $row['coords'];
+	$zoom = $row['zoom'];
 	list($lon, $lat) = explode(",", $points);
 	echo "Landmark.map = $map\nLandmark.mapTitle = '$title'\nLandmark.mapDesc = '$desc'\ndocument.title = 'Mapping Tool: $title'\nLandmark.mapTimestamp = '$timestamp'\n";
+	echo "Landmark.mapX=Projection.lon_to_x($lon);\nLandmark.mapY=Projection.lat_to_y($lat);\nLandmark.mapZoom=$zoom;\n";
 	if($_GET['noautolocate']!='yes'){
-		echo "Map.x=Projection.lon_to_x($lon)\nMap.y=Projection.lat_to_y($lat)\n";
+		echo "Map.x=Projection.lon_to_x($lon)\nMap.y=Projection.lat_to_y($lat)\nMap.zoom=$zoom\nZoombar.setPosition()\n";
 	}
 }
+
+// load icons
+$dir = '../../icons';
+$files = scandir($dir);
+$output = "[";
+foreach ($files as $file) {
+	if($file != '.' && $file != '..'){
+		$output .= "'$file', ";
+	}
+}
+$output = substr($output, 0, -2) . "]";
+echo "LandmarkEditor.icon_choices = $output;\n";
+?>

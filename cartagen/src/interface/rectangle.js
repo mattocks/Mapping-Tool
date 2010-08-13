@@ -1,40 +1,38 @@
 //= require "landmark_region"
 
 Rectangle = Class.create(Region, {
-	initialize: function($super){
-		$super()
+	initialize: function($super, pts, label, desc, id, color, tags, timestamp){
+		$super(pts, label, desc, id, color, tags, timestamp)
 		this.eventD = this.mouseup.bindAsEventListener(this)
 		Glop.observe('mouseup', this.eventD)
 	},
 	make_rectangle: function(){
 		for(var i=0;i<this.points.length;i++){
-			if(this.points[i]==Tool.Editor.obj){
+			if(this.points[i] == Tool.Editor.obj){
 				if(this.pt == null){
 					this.pt = i // keep track here for now
-					//console.log(this.pt)
 				}
 			}
 			else{
 				this.points[i].hidden = true
 			}
 		}
-		//console.log(Tool.Rectangle.which_pt)
-		if(Tool.Rectangle.which_pt == 0 || this.pt == 0){
+		if(this.pt == 0){
 			//console.log('moving 0')
 			this.points[3].x = this.points[0].x
 			this.points[1].y = this.points[0].y
 		}
-		else if(Tool.Rectangle.which_pt == 1 || this.pt == 1){
+		else if(this.pt == 1){
 			//console.log('moving 1')
 			this.points[2].x = this.points[1].x
 			this.points[0].y = this.points[1].y
 		}
-		else if(Tool.Rectangle.which_pt == 2 || this.pt == 2){
+		else if(this.pt == 2){
 			//console.log('moving 2')
 			this.points[1].x = this.points[2].x
 			this.points[3].y = this.points[2].y
 		}
-		else if(Tool.Rectangle.which_pt == 3 || this.pt == 3){
+		else if(this.pt == 3){
 			//console.log('moving 3')
 			this.points[0].x = this.points[3].x
 			this.points[2].y = this.points[3].y
@@ -75,7 +73,6 @@ Rectangle = Class.create(Region, {
 			else if(Tool.active == 'Rectangle'){
 				this.make_rectangle()
 			}
-			//this.finished = false
 		}
 		else if ((Tool.active == 'Rectangle'||Tool.active == 'Editor')&&!Mouse.down){
 			this.points.each(function(point){
@@ -88,26 +85,32 @@ Rectangle = Class.create(Region, {
 			this.make_rectangle()
 			this.pt = null
 		}
-			$C.save()
-			//$C.stroke_style('#000')
+		$C.save()
+		if (this.active) $C.line_width(2)
+		else $C.line_width(2)
+		var stroke_opacity = 1
+		if(this.highlighted){
+			$C.stroke_style('#FF0')
+			$C.line_width(12)
+			stroke_opacity = 1
+		}
+		else{
 			$C.stroke_style(this.color)
-			$C.fill_style(this.color)
-			if (this.active) $C.line_width(2)
-			else $C.line_width(2)
-			$C.begin_path()
-			if (this.points.length>0){
-				$C.move_to(this.points[0].x, this.points[0].y)		
-				this.points.each(function(point) {
-					$C.line_to(point.x, point.y)
-				})			
-				$C.line_to(this.points[0].x, this.points[0].y)
-
-			}
-			$C.opacity(0.7)
-			$C.stroke()
-			$C.opacity(0.3)
-			$C.fill()
-			$C.restore()
+		}
+		$C.fill_style(this.color)
+		$C.begin_path()
+		if (this.points.length>0){
+			$C.move_to(this.points[0].x, this.points[0].y)		
+			this.points.each(function(point) {
+				$C.line_to(point.x, point.y)
+			})
+			$C.line_to(this.points[0].x, this.points[0].y)
+		}
+		$C.opacity(0.3)
+		$C.fill()
+		$C.opacity(stroke_opacity)
+		$C.stroke()
+		$C.restore()
 	},
 	remove: function($super){
 		$super()

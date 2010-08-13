@@ -23,18 +23,13 @@ Tool.Image = {
 		console.log('mouseup in Image')
 			// could be implemented as one and the same rather than separately
 			var over_point = false
-			var over_text = false
 			Landmark.landmarks.each(function(point){
 				if (point.value.mouse_inside()) {
 					over_point = true
 					throw $break
 				}
-				if (point.value.mouse_inside_text()) {
-					over_text = true
-					throw $break
-				}
 			})
-			if (!over_point && !over_text && Landmark.mode != 'dragging') { // if you didn't click on an existing landmark
+			if (!over_point && Landmark.mode != 'dragging') { // if you didn't click on an existing landmark
 				LandmarkEditor.create(7)
 			}
 	}.bindAsEventListener(Tool.Image),

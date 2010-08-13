@@ -77,5 +77,5 @@ Tool.Measure = {
 	},
 }
 document.observe("dom:loaded", function(){
-	document.body.insert('<div id="measurebox" style="position: absolute; display: none; z-index: 2; left:50%; top:46px; background-color: white">Distance: <span id="length">0</span> meters<br /><input type="button" value="Remove last point" onclick="Tool.Measure.remove_last()" /><input type="button" value="Clear all points" onclick="Tool.Measure.new_shape()" /></div>')
+	document.body.insert('<div id="measurebox" style="position: absolute; display: none; z-index: 2; left:50%; top:46px; background-color: white">Distance: <span id="length">0</span> meters<br /><input type="button" value="Remove last point" onclick="Tool.Measure.remove_last()" /><input type="button" value="Clear all points" onclick="Tool.Measure.new_shape()" /><input type="button" value="Done" onclick="Tool.change(\'Pan\')" /></div>')
 })

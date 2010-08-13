@@ -4,6 +4,7 @@ var Config = {
 	live: false,
 	powersave: true,
 	zoom_out_limit: 0.02,
+	zoom_in_limit: 2.32,
 	simplify: 1,
 	padding_top: 0,
 	padding_left: 0,

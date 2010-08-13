@@ -27,8 +27,10 @@ Tool.Region = {
 	mousedown: function() {
 		console.log('mousedown in Region')
 		if (Tool.Region.mode == 'inactive') {
+			//document.body.insert('<div id="regiondiv" style="position:absolute;top:50px;left:200px">I\'m here</div>');
 		} 
 		else if (Tool.Region.mode == 'draw') {
+			LandmarkEditor.showButtons('regiondiv', "LandmarkEditor.create(1)")
 			var over_point = false
 			Landmark.temp_shape.points.each(function(point){
 				if (point.mouse_inside()) over_point = true
@@ -38,10 +40,12 @@ Tool.Region = {
 				Landmark.temp_shape.new_point(Map.pointer_x(), Map.pointer_y())
 				Landmark.temp_shape.active = true
 			}
+			/*
 			else if (Landmark.temp_shape.points[0].mouse_inside()){
 				// complete and store polygon
 				LandmarkEditor.create(1)
 			}
+			*/
 		}
 		else if (Tool.Region.mode == 'drag'){
 			Landmark.temp_shape.active = true

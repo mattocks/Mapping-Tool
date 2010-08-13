@@ -137,6 +137,7 @@ var Glop = {
 			})
 		}
 		
+		Glop.fire('glop:warpables')
 		/**
 		 * @name Glop#glop:postdraw
 		 * @event

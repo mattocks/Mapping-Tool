@@ -138,8 +138,7 @@ var Map = {
 	 * Current zoom level
 	 * @type Number
 	 */
-	 zoom: 0.5,
-	max_zoom: 2.25 // level at which landmarks appear full-sized on map
+	 zoom: 0.52,
 }
 
 // bind to events

@@ -25,6 +25,7 @@ Tool.Rectangle = {
 		$l('Rectangle deactivated')
 	},
 	mousedown: function() {
+		LandmarkEditor.showButtons('rectdiv', "LandmarkEditor.create(5)")
 		if (Tool.Rectangle.mode == 'inactive') {
 			Tool.Rectangle.mode = 'draw'
 			var x = Map.pointer_x()
@@ -71,7 +72,7 @@ Tool.Rectangle = {
 
 	}.bindAsEventListener(Tool.Rectangle),
 	dblclick: function() {
-		LandmarkEditor.create(5)
+		//LandmarkEditor.create(5)
 		$l('Rectangle dblclick')
 	}.bindAsEventListener(Tool.Rectangle),
 	new_shape: function() {

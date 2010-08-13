@@ -66,22 +66,22 @@ ControlPoint = Class.create({
 		}
 	},
 	mouse_inside: function() {
-		return (Geometry.distance(this.x, this.y, Map.pointer_x(), Map.pointer_y()) < this.r/Map.zoom) && !Landmark.mouse_over_desc()
-	},
-	mouse_inside_text: function(){
+		return (Geometry.distance(this.x, this.y, Map.pointer_x(), Map.pointer_y()) < this.r/Map.zoom) && !Landmark.mouse_over_desc() &&
+		(Landmark.dragging == true || this.parent_shape.active)
 	},
 	base: function() {
 		this.color = '#200'
 		this.dragging = false
 	},
 	click: function() {
-		if (this.mouse_inside()  && Tool.active!=this.tool) {
+		if (this.mouse_inside() /*&& Tool.active!=this.tool*/) {
 			this.color = '#f00'
-			//console.log('clicked control point')
 			this.parent_shape.active = true
 			Landmark.current = this.parent_shape.id
 			Tool.Editor.over_point = true
-			LandmarkEditor.setCurrent(this)
+			this.parent_shape.inside_point = true
+			//LandmarkEditor.setCurrent(this)
+			Tool.Editor.obj = this
 		}
 	},
 	hover: function() {
@@ -90,7 +90,7 @@ ControlPoint = Class.create({
 	},
 	drag: function() {
 		//console.log(Tool.Editor.obj)
-		if (this.parent_shape.active && Tool.Editor.obj == this /*&& Geometry.distance(this.x, this.y, Map.pointer)*/) {
+		if (this.parent_shape.active && Tool.Editor.obj == this) {
 			if (!this.dragging) {
 				this.dragging = true
 				this.drag_offset_x = Map.pointer_x() - this.x
@@ -100,8 +100,5 @@ ControlPoint = Class.create({
 			this.x=Map.pointer_x()
 			this.y=Map.pointer_y()
 		}
-	},
-	r: function() {
-		this.color = '#00f'
 	}
 })

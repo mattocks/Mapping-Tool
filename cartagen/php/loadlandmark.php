@@ -9,6 +9,8 @@ foreach ($ids as $id){
 $sql_query = substr($sql_query, 0, -4);
 $result = mysql_query("SELECT * FROM `landmarks` WHERE $sql_query");
 while ($row = mysql_fetch_array($result)) {
-	load_landmark($row);
+	if($row['type'] != 7){
+		load_landmark($row);
+	}
 }
 ?>

@@ -170,17 +170,19 @@ Warper.Image = Class.create(
 	 * Asyncronously upload distorted point coordinates to server
 	 */
 	save: function() {
+		//console.log('saving')
 		var coordinate_string = '',first = true
 		this.coordinates().each(function(coord){
 			if (first) first = false
-			else coordinate_string += ':'
+			else coordinate_string += ' '
 			coordinate_string += coord[0]+','+coord[1]
 		})
-		new Ajax.Request('/warper/update', {
+		console.log(coordinate_string)
+		new Ajax.Request('cartagen/php/editlandmark.php', {
 		  	method: 'post',
-			parameters: { 'warpable_id': this.id,'points': coordinate_string, 'locked': this.locked },
+			parameters: { 'id': this.id,'points': coordinate_string, 'label': this.locked },
 			onSuccess: function(response) {
-				$l('updated warper points')
+				
 			}
 		})	
 		this.reset_centroid()

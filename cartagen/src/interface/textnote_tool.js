@@ -25,16 +25,17 @@ Tool.Textnote = {
 		$l('Textnote deactivated')
 	},
 	mousedown: function() {
+		LandmarkEditor.showButtons('textnotediv', "LandmarkEditor.create(8)")
 		if (Tool.Textnote.mode == 'inactive') {
 			Tool.Textnote.mode = 'draw'
 			var x = Map.pointer_x()
 			var y = Map.pointer_y()
 			Landmark.temp_shape = new Textnote()
 			Landmark.temp_shape.color = 'rgb(242, 242, 68)'
-			Landmark.temp_shape.new_point(x-100, y-100) // points[0] = upper left
-			Landmark.temp_shape.new_point(x+100, y-100) // points[1] = upper right
-			Landmark.temp_shape.new_point(x+100, y+100) // points[2] = lower right
-			Landmark.temp_shape.new_point(x-100, y+100) // points[3] = lower left
+			Landmark.temp_shape.new_point(x-100, y-10) // points[0] = upper left
+			Landmark.temp_shape.new_point(x+100, y-10) // points[1] = upper right
+			Landmark.temp_shape.new_point(x+100, y+10) // points[2] = lower right
+			Landmark.temp_shape.new_point(x-100, y+10) // points[3] = lower left
 		} 
 		else if (Tool.Textnote.mode == 'draw') {
 			var over_point = false
@@ -71,7 +72,7 @@ Tool.Textnote = {
 
 	}.bindAsEventListener(Tool.Textnote),
 	dblclick: function() {
-		LandmarkEditor.create(8)
+		//LandmarkEditor.create(8)
 		$l('Textnote dblclick')
 	}.bindAsEventListener(Tool.Textnote),
 	new_shape: function() {

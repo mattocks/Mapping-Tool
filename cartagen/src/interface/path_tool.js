@@ -11,15 +11,16 @@ Tool.Path = {
 	 * The polygon currently being drawn. 
 	 */
 	current_poly: null,
-	//shapes: [],
 	current_shape: null,
+	over_point: false,
+	over_shape: false,
 	drag: function() {
-		$l('Path dragging')
+		console.log('Path dragging')
 	},
 	activate: function() {
 		$l('Path activated')
 		Landmark.shape_created = false
-		Tool.Path.mode='draw'	
+		Tool.Path.mode = 'draw'	
 		Landmark.temp_shape = new Path()
 	},
 	deactivate: function() {
@@ -28,41 +29,46 @@ Tool.Path = {
 	},
 	mousedown: function() {
 		console.log('mousedown in Path')
-		if (Tool.Path.mode == 'inactive') {
-		} 
-		else if (Tool.Path.mode == 'draw') {
-			var over_point = false
-			Landmark.temp_shape.points.each(function(point){
-				if (point.mouse_inside()) {
-					over_point = true
-					//Landmark.temp_shape.drawn = true
-					LandmarkEditor.create(2)
-				}
-				console.log(point.mouse_inside())
-				
-			})
-			if (!over_point) { // if you didn't click on an existing node
-				Landmark.temp_shape.new_point(Map.pointer_x(), Map.pointer_y())
-				Landmark.temp_shape.active = true
-			}
-			// I plan to rewrite this
-			else if (Landmark.temp_shape.points[0].mouse_inside()){
-				console.log('clicked first point')
-				Landmark.temp_shape.points.push(Landmark.temp_shape.points[0])
+		LandmarkEditor.showButtons('pathdiv', "LandmarkEditor.create(2)")
+		Landmark.temp_shape.points.each(function(point){
+			if (point.mouse_inside()) {
+				Tool.Path.over_point = true
+				Tool.Path.obj = point
+				throw $break
 				//Landmark.temp_shape.drawn = true
 				//LandmarkEditor.create(2)
 			}
-			
+			//console.log(point.mouse_inside())
+		})
+		if(!Tool.Path.over_point){
+			Tool.Path.over_shape = Landmark.temp_shape.mouse_inside()
+			Tool.Path.obj = Landmark.temp_shape
 		}
-		else if (Tool.Path.mode == 'drag'){
+		if (!Tool.Path.over_point && !Tool.Path.over_shape) {
+			Landmark.temp_shape.new_point(Map.pointer_x(), Map.pointer_y())
 			Landmark.temp_shape.active = true
+			console.log('creating new point')
 		}
-		
+		/*
+		// I plan to rewrite this
+		else if (Landmark.temp_shape.points[0].mouse_inside()){
+			console.log('clicked first point')
+			Landmark.temp_shape.points.push(Landmark.temp_shape.points[0])
+			//Landmark.temp_shape.drawn = true
+			//LandmarkEditor.create(2)
+		}
+		*/		
 	}.bindAsEventListener(Tool.Path),
 	mouseup: function() {
 		$l('Path mouseup')
+		Tool.Editor.obj = null
+		Tool.Path.over_point = false
+		Tool.Path.over_shape = false
+		Landmark.temp_shape.dragging = false
+		Tool.Path.obj = null
 	}.bindAsEventListener(Tool.Path),
 	mousemove: function() {
+		//console.log('mouse moved in path')
 		$l('Path mousemove')
 		/*
 		var hovering_over_first_point = false
@@ -80,6 +86,27 @@ Tool.Path = {
 			$('main').style.cursor = 'default'
 		}
 		*/
+		/*
+		if(Mouse.down){
+			if(Tool.Path.over_point){
+				Tool.Editor.obj.drag()
+			}
+			else if(Landmark.temp_shape.mouse_inside()){
+				Landmark.temp_shape.drag()
+			}
+		}
+		*/
+		if(Mouse.down){
+			if(Tool.Path.over_point){
+				Tool.Editor.obj.drag()
+				console.log('dragging stuff here')
+				console.log(Tool.Editor.obj)
+			}
+			else if (Tool.Path.over_shape){
+				console.log('moving a point?')
+				Tool.Editor.obj.drag()
+			}
+		}
 	}.bindAsEventListener(Tool.Path),
 	dblclick: function() {
 		$l('Path dblclick')
@@ -102,6 +129,7 @@ Tool.Path = {
 		// complete and store polygon
 		//LandmarkEditor.create(1)
 		*/
+		console.log(Tool.Editor.obj)
 	}.bindAsEventListener(Tool.Path),
 	new_shape: function() {
 		Tool.change("Path")

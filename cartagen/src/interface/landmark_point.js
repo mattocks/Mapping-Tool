@@ -4,14 +4,12 @@
 
 Point = Class.create(Landmark.Landmark, {
 	initialize: function($super,x,y,label,desc,icon,id,timestamp) {
-		//$super(label,desc,icon,id)
 		this.x = x
 		this.y = y
 		this.label = label
 		this.desc = desc
-		//this.icon = icon
 		this.img = new Image()
-		this.img.src = icon
+		this.img.src = 'icons/'+icon
 		this.color = '#ddd'
 		this.id = id
 		this.r = 5
@@ -36,36 +34,30 @@ Point = Class.create(Landmark.Landmark, {
 			$C.stroke_style(this.color)
 			$C.stroke_circ(0, 0, 5)
 		}
-		
 		var imag = this.img
-		$C.canvas.drawImage(imag, -imag.width/2, -imag.height/2)
-		/*
-		var c = $C.canvas
-		c.strokeStyle = this.color;
-		c.fillStyle = this.color;
-		c.beginPath();
-		c.lineTo(0,0);
-		c.arc(0,-20,10,0,Math.PI,true)
-		c.lineTo(0,0);
-		c.stroke();
-		c.fill();
-		*/
-		if(this.expanded){
-			// description open
-			//Landmark.landmarks.get(this.id).showDescription()
+		$C.scale(1/Config.zoom_in_limit,1/Config.zoom_in_limit) // picture appears full size at fully zoomed in level
+		if(this.highlighted == true){
+			var left = -this.img.width/2 - 2
+			var right = this.img.width/2 + 2
+			var upper = -this.img.height/2 - 2 
+			var bottom = this.img.height/2 + 2
+			$C.begin_path()
+			$C.move_to(left, upper);
+			$C.line_to(right, upper);
+			$C.line_to(right, bottom);
+			$C.line_to(left, bottom);
+			$C.canvas.closePath()
+			$C.line_width(12)
+			$C.stroke_style('#FF0')
+			$C.stroke();
 		}
-		else{
-			// stuff to do when description is closed
-		}
-		
+		$C.canvas.drawImage(imag, -imag.width/2, -imag.height/2)	
 		$C.restore()
-
 		if (this.dragging && Mouse.down) {
 			this.drag()
 			//console.log('dragging1')
 		}
 		else if (this.mouse_inside()) {
-			//Landmark.current = this.id
 			if (Mouse.down) {
 				//this.drag()
 				//console.log('dragging2')
@@ -74,37 +66,20 @@ Point = Class.create(Landmark.Landmark, {
 				this.hover()
 			}
 		}
-		else if (this.mouse_inside_text()){
-			//Landmark.current = this.id
-		}
-		else if (this.mouse_over_edit()){
-			//Landmark.current = this.id
-		}
 		else {
 			this.base()
 		}
 	},
-	// temporarily sees if it is over the pushpin marker
-	mouse_inside_text: function() {
-		return false
-	},
-	mouse_inside: function() { // should be renamed or revised for clarity
-		/*
-		var left = this.x - 20
-		var right = this.x + 20
-		var top = this.y - 40
-		var bottom = this.y
-		*/
+	mouse_inside: function() {
 		var left = this.x - this.img.width/2
 		var right = this.x + this.img.width/2
 		var top = this.y - this.img.height/2
 		var bottom = this.y + this.img.height/2
-		var t = Map.pointer_x() > left && Map.pointer_x() < right && Map.pointer_y() > top && Map.pointer_y() < bottom && !Landmark.mouse_over_desc()  && Tool.active != 'Measure' // && !this.expanded
+		var t = Map.pointer_x() > left && Map.pointer_x() < right && Map.pointer_y() > top && Map.pointer_y() < bottom && !Landmark.mouse_over_desc()  && Tool.active != 'Measure'
 		if(Landmark.mode == 'dragging'){
 			return (t||(Geometry.distance(this.x, this.y, Map.pointer_x(), Map.pointer_y()) < this.r + 5)) && !Landmark.mouse_over_desc()
 		}
 		return t
-		//return (Geometry.distance(this.x, this.y, Map.pointer_x(), Map.pointer_y()) < 5 + 5) && !Landmark.mouse_over_desc()
 	},
 	mousedown: function($super) {
 		if (this.mouse_inside()) {  //&& Tool.active!='Landmark') {
@@ -131,7 +106,7 @@ Point = Class.create(Landmark.Landmark, {
 	base: function() {
 		//this.color = '#200'
 		this.dragging = false
-		document.body.style.cursor = 'default'
+		//document.body.style.cursor = 'default'
 	},
 	hover: function() {
 		//this.color = '#900'

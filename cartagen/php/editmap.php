@@ -13,9 +13,10 @@ if ($_GET['mapid']){
 		$desc = mysql_real_escape_string($_GET['desc']);
 		mysql_query("UPDATE `maps` SET `title` = '$title', `desc` = '$desc' WHERE `id` = $id");
 	}
-	if ($_GET['coords']){
+	if ($_GET['coords'] && $_GET['zoom']){
 		$coords = $_GET['coords'];
-		mysql_query("UPDATE `maps` SET `coords` = '$coords' WHERE `id` = $id");
+		$zoom = $_GET['zoom'];
+		mysql_query("UPDATE `maps` SET `coords` = '$coords', `zoom` = '$zoom' WHERE `id` = $id");
 	}
 	if($_GET['author']){
 		$author = $_GET['author'];
