@@ -23,10 +23,6 @@ Tool.Warp = {
 			$('tool_warp_revert').observe('mouseup',function(){Warper.active_image.set_to_natural_size();})
 		$('tool_specific').insert('<a name=\'Distort this image by dragging corners (w)\' class=\'last\' id=\'tool_warp_default\' href=\'javascript:void(0);\'><img src=\'images/tools/stock-tool-perspective-22.png\' /></a>')
 			$('tool_warp_default').observe('mouseup',function(){Tool.Warp.mode = 'default'})
-		//Warper.active_image = null
-		//Warper.active_object = false
-		if(location.search.toQueryParams().locked != 'true')
-			Warper.locked = false
 	},
 	/**
 	 * Runs when this tool is deselected; removes custom toolbar
@@ -34,12 +30,8 @@ Tool.Warp = {
 	deactivate: function() {
 		$('tool_specific').remove()
 		Tool.Warp.mode = 'default'
-		if(Warper.active_image){
-			Warper.active_image.save() // maybe
-			Warper.active_image.active = false
-		}
-		//Warper.active_object = false
-		
+		Warper.active_image.save() // maybe
+		Warper.active_object = false
 		//Warper.active_image = null
 	},
 	delete_image: function() {
@@ -54,7 +46,7 @@ Tool.Warp = {
 					})
 				}
 			})
-			//Tool.change('Pan')
+			Tool.change('Pan')
 		}
 	},
 	lock_image: function() {
@@ -82,22 +74,6 @@ Tool.Warp = {
 			}
 		}
 		$C.cursor('auto')
-		if(Tool.Editor.over||Tool.Editor.over_point){
-			if(Tool.Editor.dragged == true){
-				LandmarkEditor.move()
-			}
-		}
-		Tool.Editor.over = false
-		Tool.Editor.over_point = false
-		Tool.Ellipse.currentX = null
-		Tool.Ellipse.currentY = null
-		if(Tool.Editor.obj != null){
-			if(!(Tool.Editor.obj instanceof ControlPoint) && Tool.Editor.dragged == false){
-				LandmarkEditor.edit()
-			}
-		}
-		Tool.Editor.obj = null
-		Tool.Editor.dragged = false
 	}.bindAsEventListener(Tool.Warp),
 	mousemove: function() {
 		if (Mouse.down){
@@ -107,12 +83,6 @@ Tool.Warp = {
 				} else {
 					Warper.active_image.drag()
 				}
-			}
-			if(Tool.Editor.over || Tool.Editor.over_point){
-				Tool.Editor.obj.drag()
-				console.log('dragging stuff')
-				console.log(Tool.Editor.obj)
-				Tool.Editor.dragged = true
 			}
 		}
 	}.bindAsEventListener(Tool.Warp),

@@ -59,9 +59,10 @@
 		}
 		document.observe('styles:loaded:/styles/main.gss',Cartagen.Builder.add_menus)
 		function setup() {
-			warpables = [
-				
-			]
+			warpables = []
+<?php
+include("cartagen/php/loadmap.php");
+?>
 			var first_new_image = true
 			warpables.each(function(warpable,index) {
 				if (warpable.nodes != 'none') {
@@ -85,12 +86,15 @@
 		document.observe('cartagen:init', setup)
 		// load in the landmarks
 		document.observe("dom:loaded", function() {
+<?php include('cartagen/php/tooltips.php'); ?>
+			/*
 			new Ajax.Request('cartagen/php/tooltips.php', {
 				method: 'get',
 				parameters: {
 					lang: 'en',
 				}
 			})
+			*/
 			/*
 			if(location.search.toQueryParams().map){
 				MapEditor.load(location.search.toQueryParams().map)
@@ -111,7 +115,7 @@
  
 <div id="browsers" style="display:none;"> 
 	<h3>WHOOPS</h3> 
-	<p>Cartagen is built on standards-compliant HTML 5 and Canvas, but is in beta stage right now. It works best in Firefox, but IE8, Chrome, Safari, Mobile Safari, and Android are coming ASAP!</p> 
+	<p>Cartagen is built on standards-compliant HTML 5 and Canvas, but is in beta stage right now. It works best in Chrome, but IE8, Firefox, Safari, Mobile Safari, and Android are coming ASAP!</p> 
 </div> 
 
 <div id="header"> 

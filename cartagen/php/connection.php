@@ -88,7 +88,13 @@ function load_landmark($row){
 			echo "Landmark.landmarks.set($id, new Ellipse($pointstr, '$label', '$desc', $id, '$color', [], '$timestamp'))\n";
 		}
 		else if ($type == 7) {
-			echo "Warper.load_image('upload/$id.jpg', $pointstr, $id, $label);\n";
+			if ($pointstr == '[[, ]]'){
+				//echo "Warper.new_image('upload/$id.jpg', $id, true);\n";
+				echo "warpables.push({id: $id, img: 'upload/$id.jpg', nodes: 'none', locked: $label});\n";
+			}
+			else{
+				echo "warpables.push({id: $id, img: 'upload/$id.jpg', nodes: $pointstr, locked: $label});\n";
+			}
 		}
 		else if ($type == 8) {
 			echo "Landmark.landmarks.set($id, new Textnote($pointstr, '$label', '$desc', $id, '$color', [], '$timestamp'))\n";

@@ -8280,6 +8280,14 @@ LandmarkEditor = {
 	idd: 0, // an internal id counter for landmarks that cannot be saved to the server
 	color_choices: ['rgb(0, 0, 0)','rgb(255, 255, 255)','rgb(255, 0, 0)','rgb(0, 255, 0)','rgb(0, 0, 255)'],
 	icon_choices: [], //moved to loadmap.php for automatic icon loading based on files in directory alphabetically
+	showConnectionWarning: function(){
+		LandmarkEditor.removeConnectionWarning()
+		document.body.insert('<div id="connection_warning" style="position:absolute;z-index:4;background-color: #FFF;bottom:0px;top:auto;height:1.5em;width:600px;left:auto;right:auto;padding-left:3px;"><span style="color: #F00">Warning: The item you just created was not saved to the server. Please check your internet connection.</span></div>')
+	},
+	removeConnectionWarning: function(){
+		if($('connection_warning'))
+			$('connection_warning').remove()
+	},
 	changeImg: function(img){
 		LandmarkEditor.img = new Image()
 		LandmarkEditor.img.src = img
@@ -8392,7 +8400,7 @@ LandmarkEditor = {
 			if ((cid == 0 && initial) || (!initial && i == Landmark.landmarks.get(Landmark.current).img.src)) {
 				s = "border: 2px inset rgb(0, 0, 255)"
 			}
-			iconstring += '<img id="i'+cid+'" style="padding: 1px; '+s+'" src="icons/'+i+'" onclick="LandmarkEditor.setIcon('+cid+')" />'
+			iconstring += '<img id="i'+cid+'" style="padding: 1px; '+s+'" src="icons/'+i+'" onclick="LandmarkEditor.setIcon('+cid+')" onload="LandmarkEditor.resizeIcon(this)"/>'
 			cid++
 		})
 		return iconstring
@@ -8408,6 +8416,23 @@ LandmarkEditor = {
 			}
 		}
 		console.log(LandmarkEditor.temp_icon)
+	},
+	resizeIcon: function(img){
+		var width = img.width
+		var height = img.height
+		if(img.width >= img.height){
+			width = 64;
+			height = 64 * img.height/img.width;
+		}
+		else{
+			height = 64;
+			width = 64 * img.width/img.height;
+		}
+		img.width = width
+		img.height = height
+		console.log('height:'+img.height)
+		console.log('width:'+img.width)
+		Modalbox.resizeToContent()
 	},
 	colors: function(initial) {
 		var colors = LandmarkEditor.color_choices
@@ -8470,13 +8495,21 @@ LandmarkEditor = {
 				mapid: Landmark.map,
 	  		},
 	  		onSuccess: function(response) {
-				var r = response.responseText.trim().split(",");
-				var id = r[0];
-				var timestamp = r[1];
-				Landmark.landmarks.set(id, new Point(Map.pointer_x(), Map.pointer_y(), label1, desc1, LandmarkEditor.temp_icon, id, timestamp))
+				console.log('did connect. strange')
+				if(response.responseText.trim() == ''){
+					LandmarkEditor.showConnectionWarning()
+				}
+				else{
+					var r = response.responseText.trim().split(",");
+					var id = r[0];
+					var timestamp = r[1];
+					Landmark.landmarks.set(id, new Point(Map.pointer_x(), Map.pointer_y(), label1, desc1, LandmarkEditor.temp_icon, id, timestamp))
+					LandmarkEditor.removeConnectionWarning()
+				}
 	  		},
 			onFailure: function() {
-				console.log('failed')
+				console.log('did not connect')
+				LandmarkEditor.showConnectionWarning()
 				var id = LandmarkEditor.idd++ // local id created
 				Landmark.landmarks.set(id, new Point(Map.pointer_x(), Map.pointer_y(), label1, desc1, color1, id))
 			}
@@ -8515,14 +8548,21 @@ LandmarkEditor = {
 				mapid: Landmark.map,
 	  		},
 	  		onSuccess: function(response) {
-				var r = response.responseText.trim().split(",");
-				var id = r[0];
-				var timestamp = r[1];
-				shape.setup(label1, desc1, id, color1, [], timestamp)
-				if(shape instanceof Textnote) shape.noteRendered = false
-				Landmark.landmarks.set(id, shape)
+				if(response.responseText.trim() == ''){
+					LandmarkEditor.showConnectionWarning()
+				}
+				else{
+					LandmarkEditor.removeConnectionWarning()
+					var r = response.responseText.trim().split(",");
+					var id = r[0];
+					var timestamp = r[1];
+					shape.setup(label1, desc1, id, color1, [], timestamp)
+					if(shape instanceof Textnote) shape.noteRendered = false
+					Landmark.landmarks.set(id, shape)
+				}
 	  		},
 			onFailure: function() {
+				LandmarkEditor.showConnectionWarning()
 				var id = LandmarkEditor.idd++
 				shape.setup(label1, desc1, id, color1)
 				Landmark.landmarks.set(id, shape)
@@ -8554,7 +8594,11 @@ LandmarkEditor = {
 				points: pts,
 	 		},
 			onSuccess: function(response) {
+				LandmarkEditor.removeConnectionWarning()
 				console.log(response.responseText)
+			},
+			onFailure: function(){
+				LandmarkEditor.showConnectionWarning()
 			}
 		})
 	},
@@ -8596,8 +8640,11 @@ LandmarkEditor = {
 				curLandmark.descRendered = false
 				curLandmark.noteRendered = false
 				console.log(response.responseText)
+				LandmarkEditor.removeConnectionWarning()
+
 	 		},
 			onFailure: function(){
+				LandmarkEditor.showConnectionWarning()
 				var curLandmark = Landmark.landmarks.get(Landmark.current)
 				curLandmark.label = label1
 				curLandmark.desc = desc1
@@ -8747,7 +8794,9 @@ MapEditor = {
 	}
 	*/
 }
-document.observe("dom:loaded", function() {
+/*
+document.observe("cartagen:init", function() {
+	console.log('cartagen:init');
 	if(location.search.toQueryParams().map){
 		MapEditor.load(location.search.toQueryParams().map)
 		new PeriodicalExecuter(function(pe) {
@@ -8764,6 +8813,7 @@ document.observe("dom:loaded", function() {
 		}
 	}
 })
+*/
 window.onbeforeunload = function(){
 	new Ajax.Request('cartagen/php/undo.php?destroy=true');
 }
@@ -8884,7 +8934,7 @@ Landmark = {
 	},
 	toggleMove: function(){
 		if (Landmark.mode == 'default') {
-			Tool.change('Editor')
+			Tool.change('Warp')
 			Landmark.mode = 'dragging'
 			Landmark.landmarks.each(function(l){
 				l.value.active = true
@@ -10279,6 +10329,9 @@ Tool.Region = {
 	},
 }
 Tool.Pan = {
+	activate: function(){
+		Warper.locked = true
+	},
 	mousedown: function(event) {
 	        Map.x_old = Map.x
 	        Map.y_old = Map.y
@@ -10437,18 +10490,19 @@ Tool.Path = {
 	},
 }
 Tool.Editor = {
-	mode: 'default', //'rotate','drag','scale'
 	over: false,
 	obj: null,
 	dragged: false, // if not dragged, will edit data; will otherwise drag
 	activate: function() {
+		Warper.active_image = null
+		Warper.active_object = false
+		Warper.locked = false
 	},
 	deactivate: function() {
 		Landmark.stopMoving()
 		if($('tool_specific')){
 			$('tool_specific').remove()
 		}
-		Tool.Editor.mode = 'default'
 		Warper.active_object = false
 	},
 	drag: function() {
@@ -10528,12 +10582,17 @@ Tool.Warp = {
 			$('tool_warp_revert').observe('mouseup',function(){Warper.active_image.set_to_natural_size();})
 		$('tool_specific').insert('<a name=\'Distort this image by dragging corners (w)\' class=\'last\' id=\'tool_warp_default\' href=\'javascript:void(0);\'><img src=\'images/tools/stock-tool-perspective-22.png\' /></a>')
 			$('tool_warp_default').observe('mouseup',function(){Tool.Warp.mode = 'default'})
+		if(location.search.toQueryParams().locked != 'true')
+			Warper.locked = false
 	},
 	deactivate: function() {
 		$('tool_specific').remove()
 		Tool.Warp.mode = 'default'
-		Warper.active_image.save() // maybe
-		Warper.active_object = false
+		if(Warper.active_image){
+			Warper.active_image.save() // maybe
+			Warper.active_image.active = false
+		}
+
 	},
 	delete_image: function() {
 		if (confirm('Are you sure you want to delete this image? You cannot undo this action.')) {
@@ -10547,7 +10606,6 @@ Tool.Warp = {
 					})
 				}
 			})
-			Tool.change('Pan')
 		}
 	},
 	lock_image: function() {
@@ -10569,6 +10627,22 @@ Tool.Warp = {
 			}
 		}
 		$C.cursor('auto')
+		if(Tool.Editor.over||Tool.Editor.over_point){
+			if(Tool.Editor.dragged == true){
+				LandmarkEditor.move()
+			}
+		}
+		Tool.Editor.over = false
+		Tool.Editor.over_point = false
+		Tool.Ellipse.currentX = null
+		Tool.Ellipse.currentY = null
+		if(Tool.Editor.obj != null){
+			if(!(Tool.Editor.obj instanceof ControlPoint) && Tool.Editor.dragged == false){
+				LandmarkEditor.edit()
+			}
+		}
+		Tool.Editor.obj = null
+		Tool.Editor.dragged = false
 	}.bindAsEventListener(Tool.Warp),
 	mousemove: function() {
 		if (Mouse.down){
@@ -10578,6 +10652,12 @@ Tool.Warp = {
 				} else {
 					Warper.active_image.drag()
 				}
+			}
+			if(Tool.Editor.over || Tool.Editor.over_point){
+				Tool.Editor.obj.drag()
+				console.log('dragging stuff')
+				console.log(Tool.Editor.obj)
+				Tool.Editor.dragged = true
 			}
 		}
 	}.bindAsEventListener(Tool.Warp),
@@ -11759,8 +11839,9 @@ var Warper = {
 		Glop.observe('dblclick', this.dblclick.bindAsEventListener(this))
 	},
 	images: [],
-	locked: false,
+	locked: true,
 	active_image: false,
+	inside: false,
 	/*
  	 * Sorts the Warper.images by polygon area; largest polygons at the bottom
  	 */
@@ -11780,45 +11861,51 @@ var Warper = {
 		Warper.images.each(function(image){ image.draw() })
 	},
 	mousedown: function() {
+		console.log('goin down')
 		if (!Warper.locked) {
-		Map.x_old = Map.x
-		Map.y_old = Map.y
-		var inside_image = false, same_image = false
-		for (i=Warper.images.length-1;i>=0;i--){
-			var image = Warper.images[i]
-			if (image.is_inside()) {
-				if (!inside_image) {
-					same_image = (Warper.active_image == image)
-					Warper.active_image = image
-					image.select()
-					image.points.each(function(point){point.mousedown()})
-					inside_image = true
-				}
-			} else {
-				if (image.active && (image.coordinates() != image.old_coordinates)) {
-					image.save()
-				}
-				if (image.active && !Tool.hover) {
-					image.deselect()
+			Map.x_old = Map.x
+			Map.y_old = Map.y
+			var inside_image = false, same_image = false
+			Warper.inside = false
+			for (i=Warper.images.length-1;i>=0;i--){
+				var image = Warper.images[i]
+				if (image.is_inside()) {
+					if (!inside_image) {
+						same_image = (Warper.active_image == image)
+						Warper.active_image = image
+						image.select()
+						image.points.each(function(point){point.mousedown()})
+						inside_image = true
+						Warper.inside = true
+					}
+				} else {
+					if (image.active && (image.coordinates() != image.old_coordinates)) {
+						image.save()
+					}
+					if (image.active && !Tool.hover) {
+						image.deselect()
+					}
 				}
 			}
-		}
-		if (Warper.active_image) {
-			var point_clicked = false
-			Warper.active_image.points.each(function(point) {
-				if (point.is_inside()) {
-					Warper.active_image.select_point(point)
-					point_clicked = true
-				}
-			})
-			if (!point_clicked && Warper.active_image.active_point) {
-				Warper.active_image.active_point.deselect()
+			if (!Warper.inside){
+				Warper.active_image = null
 			}
-		}
-		if (inside_image) {
-			Tool.change('Warp',!same_image)
-		} else if (!Tool.hover && Tool.active == 'Warp') {
-		}
+			if (Warper.active_image) {
+				var point_clicked = false
+				Warper.active_image.points.each(function(point) {
+					if (point.is_inside()) {
+						Warper.active_image.select_point(point)
+						point_clicked = true
+					}
+				})
+				if (!point_clicked && Warper.active_image.active_point) {
+					Warper.active_image.active_point.deselect()
+				}
+			}
+			if (inside_image) {
+				Tool.change('Warp',!same_image)
+			} else if (!Tool.hover && Tool.active == 'Warp') {
+			}
 		}
 	},
 	dblclick: function() {

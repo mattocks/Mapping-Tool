@@ -136,7 +136,8 @@ Landmark = {
 	},
 	toggleMove: function(){
 		if (Landmark.mode == 'default') {
-			Tool.change('Editor')
+			//Tool.change('Editor')
+			Tool.change('Warp')
 			Landmark.mode = 'dragging'
 			Landmark.landmarks.each(function(l){
 				l.value.active = true

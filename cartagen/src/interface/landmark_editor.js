@@ -7,6 +7,14 @@ LandmarkEditor = {
 	idd: 0, // an internal id counter for landmarks that cannot be saved to the server
 	color_choices: ['rgb(0, 0, 0)','rgb(255, 255, 255)','rgb(255, 0, 0)','rgb(0, 255, 0)','rgb(0, 0, 255)'],
 	icon_choices: [], //moved to loadmap.php for automatic icon loading based on files in directory alphabetically
+	showConnectionWarning: function(){
+		LandmarkEditor.removeConnectionWarning()
+		document.body.insert('<div id="connection_warning" style="position:absolute;z-index:4;background-color: #FFF;bottom:0px;top:auto;height:1.5em;width:600px;left:auto;right:auto;padding-left:3px;"><span style="color: #F00">Warning: The item you just created was not saved to the server. Please check your internet connection.</span></div>')
+	},
+	removeConnectionWarning: function(){
+		if($('connection_warning'))
+			$('connection_warning').remove()
+	},
 	/**
 	 * Allows an image to be dragged on the canvas with the mouse.
 	 * img: url of image
@@ -148,7 +156,7 @@ LandmarkEditor = {
 			if ((cid == 0 && initial) || (!initial && i == Landmark.landmarks.get(Landmark.current).img.src)) {
 				s = "border: 2px inset rgb(0, 0, 255)"
 			}
-			iconstring += '<img id="i'+cid+'" style="padding: 1px; '+s+'" src="icons/'+i+'" onclick="LandmarkEditor.setIcon('+cid+')" />'
+			iconstring += '<img id="i'+cid+'" style="padding: 1px; '+s+'" src="icons/'+i+'" onclick="LandmarkEditor.setIcon('+cid+')" onload="LandmarkEditor.resizeIcon(this)"/>'
 			cid++
 		})
 		return iconstring
@@ -164,6 +172,23 @@ LandmarkEditor = {
 			}
 		}
 		console.log(LandmarkEditor.temp_icon)
+	},
+	resizeIcon: function(img){
+		var width = img.width
+		var height = img.height
+		if(img.width >= img.height){
+			width = 64;
+			height = 64 * img.height/img.width;
+		}
+		else{
+			height = 64;
+			width = 64 * img.width/img.height;
+		}
+		img.width = width
+		img.height = height
+		console.log('height:'+img.height)
+		console.log('width:'+img.width)
+		Modalbox.resizeToContent()
 	},
 	/**
 	 * Allows colors of landmarks to be edited.
@@ -237,19 +262,23 @@ LandmarkEditor = {
 				mapid: Landmark.map,
 	  		},
 	  		onSuccess: function(response) {
-				var r = response.responseText.trim().split(",");
-				var id = r[0];
-				var timestamp = r[1];
-				Landmark.landmarks.set(id, new Point(Map.pointer_x(), Map.pointer_y(), label1, desc1, LandmarkEditor.temp_icon, id, timestamp))
-				//console.log(LandmarkEditor.temp_icon)
-				//Landmark.landmarks.set(id, new Point(Map.pointer_x(), Map.pointer_y(), label1, desc1, color1, id))
-				//LandmarkEditor.resetImg()
+				console.log('did connect. strange')
+				if(response.responseText.trim() == ''){
+					LandmarkEditor.showConnectionWarning()
+				}
+				else{
+					var r = response.responseText.trim().split(",");
+					var id = r[0];
+					var timestamp = r[1];
+					Landmark.landmarks.set(id, new Point(Map.pointer_x(), Map.pointer_y(), label1, desc1, LandmarkEditor.temp_icon, id, timestamp))
+					LandmarkEditor.removeConnectionWarning()
+				}
 	  		},
 			onFailure: function() {
-				console.log('failed')
+				console.log('did not connect')
+				LandmarkEditor.showConnectionWarning()
 				var id = LandmarkEditor.idd++ // local id created
 				Landmark.landmarks.set(id, new Point(Map.pointer_x(), Map.pointer_y(), label1, desc1, color1, id))
-				//LandmarkEditor.resetImg()
 			}
 		})
 		//Tool.change('Pan')
@@ -287,14 +316,21 @@ LandmarkEditor = {
 				mapid: Landmark.map,
 	  		},
 	  		onSuccess: function(response) {
-				var r = response.responseText.trim().split(",");
-				var id = r[0];
-				var timestamp = r[1];
-				shape.setup(label1, desc1, id, color1, [], timestamp)
-				if(shape instanceof Textnote) shape.noteRendered = false
-				Landmark.landmarks.set(id, shape)
+				if(response.responseText.trim() == ''){
+					LandmarkEditor.showConnectionWarning()
+				}
+				else{
+					LandmarkEditor.removeConnectionWarning()
+					var r = response.responseText.trim().split(",");
+					var id = r[0];
+					var timestamp = r[1];
+					shape.setup(label1, desc1, id, color1, [], timestamp)
+					if(shape instanceof Textnote) shape.noteRendered = false
+					Landmark.landmarks.set(id, shape)
+				}
 	  		},
 			onFailure: function() {
+				LandmarkEditor.showConnectionWarning()
 				var id = LandmarkEditor.idd++
 				shape.setup(label1, desc1, id, color1)
 				Landmark.landmarks.set(id, shape)
@@ -330,7 +366,11 @@ LandmarkEditor = {
 				points: pts,
 	 		},
 			onSuccess: function(response) {
+				LandmarkEditor.removeConnectionWarning()
 				console.log(response.responseText)
+			},
+			onFailure: function(){
+				LandmarkEditor.showConnectionWarning()
 			}
 		})
 	},
@@ -379,8 +419,11 @@ LandmarkEditor = {
 				curLandmark.descRendered = false
 				curLandmark.noteRendered = false
 				console.log(response.responseText)
+				LandmarkEditor.removeConnectionWarning()
+				
 	 		},
 			onFailure: function(){
+				LandmarkEditor.showConnectionWarning()
 				var curLandmark = Landmark.landmarks.get(Landmark.current)
 				curLandmark.label = label1
 				curLandmark.desc = desc1

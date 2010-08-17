@@ -12,14 +12,17 @@
  * 8: textnote
  * 9: audio
  */
-header('Content-type: text/javascript');
+//header('Content-type: text/javascript');
 include("connection.php");
 $map = $_GET['map'];
 $result = mysql_query("SELECT * FROM `landmarks` WHERE `map` = $map");
 // loads the landmarks into the map
+//echo "document.observe('cartagen:init', function(){\n";
 while ($row = mysql_fetch_array($result)) {
 	load_landmark($row);
 }
+//echo "});
+//Warper.sort_images();\n";
 // loads the map data and centers it at default location and zoom level
 $result2 = mysql_query("SELECT * FROM `maps` WHERE `id` = $map");
 while ($row = mysql_fetch_array($result2)) {
@@ -37,7 +40,8 @@ while ($row = mysql_fetch_array($result2)) {
 }
 
 // load icons
-$dir = '../../icons';
+//$dir = '../../icons';
+$dir = 'icons';
 $files = scandir($dir);
 $output = "[";
 foreach ($files as $file) {

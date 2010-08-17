@@ -117,7 +117,9 @@ MapEditor = {
 	}
 	*/
 }
-document.observe("dom:loaded", function() {
+/*
+document.observe("cartagen:init", function() {
+	console.log('cartagen:init');
 	if(location.search.toQueryParams().map){
 		MapEditor.load(location.search.toQueryParams().map)
 		new PeriodicalExecuter(function(pe) {
@@ -134,6 +136,7 @@ document.observe("dom:loaded", function() {
 		}
 	}	
 })
+*/
 window.onbeforeunload = function(){
 	new Ajax.Request('cartagen/php/undo.php?destroy=true');
 }

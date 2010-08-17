@@ -1,6 +1,6 @@
 <?php
 //error_reporting(E_ALL);
-header('Content-type: text/javascript');
+//header('Content-type: text/javascript');
 include("captions.php");
 function add_toolbar($id, $style = ''){
 	echo "\$('toolbars').insert('<div class=\"toolbar\" id=\"$id\" style=\"$style\"></div>');\n";

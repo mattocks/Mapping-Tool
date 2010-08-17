@@ -18,11 +18,12 @@ var Warper = {
   	 * Whether the map is locked; a GET parameter of ?locked=true makes all warpables 
   	 * 'permanent', i.e. they will not respond to clicks or other interaction
   	 */
-	locked: false,
+	locked: true,
 	/**
  	 * The selected image. This would be deprecated if we implement multiple selection or grouping.
  	 */
 	active_image: false,
+	inside: false,
 	/*
  	 * Sorts the Warper.images by polygon area; largest polygons at the bottom
  	 */
@@ -51,48 +52,55 @@ var Warper = {
 	 * it isn't activated unless the Warp tool is active. And for image ordering reasons.
 	 */
 	mousedown: function() {
+		console.log('goin down')
 		if (!Warper.locked) {
-		Map.x_old = Map.x
-		Map.y_old = Map.y
-		var inside_image = false, same_image = false
-		for (i=Warper.images.length-1;i>=0;i--){
-			var image = Warper.images[i]
-			if (image.is_inside()) {
-				if (!inside_image) {
-					same_image = (Warper.active_image == image)
-					Warper.active_image = image
-					image.select()
-					image.points.each(function(point){point.mousedown()})
-					inside_image = true
-				}
-			} else {
-				// if you're clicking outside while it's active, and the corners have been moved:
-				if (image.active && (image.coordinates() != image.old_coordinates)) {
-					image.save()
-				}
-				if (image.active && !Tool.hover) {
-					image.deselect()
+			Map.x_old = Map.x
+			Map.y_old = Map.y
+			var inside_image = false, same_image = false
+			Warper.inside = false
+			for (i=Warper.images.length-1;i>=0;i--){
+				var image = Warper.images[i]
+				if (image.is_inside()) {
+					if (!inside_image) {
+						same_image = (Warper.active_image == image)
+						Warper.active_image = image
+						image.select()
+						image.points.each(function(point){point.mousedown()})
+						inside_image = true
+						Warper.inside = true
+					}
+				} else {
+					// if you're clicking outside while it's active, and the corners have been moved:
+					if (image.active && (image.coordinates() != image.old_coordinates)) {
+						image.save()
+					}
+					if (image.active && !Tool.hover) {
+						image.deselect()
+					}
 				}
 			}
-		}
-		if (Warper.active_image) {
-			var point_clicked = false
-			Warper.active_image.points.each(function(point) {
-				if (point.is_inside()) {
-					Warper.active_image.select_point(point)
-					point_clicked = true
-				}
-			})
-			if (!point_clicked && Warper.active_image.active_point) {
-				Warper.active_image.active_point.deselect()
+			if (!Warper.inside){
+				//Tool.change('Editor')
+				Warper.active_image = null
 			}
-		}
-		if (inside_image) {
-			// 'true' forces a change, in case you have an image selected and are selecting a second one
-			Tool.change('Warp',!same_image)
-		} else if (!Tool.hover && Tool.active == 'Warp') {
-			//Tool.change('Pan') // changed recently
-		}
+			if (Warper.active_image) {
+				var point_clicked = false
+				Warper.active_image.points.each(function(point) {
+					if (point.is_inside()) {
+						Warper.active_image.select_point(point)
+						point_clicked = true
+					}
+				})
+				if (!point_clicked && Warper.active_image.active_point) {
+					Warper.active_image.active_point.deselect()
+				}
+			}
+			if (inside_image) {
+				// 'true' forces a change, in case you have an image selected and are selecting a second one
+				Tool.change('Warp',!same_image)
+			} else if (!Tool.hover && Tool.active == 'Warp') {
+				//Tool.change('Pan') // changed recently
+			}
 		}
 	},
 	/**
