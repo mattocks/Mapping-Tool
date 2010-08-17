@@ -13,7 +13,7 @@ function show_map_list($sql_result){
 		$updated = date("M j, Y g:i A" , $timestamp);
 		$class = $odd == false ? "light" : "dark";
 		echo "<div class=\"$class\">
-			<h3><a href=\"maps.html?map=$id\">$title</a> <small>by <a href=\"searchmaps.php?author=$author\">$author</a></small> </h3>
+			<h3><a href=\"maps.html?map=$id&locked=true\">$title</a> <small>by <a href=\"searchmaps.php?author=$author\">$author</a></small> </h3>
 			<p><small>Location: $location</small></p>
 			<p><small>
 				$outdesc
@@ -21,7 +21,7 @@ function show_map_list($sql_result){
 			<p class=\"meta\"><small>
 				<a href=\"updatemap.php?mapid=$id\">Edit Map</a> | 
 				Updated on $updated | 
-				<a href=\"maps.html?map=$id\">View map &raquo;</a>
+				<a href=\"maps.html?map=$id&locked=true\">View map &raquo;</a>
 			</small></p>
 		</div>";
 		$odd = !$odd;

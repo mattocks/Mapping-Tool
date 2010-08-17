@@ -126,8 +126,16 @@
  
 <div id="browsers" style="display:none;"> 
 	<h3>WHOOPS</h3> 
-	<p>Cartagen is built on standards-compliant HTML 5 and Canvas, but is in beta stage right now. It works best in Firefox, but IE8, Chrome, Safari, Mobile Safari, and Android are coming ASAP!</p> 
+	<p>Cartagen is built on standards-compliant HTML 5 and Canvas, but is in beta stage right now. It works best in Chrome, but IE8, Firefox, Safari, Mobile Safari, and Android are coming ASAP!</p> 
 </div> 
+<script>
+if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)){
+document.getElementById('browsers').style.position='absolute';
+document.getElementById('browsers').style.display='inline';
+document.getElementById('browsers').style.top = "100px";
+document.getElementById('browsers').style.margin = "0 auto";
+}
+</script>
 
 <div id="header"> 
 	<!--

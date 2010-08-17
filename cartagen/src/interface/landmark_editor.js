@@ -5,7 +5,7 @@ LandmarkEditor = {
 	event: null,
 	img: null,
 	idd: 0, // an internal id counter for landmarks that cannot be saved to the server
-	color_choices: ['rgb(0, 0, 0)','rgb(255, 255, 255)','rgb(255, 0, 0)','rgb(0, 255, 0)','rgb(0, 0, 255)'],
+	color_choices: ['rgb(0, 0, 0)','rgb(255, 255, 255)','rgb(255, 0, 0)','rgb(255, 162, 0)','rgb(255, 237, 0)','rgb(0, 255, 0)','rgb(0, 0, 255)','rgb(199, 0, 199)'],
 	icon_choices: [], //moved to loadmap.php for automatic icon loading based on files in directory alphabetically
 	/**
 	 * Allows an image to be dragged on the canvas with the mouse.
@@ -79,7 +79,7 @@ LandmarkEditor = {
 		$('cursorbox').stopObserving('mousemove', LandmarkEditor.moveCursor)
 	},
 	showImgUpload: function(){
-		Modalbox.show('<form id="lndmrkfrm" method="post" action="cartagen/php/upload.php"  target="submitframe" enctype="multipart/form-data" onsubmit="$(\'uploader\').update(\'Uploading\')"><input type="file" name="image" /><br /><input type="hidden" name="mapid" value="'+Landmark.map+'" /><input type="submit" value="Upload" /><input type="button" value="Cancel" onclick="Events.mouseup()" /></form><div id="uploader"></div><iframe name="submitframe" style="display:none"></iframe>', {title: 'Upload an image'});
+		Modalbox.show('<form id="lndmrkfrm" method="post" action="cartagen/php/upload.php"  target="submitframe" enctype="multipart/form-data" onsubmit="$(\'uploader\').update(\'Uploading, please wait...\')"><input type="file" name="image" /><br /><input type="hidden" name="mapid" value="'+Landmark.map+'" /><input type="submit" value="Upload" /><input type="button" value="Cancel" onclick="Modalbox.hide();Events.mouseup()" /></form><div id="uploader">&nbsp;</div><iframe name="submitframe" style="display:none"></iframe>', {title: 'Upload an image'});
 	},
 	/**
 	 * Shows the creation window for a landmark. Called after the landmark is set on the map.
@@ -142,15 +142,18 @@ LandmarkEditor = {
 		var icons = LandmarkEditor.icon_choices
 		LandmarkEditor.temp_icon = icons[0].substring(icons[0].lastIndexOf('/')+1)
 		var iconstring = ''
-		cid = 0
+		var cid = 0
 		icons.each(function(i) {
+			LandmarkEditor.img = new Image()
+			LandmarkEditor.img.src = 'icons/'+i
 			var s = 'border: 2px solid rgba(0, 0, 0, 0)'
 			if ((cid == 0 && initial) || (!initial && i == Landmark.landmarks.get(Landmark.current).img.src)) {
 				s = "border: 2px inset rgb(0, 0, 255)"
 			}
-			iconstring += '<img id="i'+cid+'" style="padding: 1px; '+s+'" src="icons/'+i+'" onclick="LandmarkEditor.setIcon('+cid+')" />'
+			iconstring += '<img id="i'+cid+'" style="padding: 1px; '+s+'" src="icons/'+i+'" onclick="LandmarkEditor.setIcon('+cid+')" onload="LandmarkEditor.resizeIcon(this)" />'
 			cid++
 		})
+		LandmarkEditor.img = null
 		return iconstring
 	},
 	setIcon: function(id) {
@@ -165,6 +168,23 @@ LandmarkEditor = {
 		}
 		console.log(LandmarkEditor.temp_icon)
 	},
+	resizeIcon: function(img){
+		var width = img.width
+		var height = img.height
+		if(img.width >= img.height){
+			width = 64;
+			height = 64 * img.height/img.width;
+		}
+		else{
+			height = 64;
+			width = 64 * img.width/img.height;
+		}
+		img.width = width
+		img.height = height
+		console.log('height:'+img.height)
+		console.log('width:'+img.width)
+		Modalbox.resizeToContent()
+	},
 	/**
 	 * Allows colors of landmarks to be edited.
 	 * @param {initial} Set to true when a landmark is being created; false if landmark exists
@@ -175,10 +195,11 @@ LandmarkEditor = {
 		var colorstring = '<table><tr>'
 		var cid = 0
 		colors.each(function(c) {
+			border = 'border: 2px solid rgba(0, 0, 0, 0)'
 			if ((cid == 0 && initial) || (!initial && c == Landmark.landmarks.get(Landmark.current).color)) {
-				c += "; border: 2px inset blue"
+				border = "border: 2px inset blue"
 			}
-			colorstring += '<td class="colorbox" id="c'+cid+'" style="width: 20px; height: 20px; padding: 1px; background-color: '+c+'" onclick="LandmarkEditor.setColor('+cid+')"> </td>'
+			colorstring += '<td class="colorbox" id="c'+cid+'" style="width: 20px; height: 20px; padding: 1px; background-color: '+c+'; '+border+'" onclick="LandmarkEditor.setColor('+cid+')"> </td>'
 			cid++
 		})
 		colorstring += '</tr></table>'
@@ -194,7 +215,7 @@ LandmarkEditor = {
 				$('color').value = $('c'+i).style.backgroundColor
 			}
 			else {
-				$('c'+i).style.border = '0px solid blue'
+				$('c'+i).style.border = '2px solid rgba(0, 0, 0, 0)'
 			}
 		}
 		console.log($('color').value)

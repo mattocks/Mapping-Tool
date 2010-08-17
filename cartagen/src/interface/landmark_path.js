@@ -136,7 +136,7 @@ Path = Class.create(Landmark.Landmark, {
 		$C.save()
 		if (this.active) $C.line_width(3)
 		else $C.line_width(3)
-		var stroke_opacity = 0.5
+		var stroke_opacity = 1
 		if(this.highlighted){
 			$C.stroke_style('rgb(255,255,0)')
 			$C.line_width(12)

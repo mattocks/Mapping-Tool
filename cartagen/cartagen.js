@@ -8278,7 +8278,7 @@ LandmarkEditor = {
 	event: null,
 	img: null,
 	idd: 0, // an internal id counter for landmarks that cannot be saved to the server
-	color_choices: ['rgb(0, 0, 0)','rgb(255, 255, 255)','rgb(255, 0, 0)','rgb(0, 255, 0)','rgb(0, 0, 255)'],
+	color_choices: ['rgb(0, 0, 0)','rgb(255, 255, 255)','rgb(255, 0, 0)','rgb(255, 162, 0)','rgb(255, 237, 0)','rgb(0, 255, 0)','rgb(0, 0, 255)','rgb(199, 0, 199)'],
 	icon_choices: [], //moved to loadmap.php for automatic icon loading based on files in directory alphabetically
 	changeImg: function(img){
 		LandmarkEditor.img = new Image()
@@ -8327,7 +8327,7 @@ LandmarkEditor = {
 		$('cursorbox').stopObserving('mousemove', LandmarkEditor.moveCursor)
 	},
 	showImgUpload: function(){
-		Modalbox.show('<form id="lndmrkfrm" method="post" action="cartagen/php/upload.php"  target="submitframe" enctype="multipart/form-data" onsubmit="$(\'uploader\').update(\'Uploading\')"><input type="file" name="image" /><br /><input type="hidden" name="mapid" value="'+Landmark.map+'" /><input type="submit" value="Upload" /><input type="button" value="Cancel" onclick="Events.mouseup()" /></form><div id="uploader"></div><iframe name="submitframe" style="display:none"></iframe>', {title: 'Upload an image'});
+		Modalbox.show('<form id="lndmrkfrm" method="post" action="cartagen/php/upload.php"  target="submitframe" enctype="multipart/form-data" onsubmit="$(\'uploader\').update(\'Uploading, please wait...\')"><input type="file" name="image" /><br /><input type="hidden" name="mapid" value="'+Landmark.map+'" /><input type="submit" value="Upload" /><input type="button" value="Cancel" onclick="Modalbox.hide();Events.mouseup()" /></form><div id="uploader">&nbsp;</div><iframe name="submitframe" style="display:none"></iframe>', {title: 'Upload an image'});
 	},
 	create: function(type){
 		var action = 'LandmarkEditor.newArea('+type+')' // default
@@ -8386,15 +8386,18 @@ LandmarkEditor = {
 		var icons = LandmarkEditor.icon_choices
 		LandmarkEditor.temp_icon = icons[0].substring(icons[0].lastIndexOf('/')+1)
 		var iconstring = ''
-		cid = 0
+		var cid = 0
 		icons.each(function(i) {
+			LandmarkEditor.img = new Image()
+			LandmarkEditor.img.src = 'icons/'+i
 			var s = 'border: 2px solid rgba(0, 0, 0, 0)'
 			if ((cid == 0 && initial) || (!initial && i == Landmark.landmarks.get(Landmark.current).img.src)) {
 				s = "border: 2px inset rgb(0, 0, 255)"
 			}
-			iconstring += '<img id="i'+cid+'" style="padding: 1px; '+s+'" src="icons/'+i+'" onclick="LandmarkEditor.setIcon('+cid+')" />'
+			iconstring += '<img id="i'+cid+'" style="padding: 1px; '+s+'" src="icons/'+i+'" onclick="LandmarkEditor.setIcon('+cid+')" onload="LandmarkEditor.resizeIcon(this)" />'
 			cid++
 		})
+		LandmarkEditor.img = null
 		return iconstring
 	},
 	setIcon: function(id) {
@@ -8409,15 +8412,33 @@ LandmarkEditor = {
 		}
 		console.log(LandmarkEditor.temp_icon)
 	},
+	resizeIcon: function(img){
+		var width = img.width
+		var height = img.height
+		if(img.width >= img.height){
+			width = 64;
+			height = 64 * img.height/img.width;
+		}
+		else{
+			height = 64;
+			width = 64 * img.width/img.height;
+		}
+		img.width = width
+		img.height = height
+		console.log('height:'+img.height)
+		console.log('width:'+img.width)
+		Modalbox.resizeToContent()
+	},
 	colors: function(initial) {
 		var colors = LandmarkEditor.color_choices
 		var colorstring = '<table><tr>'
 		var cid = 0
 		colors.each(function(c) {
+			border = 'border: 2px solid rgba(0, 0, 0, 0)'
 			if ((cid == 0 && initial) || (!initial && c == Landmark.landmarks.get(Landmark.current).color)) {
-				c += "; border: 2px inset blue"
+				border = "border: 2px inset blue"
 			}
-			colorstring += '<td class="colorbox" id="c'+cid+'" style="width: 20px; height: 20px; padding: 1px; background-color: '+c+'" onclick="LandmarkEditor.setColor('+cid+')"> </td>'
+			colorstring += '<td class="colorbox" id="c'+cid+'" style="width: 20px; height: 20px; padding: 1px; background-color: '+c+'; '+border+'" onclick="LandmarkEditor.setColor('+cid+')"> </td>'
 			cid++
 		})
 		colorstring += '</tr></table>'
@@ -8430,7 +8451,7 @@ LandmarkEditor = {
 				$('color').value = $('c'+i).style.backgroundColor
 			}
 			else {
-				$('c'+i).style.border = '0px solid blue'
+				$('c'+i).style.border = '2px solid rgba(0, 0, 0, 0)'
 			}
 		}
 		console.log($('color').value)
@@ -9447,7 +9468,7 @@ Path = Class.create(Landmark.Landmark, {
 		$C.save()
 		if (this.active) $C.line_width(3)
 		else $C.line_width(3)
-		var stroke_opacity = 0.5
+		var stroke_opacity = 1
 		if(this.highlighted){
 			$C.stroke_style('rgb(255,255,0)')
 			$C.line_width(12)
@@ -10442,6 +10463,8 @@ Tool.Editor = {
 	obj: null,
 	dragged: false, // if not dragged, will edit data; will otherwise drag
 	activate: function() {
+		Warper.active_image = null
+		Warper.active_object = false
 	},
 	deactivate: function() {
 		Landmark.stopMoving()
@@ -11260,16 +11283,19 @@ var Interface = {
 	display_iframe: function() {
 		if ($('iframe_code') != undefined) {
 			$('iframe_code').remove()
-		} else { $$('body')[0].insert("<div style='padding:6px 10px;width:400px;z-index:999999;background:rgba(255,255,255,0.6);margin:8px;' id='iframe_code'><h3>Embed this map on your web site</h3><p>Copy this code and paste it into a blog post or HTML page:</p><textarea cols='40' rows='5'>"+Interface.get_iframe(Map.lat,Map.lon,Map.zoom,Config.stylesheet)+"</textarea><p style='text-align:right;'><br style='clear:both;' /></div>")
+		} else { /* $$('body')[0].insert("<div style='padding:6px 10px;width:400px;z-index:999999;background:rgba(255,255,255,0.6);margin:8px;' id='iframe_code'><h3>Embed this map on your web site</h3><p>Copy this code and paste it into a blog post or HTML page:</p><textarea cols='40' rows='5'>"+Interface.get_iframe(Map.lat,Map.lon,Map.zoom,Config.stylesheet)+"</textarea><p style='text-align:right;'><br style='clear:both;' /></div>") */
+		$$('body')[0].insert("<div style='padding:6px 10px;width:400px;z-index:999999;background:rgba(255,255,255,0.6);margin:8px;' id='iframe_code'><h3>Embed this map on your web site</h3><p>Copy this code and paste it into a blog post or HTML page:</p><textarea cols='40' rows='5'>"+Interface.get_iframe(Map.lat,Map.lon,Map.zoom,Config.stylesheet)+"</textarea><p style='text-align:right;'><br style='clear:both;' /></div>")
 		$('iframe_code').absolutize()
 		}
 	},
 	display_knitter_iframe: function() {
 		if ($('iframe_code') != undefined) {
 			$('iframe_code').remove()
-		} else { $$('body')[0].insert("<div style='padding:6px 10px;width:400px;z-index:999999;background:rgba(255,255,255,0.6);margin:8px;' id='iframe_code'><h3>Embed this map on your web site</h3><p>Copy this code and paste it into a blog post or HTML page:</p><textarea cols='40' rows='5'>"+Interface.get_iframe(Map.lat,Map.lon,Map.zoom,Config.stylesheet,'http://cartagen.org/maps/'+Config.map_name,true)+"</textarea><p style='text-align:right;'><br style='clear:both;' /></div>")
+		} else { /*$$('body')[0].insert("<div style='padding:6px 10px;width:400px;z-index:999999;background:rgba(255,255,255,0.6);margin:8px;' id='iframe_code'><h3>Embed this map on your web site</h3><p>Copy this code and paste it into a blog post or HTML page:</p><textarea cols='40' rows='5'>"+Interface.get_iframe(Map.lat,Map.lon,Map.zoom,Config.stylesheet,'http://cartagen.org/maps/'+Config.map_name,true)+"</textarea><p style='text-align:right;'><br style='clear:both;' /></div>")*/
+		$$('body')[0].insert('<div style="padding:6px 10px;width:400px;z-index:999999;background:rgba(255,255,255,0.6);margin:8px;" id="iframe_code"><h3>Embed this map on your web site</h3><p>Copy this code and paste it into a blog post or HTML page:</p><textarea cols="40" rows="5"><iframe height="300" width="500" src="'+location.href.substring(0, location.href.indexOf('?'))+'?map='+Landmark.map+'&locked=true&fullscreen=true" style="border:0;"></iframe></textarea><p style="text-align:right;"><br style="clear:both;" /></div>')
 		$('iframe_code').absolutize()
 		}
+		console.log(location.href.substring(0, location.href.indexOf('?')))
 	},
 	get_iframe: function(lat,lon,zoom,stylesheet,url,locked,height,width) {
 		width = width || 500

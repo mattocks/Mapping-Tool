@@ -11,6 +11,8 @@ Tool.Editor = {
 	obj: null,
 	dragged: false, // if not dragged, will edit data; will otherwise drag
 	activate: function() {
+		Warper.active_image = null
+		Warper.active_object = false
 	},
 	deactivate: function() {
 		Landmark.stopMoving()

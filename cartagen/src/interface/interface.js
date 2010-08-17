@@ -82,16 +82,19 @@ var Interface = {
 	display_iframe: function() {
 		if ($('iframe_code') != undefined) {
 			$('iframe_code').remove()
-		} else { $$('body')[0].insert("<div style='padding:6px 10px;width:400px;z-index:999999;background:rgba(255,255,255,0.6);margin:8px;' id='iframe_code'><h3>Embed this map on your web site</h3><p>Copy this code and paste it into a blog post or HTML page:</p><textarea cols='40' rows='5'>"+Interface.get_iframe(Map.lat,Map.lon,Map.zoom,Config.stylesheet)+"</textarea><p style='text-align:right;'><br style='clear:both;' /></div>")
+		} else { /* $$('body')[0].insert("<div style='padding:6px 10px;width:400px;z-index:999999;background:rgba(255,255,255,0.6);margin:8px;' id='iframe_code'><h3>Embed this map on your web site</h3><p>Copy this code and paste it into a blog post or HTML page:</p><textarea cols='40' rows='5'>"+Interface.get_iframe(Map.lat,Map.lon,Map.zoom,Config.stylesheet)+"</textarea><p style='text-align:right;'><br style='clear:both;' /></div>") */
+		$$('body')[0].insert("<div style='padding:6px 10px;width:400px;z-index:999999;background:rgba(255,255,255,0.6);margin:8px;' id='iframe_code'><h3>Embed this map on your web site</h3><p>Copy this code and paste it into a blog post or HTML page:</p><textarea cols='40' rows='5'>"+Interface.get_iframe(Map.lat,Map.lon,Map.zoom,Config.stylesheet)+"</textarea><p style='text-align:right;'><br style='clear:both;' /></div>")
 		$('iframe_code').absolutize()
 		}
 	},
 	display_knitter_iframe: function() {
 		if ($('iframe_code') != undefined) {
 			$('iframe_code').remove()
-		} else { $$('body')[0].insert("<div style='padding:6px 10px;width:400px;z-index:999999;background:rgba(255,255,255,0.6);margin:8px;' id='iframe_code'><h3>Embed this map on your web site</h3><p>Copy this code and paste it into a blog post or HTML page:</p><textarea cols='40' rows='5'>"+Interface.get_iframe(Map.lat,Map.lon,Map.zoom,Config.stylesheet,'http://cartagen.org/maps/'+Config.map_name,true)+"</textarea><p style='text-align:right;'><br style='clear:both;' /></div>")
+		} else { /*$$('body')[0].insert("<div style='padding:6px 10px;width:400px;z-index:999999;background:rgba(255,255,255,0.6);margin:8px;' id='iframe_code'><h3>Embed this map on your web site</h3><p>Copy this code and paste it into a blog post or HTML page:</p><textarea cols='40' rows='5'>"+Interface.get_iframe(Map.lat,Map.lon,Map.zoom,Config.stylesheet,'http://cartagen.org/maps/'+Config.map_name,true)+"</textarea><p style='text-align:right;'><br style='clear:both;' /></div>")*/
+		$$('body')[0].insert('<div style="padding:6px 10px;width:400px;z-index:999999;background:rgba(255,255,255,0.6);margin:8px;" id="iframe_code"><h3>Embed this map on your web site</h3><p>Copy this code and paste it into a blog post or HTML page:</p><textarea cols="40" rows="5"><iframe height="300" width="500" src="'+location.href.substring(0, location.href.indexOf('?'))+'?map='+Landmark.map+'&locked=true&fullscreen=true" style="border:0;"></iframe></textarea><p style="text-align:right;"><br style="clear:both;" /></div>')
 		$('iframe_code').absolutize()
 		}
+		console.log(location.href.substring(0, location.href.indexOf('?')))
 	},
 	get_iframe: function(lat,lon,zoom,stylesheet,url,locked,height,width) {
 		width = width || 500
