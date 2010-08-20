@@ -1,13 +1,15 @@
 <?php
 /**
-* Connects to the cartagen MySQL database.
-*/
+ * Establishes a connection to the database and contains several helper functions for working with the database
+ */
+
+// Connects to the Cartagen MySQL database.
 $con = mysql_connect("localhost","cartagen","pKLaqw8MhcdCHspK");
 if (!$con) {
-	die('alert("Could not connect: ' . mysql_error() . '")');
+	die('Could not connect: ' . mysql_error());
 }
 if (!mysql_select_db("cartagen", $con)) {
-	die('alert("Could not open cartagen db: ' . mysql_error() . '")');
+	die('Could not open cartagen db: ' . mysql_error());
 }
 
 /**
@@ -16,12 +18,22 @@ if (!mysql_select_db("cartagen", $con)) {
 function sql_to_js($string){
 	return str_replace(array("\\", "'", "\r\n", "\n"), array("\\\\", "\\'", "\\n", "\\n"), $string);
 }
+/**
+ * Converts stored data in the MySQL database to HTML output.
+ */
 function sql_to_html($string){
 	return str_replace(array("&", "<", ">", "\r\n", "\n"), array("&amp;", "&lt;", "&gt;", "<br />", "<br />"), $string);
 }
+/**
+ * Converts stored data in the MySQL database to a format suitable for HTML textarea.
+ */
 function sql_to_textarea($string){
 	return str_replace(array("&", "<", ">"), array("&amp;", "&lt;", "&gt;"), $string);
 }
+
+/*
+ * Converts a string of "lon1,lat1 lon2,lat2 " to a JavaScript list
+ */
 function points_to_array($points){
 	$point = explode(" ", trim($points));
 	$pointstr = "[";
@@ -31,6 +43,10 @@ function points_to_array($points){
 	}
 	return substr($pointstr, 0, -2) . "]";
 }
+
+/*
+ * Loads a landmark from a MySQL query row; outputs the JavaScript to add it to the map
+ */
 function load_landmark($row){
 	$type = $row['type'];
 	$id = $row['id'];
@@ -112,6 +128,9 @@ function load_landmark($row){
 		//echo "Landmark.landmarks.get($id).setup('$label', '$desc', $id, '$color', [], '$timestamp')\n";
 	}
 }
+/*
+ * Adds a row to the 'actions' session variable for the undo function
+ */
 function add_to_session($row){
 	if(!isset($_SESSION['actions'])){
 		$_SESSION['actions'] = array($row);
@@ -120,12 +139,18 @@ function add_to_session($row){
 		$_SESSION['actions'][] = $row;
 	}
 }
+
+/*
+ * Removes the last row from the session
+ */
 function remove_last_from_session(){
 	if(isset($_SESSION['actions'])){
 		array_pop($_SESSION['actions']);
 	}
 }
-// updates the timestamp associated with a landmark and returns the new map timestamp
+/*
+ * Updates the timestamp associated with a landmark and returns the new map timestamp
+ */
 function update_map_timestamp($landmark_id){
 	$x = mysql_query("SELECT `map` FROM `landmarks` WHERE `id` = $landmark_id");
 	$y = mysql_fetch_assoc($x);

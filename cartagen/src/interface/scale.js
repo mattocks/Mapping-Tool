@@ -1,3 +1,6 @@
+/*
+ * Provides a scale on the left in meters
+ */
 var Scale = {
 	last_zoom: null,
 	scale: null,
@@ -12,7 +15,6 @@ var Scale = {
 			var pts = [leftpoint, rightpoint]
 			$('scalelevel').update(Geometry.line_length(pts))
 		}
-		//console.log('showing scale')
 	}
 }
 document.observe("dom:loaded", function(){

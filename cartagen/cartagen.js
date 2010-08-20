@@ -5251,6 +5251,7 @@ var Cartagen = {
 		})
 		this.feature_queue = []
 
+
 		if (Prototype.Browser.MobileSafari || window.PhoneGap) User.mark()
 	},
     post_draw: function() {
@@ -8121,165 +8122,25 @@ Tool.Select = {
 		$l('Select dblclick')
 	}.bindAsEventListener(Tool.Select)
 }
-
-Tooltips = {
-}
-
-Tool.Landmark = {
-	mode: 'create',
-	drag: function() {
-		$l('Landmark dragging')
-	},
-	activate: function() {
-		$l('Landmark activated')
-	},
-	deactivate: function() {
-
-		$l('Landmark deactivated')
-	},
-	mousedown: function() {
-	}.bindAsEventListener(Tool.Landmark),
-	mouseup: function() {
-		$l('Landmark mouseup')
-		LandmarkEditor.create(3)
-			/*
-			var over_point = false
-			var over_text = false
-			Landmark.landmarks.each(function(point){
-				if (point.value.mouse_inside()) {
-					over_point = true
-					throw $break
-				}
-				if (point.value.mouse_inside_text()) {
-					over_text = true
-					throw $break
-				}
-				console.log(over_point)
-			})
-			if (!over_point && !over_text && Landmark.mode != 'dragging') { // if you didn't click on an existing landmark
-				LandmarkEditor.create(3)
-			}
-			*/
-
-			/*
-			else if (Landmark.mode == 'dragging') { // done dragging the point elsewhere
-				LandmarkEditor.move()
-			}
-			*/
-	}.bindAsEventListener(Tool.Landmark),
-	mousemove: function() {
-		$l('Landmark mousemove')
-	}.bindAsEventListener(Tool.Landmark),
-	dblclick: function() {
-		$l('Landmark dblclick')
-		if (true) {
-		}
-
-	}.bindAsEventListener(Tool.Landmark),
-
-}
-ControlPoint = Class.create({
-	initialize: function(x,y,r,parent) {
-		this.x = x
-		this.y = y
-		this.r = r
-		this.parent_shape = parent
-		this.color = '#200'
-		this.dragging = false
-		if(parent instanceof Region){
-			this.tool = 'Region'
-		}
-		else if (parent instanceof Path){
-			this.tool = 'Path'
-		}
-		else if (parent instanceof Ellipse){
-			this.tool = 'Ellipse'
-		}
-		else if (parent instanceof Rectangle){
-			this.tool = 'Rectangle'
-		}
-		this.eventA = this.draw.bindAsEventListener(this)
-		this.eventB = this.click.bindAsEventListener(this)
-		Glop.observe('glop:postdraw', this.eventA)
-		Glop.observe('mousedown', this.eventB)
-	},
-	draw: function() {
-		if ((this.parent_shape.active || Landmark.mode == 'dragging' || this.parent_shape.type == 'Measure') && !this.hidden) {
-			$C.save()
-			$C.line_width(3/Map.zoom)
-			$C.translate(this.x,this.y)
-			$C.fill_style("#333")
-			$C.stroke_style(this.color)
-			$C.opacity(0.6)
-			if (this.parent_shape.locked) {
-				$C.begin_path()
-				$C.move_to(-6/Map.zoom,-6/Map.zoom)
-				$C.line_to(6/Map.zoom,6/Map.zoom)
-				$C.move_to(-6/Map.zoom,6/Map.zoom)
-				$C.line_to(6/Map.zoom,-6/Map.zoom)
-				$C.stroke()
-			} else {
-				if (this.mouse_inside()) $C.circ(0, 0, this.r/Map.zoom)
-				$C.stroke_circ(0, 0, this.r/Map.zoom)
-			}
-			$C.restore()
-		}
-		if (this.dragging && Mouse.down) {
-			this.drag()
-		}
-		else if (this.mouse_inside()) {
-			if (Mouse.down) {
-				this.drag()
-			}
-			else {
-				this.hover()
-			}
-		}
-		else {
-			this.base()
-		}
-	},
-	mouse_inside: function() {
-		return (Geometry.distance(this.x, this.y, Map.pointer_x(), Map.pointer_y()) < this.r/Map.zoom) && !Landmark.mouse_over_desc() &&
-		(Landmark.dragging == true || this.parent_shape.active)
-	},
-	base: function() {
-		this.color = '#200'
-		this.dragging = false
-	},
-	click: function() {
-		if (this.mouse_inside() /*&& Tool.active!=this.tool*/) {
-			this.color = '#f00'
-			this.parent_shape.active = true
-			Landmark.current = this.parent_shape.id
-			Tool.Editor.over_point = true
-			this.parent_shape.inside_point = true
-			Tool.Editor.obj = this
-		}
-	},
-	hover: function() {
-		this.color = '#900'
-		this.dragging = false
-	},
-	drag: function() {
-		if (this.parent_shape.active && Tool.Editor.obj == this) {
-			if (!this.dragging) {
-				this.dragging = true
-				this.drag_offset_x = Map.pointer_x() - this.x
-				this.drag_offset_y = Map.pointer_y() - this.y
-			}
-			this.color = '#f00'
-			this.x=Map.pointer_x()
-			this.y=Map.pointer_y()
-		}
-	}
-})
 LandmarkEditor = {
-	event: null,
-	img: null,
+	event: null, // temp holder if dragging an image with the cursor
+	img: null, // temp image holder for handling cursor images and rendering point icons
 	idd: 0, // an internal id counter for landmarks that cannot be saved to the server
-	color_choices: ['rgb(0, 0, 0)','rgb(255, 255, 255)','rgb(255, 0, 0)','rgb(255, 162, 0)','rgb(255, 237, 0)','rgb(0, 255, 0)','rgb(0, 0, 255)','rgb(199, 0, 199)'],
+	color_choices: ['rgb(0, 0, 0)','rgb(255, 255, 255)','rgb(255, 0, 0)','rgb(255, 162, 0)',
+	'rgb(255, 237, 0)','rgb(0, 255, 0)','rgb(0, 0, 255)','rgb(199, 0, 199)'], // color choices for path/shapes
 	icon_choices: [], //moved to loadmap.php for automatic icon loading based on files in directory alphabetically
+	/*
+	 * Shows a warning in the bottom of the window if data was not sent to server properly
+	*/
+	showConnectionWarning: function(){
+		if(!$('connection_warning')){
+			document.body.insert('<div id="connection_warning" style="position:absolute;z-index:4;background-color: #FFF;bottom:0px;top:auto;height:1.5em;width:600px;padding-left:3px;"><span style="color: #F00">Warning: The item you just created was not saved to the server. Please check your internet connection.</span></div>')
+		}
+	},
+	removeConnectionWarning: function(){
+		if($('connection_warning'))
+			$('connection_warning').remove()
+	},
 	changeImg: function(img){
 		LandmarkEditor.img = new Image()
 		LandmarkEditor.img.src = img
@@ -8299,32 +8160,9 @@ LandmarkEditor = {
 		LandmarkEditor.event = null
 	},
 	showButtons: function(div, action){
-		/*
 		if(!$(div)){
-			document.body.insert('<div id="'+div+'" style="position:absolute;top:50px;left:50%;z-index:3;"><input type="button" value="Done" onclick="'+action+';$(\''+div+'\').remove()" /> <input type="button" value="Cancel" onclick="Tool.change(\'Pan\');$(\''+div+'\').remove()" /></div>');
+			$('toolbars').insert('<div id="'+div+'"><input type="button" value="'+Tooltips.done+'" onclick="'+action+';$(\''+div+'\').remove()" /> <input type="button" value="'+Tooltips.cancel+'" onclick="Tool.change(\'Pan\');$(\''+div+'\').remove()" /></div>');
 		}
-		*/
-		if(!$(div)){
-			$('toolbars').insert('<div id="'+div+'"><input type="button" value="Done" onclick="'+action+';$(\''+div+'\').remove()" /> <input type="button" value="Cancel" onclick="Tool.change(\'Pan\');$(\''+div+'\').remove()" /></div>');
-		}
-	},
-	changeCursor: function(img){
-		$('cursor').src = img
-		$('main').observe('mousemove', LandmarkEditor.moveCursor)
-		$('cursorbox').observe('mousemove', LandmarkEditor.moveCursor)
-		Modalbox.hide()
-	},
-	moveCursor: function(e){
-		var x = Event.pointerX(e)
-		var y = Event.pointerY(e)
-		$('cursorbox').style.display = 'inline'
-		$('cursorbox').style.left = (x-$('cursor').width)+'px'
-		$('cursorbox').style.top = (y-$('cursor').height)+'px'
-	},
-	resetCursor: function(){
-		$('cursorbox').style.display = 'none'
-		$('main').stopObserving('mousemove', LandmarkEditor.moveCursor)
-		$('cursorbox').stopObserving('mousemove', LandmarkEditor.moveCursor)
 	},
 	showImgUpload: function(){
 		Modalbox.show('<form id="lndmrkfrm" method="post" action="cartagen/php/upload.php"  target="submitframe" enctype="multipart/form-data" onsubmit="$(\'uploader\').update(\'Uploading, please wait...\')"><input type="file" name="image" /><br /><input type="hidden" name="mapid" value="'+Landmark.map+'" /><input type="submit" value="Upload" /><input type="button" value="Cancel" onclick="Modalbox.hide();Events.mouseup()" /></form><div id="uploader">&nbsp;</div><iframe name="submitframe" style="display:none"></iframe>', {title: 'Upload an image'});
@@ -8333,7 +8171,7 @@ LandmarkEditor = {
 		var action = 'LandmarkEditor.newArea('+type+')' // default
 		Landmark.shape_created = false
 		var colorstr = Tooltips.color+' '+LandmarkEditor.colors(true)+'<input type="hidden" id="color" value="'+LandmarkEditor.color_choices[0]+'" />'
-		var options = colorstr // anything that should appear under the description box specific to a type of landmark
+		var options = colorstr // anything that should appear under the description box specific to a type of landmark; default is the color choice array
 		var r = 'false' // return r upon form submission
 		var target = 'submitframe'
 		var title = 'Create a landmark' // default title for creation window
@@ -8346,7 +8184,7 @@ LandmarkEditor = {
 				break
 			case 3: // point
 				title = 'Creating a point'
-				options = LandmarkEditor.icons(true)
+				options = LandmarkEditor.icons()
 				action = 'LandmarkEditor.newPoint()'
 				Landmark.shape_created = null
 				break
@@ -8359,6 +8197,7 @@ LandmarkEditor = {
 			case 6: // ellipse
 				title = 'Creating an ellipse'
 				break
+			/*
 			case 7: // image
 				title = 'Uploading an image'
 				options = '<input type="file" name="image" /><br />'
@@ -8366,6 +8205,7 @@ LandmarkEditor = {
 				action = ''
 				Landmark.shape_created = null
 				break
+			*/
 			case 8: // text note
 				title = 'Creating a text note'
 				options = ''
@@ -8380,9 +8220,12 @@ LandmarkEditor = {
 		}
 		if(action!='') action += ';'
 		var pts = Projection.x_to_lon(-1*Map.pointer_x())+','+Projection.y_to_lat(Map.pointer_y());
-		Modalbox.show(Tooltips.enter_label+'<br /><form id="lndmrkfrm" method="post" action="cartagen/php/upload.php" onsubmit="'+action+'Modalbox.hide();return '+r+'" target="'+target+'" enctype="multipart/form-data"><input type="text" name="label" id="landmarker" value="Untitled" style="width: 400px;"/><br />'+Tooltips.enter_description+'<br /><textarea id="desc" name="desc" style="height: 200px; width: 400px;">Enter a description here</textarea><br />'+options+'<br /><input type="hidden" name="mapid" value="'+Landmark.map+'" /><input type="hidden" name="points" value="'+pts+'" /><input type="submit" value="Make" /><input type="button" value="Cancel" onclick="Modalbox.hide();Events.mouseup()" /></form><iframe name="submitframe" style="display:none"></iframe>', {title: title, width: 424, beforeHide: function(){Landmark.remove_temp_shape(); Tool.change('Pan')} })
+		Modalbox.show(Tooltips.label+'<br /><form id="lndmrkfrm" method="post" action="cartagen/php/upload.php" onsubmit="'+action+'Modalbox.hide();return '+r+'" target="'+target+'" enctype="multipart/form-data"><input type="text" name="label" id="landmarker" value="'+Tooltips.untitled+'" style="width: 400px;" /><br />'+Tooltips.description+'<br /><textarea id="desc" name="desc" style="height: 200px; width: 400px;" onfocus="if(!this.cleared){this.value=\'\';this.cleared=true}">'+Tooltips.enter_description+'</textarea><br />'+options+'<br /><input type="hidden" name="mapid" value="'+Landmark.map+'" /><input type="hidden" name="points" value="'+pts+'" /><input type="submit" value="'+Tooltips.make+'" /><input type="button" value="'+Tooltips.cancel+'" onclick="Modalbox.hide();Events.mouseup()" /></form><iframe name="submitframe" style="display:none"></iframe>', {title: title, width: 424, beforeHide: function(){Landmark.remove_temp_shape(); Tool.change('Pan')} })
 	},
-	icons: function(initial) {
+	/*
+	 * Returns an HTML string of icons for the point landmark option. All files should be placed in icons/ directory.
+	 */
+	icons: function() {
 		var icons = LandmarkEditor.icon_choices
 		LandmarkEditor.temp_icon = icons[0].substring(icons[0].lastIndexOf('/')+1)
 		var iconstring = ''
@@ -8391,7 +8234,7 @@ LandmarkEditor = {
 			LandmarkEditor.img = new Image()
 			LandmarkEditor.img.src = 'icons/'+i
 			var s = 'border: 2px solid rgba(0, 0, 0, 0)'
-			if ((cid == 0 && initial) || (!initial && i == Landmark.landmarks.get(Landmark.current).img.src)) {
+			if (cid == 0) {
 				s = "border: 2px inset rgb(0, 0, 255)"
 			}
 			iconstring += '<img id="i'+cid+'" style="padding: 1px; '+s+'" src="icons/'+i+'" onclick="LandmarkEditor.setIcon('+cid+')" onload="LandmarkEditor.resizeIcon(this)" />'
@@ -8402,7 +8245,7 @@ LandmarkEditor = {
 	},
 	setIcon: function(id) {
 		for (var i = 0; i < LandmarkEditor.icon_choices.length; i++) {
-			if (i == id) {colors = ['rgb(0, 0, 0)','rgb(255, 255, 255)','rgb(255, 0, 0)','rgb(0, 255, 0)','rgb(0, 0, 255)']
+			if (i == id) {
 				$('i'+i).style.border = '2px inset rgb(0, 0, 255)'
 				LandmarkEditor.temp_icon = $('i'+i).src.substring($('i'+i).src.lastIndexOf('/')+1)
 			}
@@ -8410,7 +8253,6 @@ LandmarkEditor = {
 				$('i'+i).style.border = '2px solid rgba(0, 0, 0, 0)'
 			}
 		}
-		console.log(LandmarkEditor.temp_icon)
 	},
 	resizeIcon: function(img){
 		var width = img.width
@@ -8456,6 +8298,9 @@ LandmarkEditor = {
 		}
 		console.log($('color').value)
 	},
+	/*
+	 * Sends a recorded audio file to the server
+	 */
 	newAudio: function(){
 		var label1 = $('landmarker').value
 		var desc1 = $('desc').value
@@ -8491,13 +8336,20 @@ LandmarkEditor = {
 				mapid: Landmark.map,
 	  		},
 	  		onSuccess: function(response) {
-				var r = response.responseText.trim().split(",");
-				var id = r[0];
-				var timestamp = r[1];
-				Landmark.landmarks.set(id, new Point(Map.pointer_x(), Map.pointer_y(), label1, desc1, LandmarkEditor.temp_icon, id, timestamp))
+				if(response.responseText.trim() == ''){
+					LandmarkEditor.showConnectionWarning()
+				}
+				else{
+					var r = response.responseText.trim().split(",");
+					var id = r[0];
+					var timestamp = r[1];
+					Landmark.landmarks.set(id, new Point(Map.pointer_x(), Map.pointer_y(), label1, desc1, LandmarkEditor.temp_icon, id, timestamp))
+					LandmarkEditor.removeConnectionWarning()
+				}
 	  		},
 			onFailure: function() {
-				console.log('failed')
+				console.log('did not connect')
+				LandmarkEditor.showConnectionWarning()
 				var id = LandmarkEditor.idd++ // local id created
 				Landmark.landmarks.set(id, new Point(Map.pointer_x(), Map.pointer_y(), label1, desc1, color1, id))
 			}
@@ -8505,7 +8357,7 @@ LandmarkEditor = {
 	},
 	/*
 	 * Saves a polygon or path to the server
-	 * @param {t} type of landmark: 1 is polygon; 2 is path; 4 is freeform
+	 * @param {t} type of landmark: see documentation
 	 */
 	newArea: function(t){
 		var shape = Landmark.temp_shape
@@ -8536,14 +8388,21 @@ LandmarkEditor = {
 				mapid: Landmark.map,
 	  		},
 	  		onSuccess: function(response) {
-				var r = response.responseText.trim().split(",");
-				var id = r[0];
-				var timestamp = r[1];
-				shape.setup(label1, desc1, id, color1, [], timestamp)
-				if(shape instanceof Textnote) shape.noteRendered = false
-				Landmark.landmarks.set(id, shape)
+				if(response.responseText.trim() == ''){
+					LandmarkEditor.showConnectionWarning()
+				}
+				else{
+					LandmarkEditor.removeConnectionWarning()
+					var r = response.responseText.trim().split(",");
+					var id = r[0];
+					var timestamp = r[1];
+					shape.setup(label1, desc1, id, color1, [], timestamp)
+					if(shape instanceof Textnote) shape.noteRendered = false
+					Landmark.landmarks.set(id, shape)
+				}
 	  		},
 			onFailure: function() {
+				LandmarkEditor.showConnectionWarning()
 				var id = LandmarkEditor.idd++
 				shape.setup(label1, desc1, id, color1)
 				Landmark.landmarks.set(id, shape)
@@ -8575,13 +8434,25 @@ LandmarkEditor = {
 				points: pts,
 	 		},
 			onSuccess: function(response) {
+				if(response.responseText.trim() == ''){
+					LandmarkEditor.showConnectionWarning()
+				}
+				else{
+					LandmarkEditor.removeConnectionWarning()
+				}
 				console.log(response.responseText)
+			},
+			onFailure: function(){
+				LandmarkEditor.showConnectionWarning()
 			}
 		})
 	},
+	/*
+	 * Sets the current object on mousedown if a landmark is clicked
+	 */
 	setCurrent: function(o){
-		if(Tool.Editor.obj == null){
-			Tool.Editor.obj = o
+		if(Landmark.obj == null){
+			Landmark.obj = o
 		}
 	},
 	edit: function(){
@@ -8589,9 +8460,9 @@ LandmarkEditor = {
 		var options = colorstr
 		var lndmrk = Landmark.landmarks.get(Landmark.current)
 		if(!(lndmrk instanceof Region || lndmrk instanceof Path) || lndmrk instanceof Textnote){
-			options = ''
+			options = '' // no color choices for these landmarks
 		}
-		Modalbox.show(Tooltips.enter_label+'<br /><form id="lndmrkfrm" onsubmit="LandmarkEditor.editData();Modalbox.hide();Events.mouseup();return false"><input type="text" id="newName" value="' + lndmrk.label + '" style="width:400px;" /><br />'+Tooltips.enter_description+'<br /><textarea id="newDesc" name="newDesc" style="height: 200px; width: 400px;">' + lndmrk.desc + '</textarea><br />'+options+'<br /><input type="submit" value="Edit" /><input type="button" value="Cancel" onclick="Modalbox.hide();Events.mouseup()" /><input type="button" value="Delete" onclick="LandmarkEditor.remove();Modalbox.hide();Events.mouseup()" /></form>', {title: 'Edit this landmark', width: 424})
+		Modalbox.show(Tooltips.label+'<br /><form id="lndmrkfrm" onsubmit="LandmarkEditor.editData();Modalbox.hide();Events.mouseup();return false"><input type="text" id="newName" value="' + lndmrk.label + '" style="width:400px;" /><br />'+Tooltips.description+'<br /><textarea id="newDesc" name="newDesc" style="height: 200px; width: 400px;">' + lndmrk.desc + '</textarea><br />'+options+'<br /><input type="submit" value="'+Tooltips.edit+'" /><input type="button" value="'+Tooltips.cancel+'" onclick="Modalbox.hide();Events.mouseup()" /><input type="button" value="'+Tooltips.deleteBtn+'" onclick="LandmarkEditor.remove();Modalbox.hide();Events.mouseup()" /></form>', {title: 'Edit this landmark', width: 424})
 	},
 	editData : function() {
 		var label1 = $('newName').value
@@ -8610,15 +8481,22 @@ LandmarkEditor = {
 				color: color1,
 		 		},
 			onSuccess: function(response) {
-				var curLandmark = Landmark.landmarks.get(Landmark.current)
-				curLandmark.label = label1
-				curLandmark.desc = desc1
-				curLandmark.color = color1
-				curLandmark.descRendered = false
-				curLandmark.noteRendered = false
+				if(response.responseText.trim() == ''){
+					LandmarkEditor.showConnectionWarning()
+				}
+				else{
+					var curLandmark = Landmark.landmarks.get(Landmark.current)
+					curLandmark.label = label1
+					curLandmark.desc = desc1
+					curLandmark.color = color1
+					curLandmark.descRendered = false
+					curLandmark.noteRendered = false
+					LandmarkEditor.removeConnectionWarning()
+				}
 				console.log(response.responseText)
 	 		},
 			onFailure: function(){
+				LandmarkEditor.showConnectionWarning()
 				var curLandmark = Landmark.landmarks.get(Landmark.current)
 				curLandmark.label = label1
 				curLandmark.desc = desc1
@@ -8634,6 +8512,9 @@ LandmarkEditor = {
 		new Ajax.Request('cartagen/php/undo.php?undo=true', {
 			onSuccess: function(r){
 				console.log(r.responseText);
+			},
+			onFailure: function(){
+				LandmarkEditor.showConnectionWarning()
 			}
 		});
 	},
@@ -8644,6 +8525,9 @@ LandmarkEditor = {
 		  		parameters: {
 					remove: Landmark.current,
 		  		},
+				onFailure: function(){
+					LandmarkEditor.showConnectionWarning()
+				}
 			})
 			Landmark.landmarks.get(Landmark.current).remove()
 			Landmark.landmarks.unset(Landmark.current)
@@ -8652,19 +8536,8 @@ LandmarkEditor = {
 	}
 }
 MapEditor = {
-	create: function(){
-		Modalbox.show('Enter a title<br /><form id="lndmrkfrm" onsubmit="MapEditor.newMap();Modalbox.hide();return false"><input type="text" id="maptitle" /><br /><br />Description<br /><textarea id="desc" name="desc" style="height: 200px; width: 400px;"></textarea><br /><input type="submit" value="Make" /><input type="button" value="Cancel" onclick="Modalbox.hide()" /></form>', {title: 'Create a new map'})
-	},
 	showLoad: function(){
 		window.location = './'
-		/*
-		new Ajax.Request('landmark.php', {
-		 	method: 'get',
-		  	parameters: {
-				map: 'list',
-		  	},
-		})
-		*/
 	},
 	newMap: function(){
 		new Ajax.Request('cartagen/php/createmap.php', {
@@ -8680,12 +8553,10 @@ MapEditor = {
 			}
 		})
 	},
+	/*
+	 * Loads a user-created map into the window.
+	 */
 	load: function(map, no_auto_locate){
-		/*
-		if($('holder') != null){
-			$('holder').remove()
-		}
-		*/
 		Landmark.current = null
 		Landmark.landmarks.each(function(l){
 			var lndmrk = l.value
@@ -8740,7 +8611,7 @@ MapEditor = {
 		var title = $('maptitle').value
 		var desc = $('desc').value
 		new Ajax.Request('cartagen/php/editmap.php', {
-		 	method: 'get',
+		 	method: 'post',
 		  	parameters: {
 				mapid: Landmark.map,
 				title: title,
@@ -8753,20 +8624,6 @@ MapEditor = {
 			}
 		})
 	},
-	/*
-	remove: function(id){
-		if(confirm('Are you sure you want to delete this map entirely? Press OK to continue or Cancel to stop.')){
-			new Ajax.Request('cartagen/php/editmap.php', {
-			 	method: 'get',
-			  	parameters: {
-					removemap: id,
-			  	},
-				onSuccess: function(r){
-				}
-			})
-		}
-	}
-	*/
 }
 document.observe("dom:loaded", function() {
 	if(location.search.toQueryParams().map){
@@ -8788,22 +8645,112 @@ document.observe("dom:loaded", function() {
 window.onbeforeunload = function(){
 	new Ajax.Request('cartagen/php/undo.php?destroy=true');
 }
-
+ControlPoint = Class.create({
+	initialize: function(x,y,r,parent) {
+		this.x = x
+		this.y = y
+		this.r = r
+		this.parent_shape = parent
+		this.color = '#200'
+		this.dragging = false
+		this.eventA = this.draw.bindAsEventListener(this)
+		this.eventB = this.click.bindAsEventListener(this)
+		Glop.observe('glop:postdraw', this.eventA)
+		Glop.observe('mousedown', this.eventB)
+	},
+	draw: function() {
+		if ((this.parent_shape.active || Landmark.mode == 'dragging' || this.parent_shape.type == 'Measure') && !this.hidden) {
+			$C.save()
+			$C.line_width(3/Map.zoom)
+			$C.translate(this.x,this.y)
+			$C.fill_style("#333")
+			$C.stroke_style(this.color)
+			$C.opacity(0.6)
+			if (this.parent_shape.locked) {
+				$C.begin_path()
+				$C.move_to(-6/Map.zoom,-6/Map.zoom)
+				$C.line_to(6/Map.zoom,6/Map.zoom)
+				$C.move_to(-6/Map.zoom,6/Map.zoom)
+				$C.line_to(6/Map.zoom,-6/Map.zoom)
+				$C.stroke()
+			} else {
+				if (this.mouse_inside()) $C.circ(0, 0, this.r/Map.zoom)
+				$C.stroke_circ(0, 0, this.r/Map.zoom)
+			}
+			$C.restore()
+		}
+		if (this.dragging && Mouse.down) {
+			this.drag()
+		}
+		else if (this.mouse_inside()) {
+			if (Mouse.down) {
+				this.drag()
+			}
+			else {
+				this.hover()
+			}
+		}
+		else {
+			this.base()
+		}
+	},
+	mouse_inside: function() {
+		return (Geometry.distance(this.x, this.y, Map.pointer_x(), Map.pointer_y()) < this.r/Map.zoom) && !Landmark.mouse_over_desc() &&
+		(Landmark.dragging == true || this.parent_shape.active)
+	},
+	base: function() {
+		this.color = '#200'
+		this.dragging = false
+	},
+	click: function() {
+		if (this.mouse_inside()) {
+			this.color = '#f00'
+			this.parent_shape.active = true
+			Landmark.current = this.parent_shape.id
+			Landmark.over_point = true
+			this.parent_shape.inside_point = true
+			Landmark.obj = this
+		}
+	},
+	hover: function() {
+		this.color = '#900'
+		this.dragging = false
+	},
+	drag: function() {
+		if (this.parent_shape.active && Landmark.obj == this) {
+			if (!this.dragging) {
+				this.dragging = true
+				this.drag_offset_x = Map.pointer_x() - this.x
+				this.drag_offset_y = Map.pointer_y() - this.y
+			}
+			this.color = '#f00'
+			this.x=Map.pointer_x()
+			this.y=Map.pointer_y()
+		}
+	}
+})
 Landmark = {
-	mode: 'default',
-	landmarks: new Hash(),
-	current: null,
-	map: null,
-	mapTitle: null,
-	mapDesc: null,
-	mapX: null,
-	mapY: null,
-	mapZoom: null,
-	temp_shape: null,
-	obj: null,
+	mode: 'default', // dragging or default: determines if in editing mode or not
+	landmarks: new Hash(), // stores all the landmarks here (except for images)
+	current: null, // id of current landmark
+	map: null, // id of current map
+	mapTitle: null, // title of current map
+	mapDesc: null, // description of current map
+	mapX: null, // default x coordinate of map
+	mapY: null, // default y coordinate of map
+	mapZoom: null, // default zoom level of map
+	temp_shape: null, // object stored when creating polygons, paths, etc
+	obj: null, // object currently being dragged
+	dragged: false, // if an object in editing mode was moved upon clicking
+	over: false, // over a landmark (but not control point)?
+	over_point: false, // over a control point of a landmark?
 	action_performed: false, // for clicking
 	highlighted: null, // which id is currently highlighted
-	shape_created: null,
+	shape_created: null, // when creating polygon, path, etc if the shape was created
+	highlighted: null, // id of currently highlighted landmark
+	/*
+	 * Removes temp_shape and stops it from being displayed on the canvas
+	 */
 	remove_temp_shape: function(){
 		console.log(Landmark.temp_shape)
 		console.log(''+Landmark.shape_created)
@@ -8817,16 +8764,25 @@ Landmark = {
 			Landmark.temp_shape = null
 		}
 	},
+	/*
+	 * Highlights a landmark (usually in yellow). Called from search results.
+	 */
 	highlight: function(id){
 		Landmark.landmarks.get(id).highlighted = true
 		Landmark.highlighted = id
 	},
+	/*
+	 * Unhighlights a landmark
+	 */
 	unhighlight: function(){
 		if(Landmark.highlighted != null){
 			Landmark.landmarks.get(Landmark.highlighted).highlighted = false
 		}
 		Landmark.highlighted = null
 	},
+	/*
+	 * Centers the map at a given landmark and opens its description.
+	 */
 	goTo: function(id){
 		var lndmrk = Landmark.landmarks.get(id)
 		if(lndmrk.x == null || lndmrk.y == null){
@@ -8850,7 +8806,7 @@ Landmark = {
 		var over = false
 		Landmark.landmarks.each(function(l){
 			if ((l.value.mouse_inside() || l.value.mouse_over_edit() || l.value.mouse_over_X())
-			&& (Tool.active == 'Pan' || Tool.active == 'Editor')) {
+			&& (Tool.active == 'Pan' || Tool.active == 'Warp')) {
 				over = true
 				throw $break
 			}
@@ -8903,9 +8859,12 @@ Landmark = {
 		})
 		return t
 	},
+	/*
+	 * Toggles the editing mode based on Landmark.mode
+	 */
 	toggleMove: function(){
 		if (Landmark.mode == 'default') {
-			Tool.change('Editor')
+			Tool.change('Warp')
 			Landmark.mode = 'dragging'
 			Landmark.landmarks.each(function(l){
 				l.value.active = true
@@ -8920,6 +8879,9 @@ Landmark = {
 		}
 		Glop.trigger_draw()
 	},
+	/*
+	 * Forces user out of editing mode
+	 */
 	stopMoving: function(){
 			Landmark.mode = 'default'
 			Landmark.landmarks.each(function(l){
@@ -8927,144 +8889,172 @@ Landmark = {
 			})
 			$('move').style.background = ''
 			$('move').name = Tooltips.move
-	},
-	Landmark: Class.create({
-		initialize: function(label,desc,id,tags) {
-			this.id = id
-			this.descRendered = false
-			this.descView = ['','','','']
-			this.label = label
-			this.desc = desc
-			this.tags = (!tags) ? [] : tags
-		},
-		setup: function(label,desc,id,color,tags,timestamp){
-			this.color = color
-			this.label = label
-			this.desc = desc
-			this.id = id
-			this.color = color
-			this.timestamp = timestamp
-			this.active = false
-			this.tags = (!tags) ? [] : tags
-		},
-		mouse_over_edit: function() {
-			var left = this.x + 204/Map.zoom
-			var right = this.x + 235/Map.zoom
-			var top = this.y - 255/Map.zoom
-			var bottom = this.y - 240/Map.zoom
-			var over = Map.pointer_x() > left && Map.pointer_x() < right && Map.pointer_y() > top && Map.pointer_y() < bottom && this.expanded
-			return over
-		},
-		mouse_over_X: function() {
-			var left = this.x + 242/Map.zoom
-			var right = this.x + 253/Map.zoom
-			var top = this.y - 255/Map.zoom
-			var bottom = this.y - 240/Map.zoom
-			var over = Map.pointer_x() > left && Map.pointer_x() < right && Map.pointer_y() > top && Map.pointer_y() < bottom && this.expanded
-			return over
-		},
-		mouse_over_description: function() {
-			if (this.x == null || this.y == null){
-				return false
-			}
-			var left = this.x + 5/Map.zoom
-			var right = this.x + 255/Map.zoom
-			var top = this.y - 255/Map.zoom
-			var bottom = this.y - 5/Map.zoom
-			var over = Map.pointer_x() > left && Map.pointer_x() < right && Map.pointer_y() > top && Map.pointer_y() < bottom && this.expanded
-			return over
-		},
-		draw: function(){
-		},
-		mousedown: function(){
-			if (this.mouse_over_X()){
-				this.expanded = false
-				Landmark.action_performed = true
-			}
-		},
-		drawDesc: function() {
-			if (Landmark.mode == 'dragging' || this.active){
-				this.expanded = false
-			}
-			if (this.expanded) { // description oRegion
-				$C.opacity(1)
-				this.showDescription()
-			}
-			else { // stuff to do when description is closed
-			}
-		},
-		renderDesc: function(){
-			if(!this.descRendered){
-				var i = 1
-				var line = 0
-				var start = 0
-				var indexOfLastSpace = this.desc.length
-				this.descView = ['','','','']
-				var reachedEnd = false
-				if(this.desc.length < 3){
-					this.descView = [this.desc,'','','']
-				}
-				else{
-					while (line < 4 && i < this.desc.length){
-						if ($C.measure_text('Arial', 12, this.desc.substring(start, i)) < 240){
-							this.descView[line] = this.desc.substring(start, i+1)
-							if (this.desc.charAt(i) == ' '){
-								indexOfLastSpace = i
-							}
-						}
-						else {
-							this.descView[line] = this.desc.substring(start, indexOfLastSpace)
-							start = indexOfLastSpace + 1
-							line++
-						}
-						i++
-					}
-				}
-				this.descRendered = true
-			}
-		},
-		showDescription: function(){
-			$C.save()
-			$C.translate(this.x, this.y)
-			$C.scale(1/Map.zoom, 1/Map.zoom)
-			$C.canvas.fillStyle = 'rgb(255, 255, 255)'
-			var left_bound = 5
-			var right_bound = 255
-			var upper_bound = -259
-			var lower_bound = -6
-			$C.rect(left_bound, upper_bound, right_bound - left_bound, lower_bound - upper_bound)
-			$C.stroke_style('rgb(100, 100, 100)')
-			$C.begin_path()
-			$C.move_to(left_bound, upper_bound)
-			$C.line_to(right_bound, upper_bound)
-			$C.line_to(right_bound, lower_bound)
-			$C.line_to(left_bound, lower_bound)
-			$C.canvas.closePath()
-			$C.line_width(2)
-			$C.stroke()
-			$C.draw_text('Arial', 18, 'black', 10, -236, this.label)
-			$C.draw_text('Arial', 10, '#00D', 210, -246, 'Edit')
-			$C.draw_text('Arial', 10, '#00D', 242, -246, 'X')
-			this.renderDesc()
-			$C.draw_text('Arial', 12, 'black', 10, -102, this.descView[0])
-			$C.draw_text('Arial', 12, 'black', 10, -82, this.descView[1])
-			$C.draw_text('Arial', 12, 'black', 10, -62, this.descView[2])
-			$C.draw_text('Arial', 12, 'black', 10, -42, this.descView[3])
-			if((this instanceof Region) && !(this instanceof Textnote) && !(this instanceof Ellipse)){
-				$C.draw_text('Arial', 10, 'black', 10, -18, 'Perimeter: '+Geometry.line_length(this.points, false)+' meters')
-			}
-			else if (this instanceof Path && this.type != 'Freeform'){
-				$C.draw_text('Arial', 10, 'black', 10, -18, 'Length: '+Geometry.line_length(this.points, false)+' meters')
-			}
-			$C.restore()
-		},
-		remove: function(){
-			Glop.stopObserving('glop:postdraw', this.eventA)
-			Glop.stopObserving('glop:descriptions', this.eventB)
-			Glop.stopObserving('mousedown', this.eventC)
-		},
-	}),
+	}
 }
+/*
+ * Provides a basic outline for landmarks that are saved.
+ */
+Landmark.Landmark = Class.create({
+	initialize: function(label,desc,id,tags) {
+		this.id = id
+		this.descRendered = false
+		this.descView = ['','','','']
+		this.label = label
+		this.desc = desc
+		this.tags = (!tags) ? [] : tags
+	},
+	/*
+	 * Essentially an 'initialize' function for shapes
+	 */
+	setup: function(label,desc,id,color,tags,timestamp){
+		this.color = color
+		this.label = label
+		this.desc = desc
+		this.id = id
+		this.color = color
+		this.timestamp = timestamp
+		this.active = false
+		this.tags = (!tags) ? [] : tags
+	},
+	/*
+	 * Returns a boolean value indicating if the mouse is over the "edit" button in the description window.
+	 */
+	mouse_over_edit: function() {
+		var left = this.x + 204/Map.zoom
+		var right = this.x + 235/Map.zoom
+		var top = this.y - 255/Map.zoom
+		var bottom = this.y - 240/Map.zoom
+		var over = Map.pointer_x() > left && Map.pointer_x() < right && Map.pointer_y() > top && Map.pointer_y() < bottom && this.expanded
+		return over
+	},
+	/*
+	 * Returns a boolean value indicating if the mouse is over the "X" button in the description window.
+	 */
+	mouse_over_X: function() {
+		var left = this.x + 242/Map.zoom
+		var right = this.x + 253/Map.zoom
+		var top = this.y - 255/Map.zoom
+		var bottom = this.y - 240/Map.zoom
+		var over = Map.pointer_x() > left && Map.pointer_x() < right && Map.pointer_y() > top && Map.pointer_y() < bottom && this.expanded
+		return over
+	},
+	/*
+	 * Returns a boolean value indicating if the mouse is over the description window.
+	 */
+	mouse_over_description: function() {
+		if (this.x == null || this.y == null){
+			return false
+		}
+		var left = this.x + 5/Map.zoom
+		var right = this.x + 255/Map.zoom
+		var top = this.y - 255/Map.zoom
+		var bottom = this.y - 5/Map.zoom
+		var over = Map.pointer_x() > left && Map.pointer_x() < right && Map.pointer_y() > top && Map.pointer_y() < bottom && this.expanded
+		return over
+	},
+	/*
+	 * Should be implemented by any subclass of Landmark.Landmark
+	 */
+	draw: function(){
+	},
+	/*
+	 * Should be implemented by any subclass of Landmark.Landmark
+	 */
+	mousedown: function(){
+		if (this.mouse_over_X()){
+			this.expanded = false
+			Landmark.action_performed = true
+		}
+	},
+	/*
+	 * Shows description if appropriate
+	 */
+	drawDesc: function() {
+		if (Landmark.mode == 'dragging' || this.active){
+			this.expanded = false
+		}
+		if (this.expanded) { // description
+			$C.opacity(1)
+			this.showDescription()
+		}
+	},
+	/*
+	 * Renders the description so it fits within the constraints of the description window.
+	 */
+	renderDesc: function(){
+		if(!this.descRendered){
+			var i = 1
+			var line = 0
+			var start = 0
+			var indexOfLastSpace = this.desc.length
+			this.descView = ['','','','']
+			var reachedEnd = false
+			if(this.desc.length < 3){
+				this.descView = [this.desc,'','','']
+			}
+			else{
+				while (line < 4 && i < this.desc.length){
+					if ($C.measure_text('Arial', 12, this.desc.substring(start, i)) < 240){
+						this.descView[line] = this.desc.substring(start, i+1)
+						if (this.desc.charAt(i) == ' '){
+							indexOfLastSpace = i
+						}
+					}
+					else {
+						this.descView[line] = this.desc.substring(start, indexOfLastSpace)
+						start = indexOfLastSpace + 1
+						line++
+					}
+					i++
+				}
+			}
+			this.descRendered = true
+		}
+	},
+	/*
+	 * Draws the description window on the canvas
+	 */
+	showDescription: function(){
+		$C.save()
+		$C.translate(this.x, this.y)
+		$C.scale(1/Map.zoom, 1/Map.zoom)
+		$C.canvas.fillStyle = 'rgb(255, 255, 255)'
+		var left_bound = 5
+		var right_bound = 255
+		var upper_bound = -259
+		var lower_bound = -6
+		$C.rect(left_bound, upper_bound, right_bound - left_bound, lower_bound - upper_bound)
+		$C.stroke_style('rgb(100, 100, 100)')
+		$C.begin_path()
+		$C.move_to(left_bound, upper_bound)
+		$C.line_to(right_bound, upper_bound)
+		$C.line_to(right_bound, lower_bound)
+		$C.line_to(left_bound, lower_bound)
+		$C.canvas.closePath()
+		$C.line_width(2)
+		$C.stroke()
+		$C.draw_text('Arial', 18, 'black', 10, -236, this.label)
+		$C.draw_text('Arial', 10, '#00D', 210, -246, 'Edit')
+		$C.draw_text('Arial', 10, '#00D', 242, -246, 'X')
+		this.renderDesc()
+		$C.draw_text('Arial', 12, 'black', 10, -102, this.descView[0])
+		$C.draw_text('Arial', 12, 'black', 10, -82, this.descView[1])
+		$C.draw_text('Arial', 12, 'black', 10, -62, this.descView[2])
+		$C.draw_text('Arial', 12, 'black', 10, -42, this.descView[3])
+		if((this instanceof Region) && !(this instanceof Textnote) && !(this instanceof Ellipse)){
+			$C.draw_text('Arial', 10, 'black', 10, -18, Tooltips.perimeter+': '+Geometry.line_length(this.points, false)+' '+Tooltips.meters)
+		}
+		else if (this instanceof Path && this.type != 'Freeform'){
+			$C.draw_text('Arial', 10, 'black', 10, -18, Tooltips.lengthTxt+': '+Geometry.line_length(this.points, false)+' '+Tooltips.meters)
+		}
+		$C.restore()
+	},
+	remove: function(){
+		Glop.stopObserving('glop:postdraw', this.eventA)
+		Glop.stopObserving('glop:descriptions', this.eventB)
+		Glop.stopObserving('mousedown', this.eventC)
+	},
+})
 
 Point = Class.create(Landmark.Landmark, {
 	initialize: function($super,x,y,label,desc,icon,id,timestamp) {
@@ -9141,9 +9131,9 @@ Point = Class.create(Landmark.Landmark, {
 		return t
 	},
 	mousedown: function($super) {
-		if (this.mouse_inside()) {  //&& Tool.active!='Landmark') {
+		if (this.mouse_inside()) {
 			Landmark.current = this.id
-			Tool.Editor.over = true
+			Landmark.over = true
 			LandmarkEditor.setCurrent(this)
 			this.oldx = this.x
 			this.oldy = this.y
@@ -9229,7 +9219,7 @@ Region = Class.create(Landmark.Landmark, {
 	mousedown: function($super) {
 		if (this.mouse_inside() && Tool.active !='Region') {
 			Landmark.current = this.id
-			Tool.Editor.over = true
+			Landmark.over = true
 			if(Landmark.mode != 'dragging' && Tool.active == 'Pan'){
 				this.expanded = !this.expanded
 			}
@@ -9274,7 +9264,7 @@ Region = Class.create(Landmark.Landmark, {
 		this.dragging=false
 	},
 	drag: function(){
-		if(Tool.Editor.obj == this){
+		if(Landmark.obj == this){
 			this.drag_started=true
 			Tool.Region.mode='drag'
 			for (var i=0; i<this.points.length; i++){
@@ -9405,7 +9395,7 @@ Path = Class.create(Landmark.Landmark, {
 					LandmarkEditor.setCurrent(this)
 				}
 			}
-			Tool.Editor.over = true
+			Landmark.over = true
 			if(Tool.active !='Path'){
 				Landmark.current = this.id
 				if(Landmark.mode != 'dragging'){
@@ -9505,7 +9495,7 @@ Rectangle = Class.create(Region, {
 	},
 	make_rectangle: function(){
 		for(var i=0;i<this.points.length;i++){
-			if(this.points[i] == Tool.Editor.obj){
+			if(this.points[i] == Landmark.obj){
 				if(this.pt == null){
 					this.pt = i // keep track here for now
 				}
@@ -9533,7 +9523,6 @@ Rectangle = Class.create(Region, {
 	},
 	mouseup: function(){
 		this.make_rectangle()
-		console.log(this.pt)
 		this.pt = null
 	},
 	draw: function() {
@@ -9557,9 +9546,9 @@ Rectangle = Class.create(Region, {
 		else{
 			this.base()
 		}
-		if (Tool.Editor.over_point){
-			if(Tool.active == 'Editor'){
-				if(Tool.Editor.obj.parent_shape == this){
+		if (Landmark.over_point){
+			if(Tool.active == 'Warp'){
+				if(Landmark.obj.parent_shape == this){
 					this.make_rectangle()
 				}
 			}
@@ -9567,7 +9556,7 @@ Rectangle = Class.create(Region, {
 				this.make_rectangle()
 			}
 		}
-		else if ((Tool.active == 'Rectangle'||Tool.active == 'Editor')&&!Mouse.down){
+		else if ((Tool.active == 'Rectangle'||Tool.active == 'Warp')&&!Mouse.down){
 			this.points.each(function(point){
 				point.hidden = false
 			})
@@ -9688,9 +9677,9 @@ Textnote = Class.create(Rectangle, {
 		else{
 			this.base()
 		}
-		if (Tool.Editor.over_point){
-			if(Tool.active == 'Editor'){
-				if(Tool.Editor.obj.parent_shape == this){
+		if (Landmark.over_point){
+			if(Tool.active == 'Warp'){
+				if(Landmark.obj.parent_shape == this){
 					this.noteRendered = false
 					this.make_rectangle()
 				}
@@ -9700,7 +9689,7 @@ Textnote = Class.create(Rectangle, {
 			}
 			this.finished = false
 		}
-		else if ((Tool.active == 'Textnote'||Tool.active == 'Editor')&&!Mouse.down){
+		else if ((Tool.active == 'Textnote'||Tool.active == 'Warp')&&!Mouse.down){
 			this.points.each(function(point){
 				point.hidden = false
 			})
@@ -9857,9 +9846,9 @@ Img = Class.create(Landmark.Landmark, {
 		*/
 	},
 	mousedown: function($super) {
-		if (this.mouse_inside()) {  //&& Tool.active!='Landmark') {
+		if (this.mouse_inside()) {
 			Landmark.current = this.id
-			Tool.Editor.over = true
+			Landmark.over = true
 			LandmarkEditor.setCurrent(this)
 			this.oldx = this.x
 			this.oldy = this.y
@@ -9913,7 +9902,7 @@ Img = Class.create(Landmark.Landmark, {
 	}
 })
 Audio = Class.create(Landmark.Landmark, {
-	initialize: function($super,x,y,label,desc,id,timestamp) {
+	initialize: function(x,y,label,desc,id,timestamp) {
 		this.x = x
 		this.y = y
 		this.label = label
@@ -9924,32 +9913,13 @@ Audio = Class.create(Landmark.Landmark, {
 		this.expanded = false
 		this.timestamp = timestamp
 		this.img = new Image()
-		this.img.src = 'sound.png'
-		this.tab = 'img' // for tab view
+		this.img.src = 'sound.png' // icon to use for audio items
 		this.eventA = this.draw.bindAsEventListener(this)
 		Glop.observe('glop:points', this.eventA)
 		this.eventB = this.drawDesc.bindAsEventListener(this)
 		Glop.observe('glop:descriptions', this.eventB)
 		this.eventC = this.mousedown.bindAsEventListener(this)
 		Glop.observe('mousedown', this.eventC)
-	},
-	/*
-	mouse_over_edit: function() {
-		return false
-	},
-	mouse_over_X: function() {
-		return false
-	},
-	*/
-	showDescription: function($super){
-		/*
-		$super()
-		$C.save()
-		$C.translate(this.x, this.y)
-		$C.scale(1/Map.zoom, 1/Map.zoom)
-		$C.canvas.drawImage(this.img, 20, -170)
-		$C.restore()
-		*/
 	},
 	show_audio_player: function(){
 		Modalbox.show('<iframe src="nanogong-player.php?id='+this.id+'" style="border:0px;width:180px;height:40px;"></iframe>', {title: 'Listening to audio for this landmark'})
@@ -9988,12 +9958,8 @@ Audio = Class.create(Landmark.Landmark, {
 		if (this.dragging && Mouse.down) {
 			this.drag()
 		}
-		else if (this.mouse_inside()) {
-			if (Mouse.down) {
-			}
-			else {
-				this.hover()
-			}
+		else if (this.mouse_inside() && !Mouse.down) {
+			this.hover()
 		}
 		else {
 			this.base()
@@ -10006,26 +9972,11 @@ Audio = Class.create(Landmark.Landmark, {
 		var top = this.y - imag.height/2/Config.zoom_in_limit
 		var bottom = this.y + imag.height/2/Config.zoom_in_limit
 		return Map.pointer_x() > left && Map.pointer_x() < right && Map.pointer_y() > top && Map.pointer_y() < bottom && !Landmark.mouse_over_desc() && Tool.active != 'Measure'
-		/*
-		return this.mouse_inside_text()
-		if(Landmark.mode == 'dragging'){
-			return (this.mouse_inside_text()||(Geometry.distance(this.x, this.y, Map.pointer_x(), Map.pointer_y()) < this.r + 5)) && !Landmark.mouse_over_desc()
-		}
-		return (Geometry.distance(this.x, this.y, Map.pointer_x(), Map.pointer_y()) < this.r + 5) && !Landmark.mouse_over_desc()
-		*/
-	},
-	mouse_over_audio: function(){
-		var left = this.x + 20/Map.zoom
-		var right = this.x + 50/Map.zoom
-		var top = this.y - 200/Map.zoom
-		var bottom = this.y - 130/Map.zoom
-		var over = Map.pointer_x() > left && Map.pointer_x() < right && Map.pointer_y() > top && Map.pointer_y() < bottom && this.expanded
-		return false
 	},
 	mousedown: function($super) {
-		if (this.mouse_inside()) {  //&& Tool.active!='Landmark') {
+		if (this.mouse_inside()) {
 			Landmark.current = this.id
-			Tool.Editor.over = true
+			Landmark.over = true
 			LandmarkEditor.setCurrent(this)
 			this.oldx = this.x
 			this.oldy = this.y
@@ -10034,19 +9985,9 @@ Audio = Class.create(Landmark.Landmark, {
 				this.show_audio_player()
 			}
 		}
-		/*
-		if (this.mouse_inside() && Landmark.mode != 'dragging'){
-			Landmark.current = this.id
-			this.show_audio_player()
-		}
-		*/
 		else if (this.mouse_over_edit()) {
 			Landmark.current = this.id
 			LandmarkEditor.edit()
-		}
-		else if (this.mouse_over_audio()){
-			Landmark.current = this.id
-			this.show_audio_player()
 		}
 		else {
 			$super()
@@ -10063,7 +10004,6 @@ Audio = Class.create(Landmark.Landmark, {
 	},
 	drag: function() {
 		this.expanded = false
-		console.log('dragging!!!')
 		if (!this.dragging) {
 			this.dragging = true
 			this.drag_offset_x = Map.pointer_x() - this.x
@@ -10073,9 +10013,11 @@ Audio = Class.create(Landmark.Landmark, {
 		this.x=Map.pointer_x() - this.drag_offset_x
 		this.y=Map.pointer_y() - this.drag_offset_y
 	},
+	/*
 	r: function() {
 		this.color = '#00f'
 	},
+	*/
 	remove: function(){
 		Glop.stopObserving('glop:points', this.eventA)
 		Glop.stopObserving('glop:descriptions', this.eventB)
@@ -10105,38 +10047,39 @@ Ellipse = Class.create(Region, {
 	},
 	make_ellipse: function(){
 		for(var i=0;i<this.points.length;i++){
-			if(this.points[i]==Tool.Editor.obj){
-				if(Tool.Ellipse.currentX == null && Tool.Ellipse.currentY == null){
-					Tool.Ellipse.which_pt = i
-					Tool.Ellipse.currentX = this.points[i].x
-					Tool.Ellipse.currentY = this.points[i].y
+			if(this.points[i]==Landmark.obj){
+				if(this.currentX == null && this.currentY == null){
+					this.which_pt = i
+					this.currentX = this.points[i].x
+					this.currentY = this.points[i].y
+					console.log(this.currentX)
 				}
 			}
 			else{
 				this.points[i].hidden = true
 			}
 		}
-		if(Tool.Ellipse.which_pt == 0){
+		if(this.which_pt == 0){
 			console.log('moving 0')
-			this.points[0].x = Tool.Ellipse.currentX
+			this.points[0].x = this.currentX
 			this.points[1].y = this.centerY()
 			this.points[3].y = this.centerY()
 		}
-		else if(Tool.Ellipse.which_pt == 1){
+		else if(this.which_pt == 1){
 			console.log('moving 1')
-			this.points[1].y = Tool.Ellipse.currentY
+			this.points[1].y = this.currentY
 			this.points[0].x = this.centerX()
 			this.points[2].x = this.centerX()
 		}
-		else if(Tool.Ellipse.which_pt == 2){
+		else if(this.which_pt == 2){
 			console.log('moving 2')
-			this.points[2].x = Tool.Ellipse.currentX
+			this.points[2].x = this.currentX
 			this.points[1].y = this.centerY()
 			this.points[3].y = this.centerY()
 		}
-		else if(Tool.Ellipse.which_pt == 3){
+		else if(this.which_pt == 3){
 			console.log('moving 3')
-			this.points[3].y = Tool.Ellipse.currentY
+			this.points[3].y = this.currentY
 			this.points[0].x = this.centerX()
 			this.points[2].x = this.centerX()
 		}
@@ -10162,9 +10105,9 @@ Ellipse = Class.create(Region, {
 		else{
 			this.base()
 		}
-		if (Tool.Editor.over_point){
-			if(Tool.active == 'Editor'){
-				if(Tool.Editor.obj.parent_shape == this){
+		if (Landmark.over_point){
+			if(Tool.active == 'Warp'){
+				if(Landmark.obj.parent_shape == this){
 					this.make_ellipse()
 				}
 			}
@@ -10173,7 +10116,7 @@ Ellipse = Class.create(Region, {
 			}
 			this.finished = false
 		}
-		else if ((Tool.active == 'Ellipse'||Tool.active == 'Editor')&&!Mouse.down){
+		else if ((Tool.active == 'Ellipse'||Tool.active == 'Warp')&&!Mouse.down){
 			this.points.each(function(point){
 				point.hidden = false
 			})
@@ -10222,6 +10165,277 @@ Ellipse = Class.create(Region, {
 		})
 	}
 }),
+Tool.Pan = {
+	activate: function(){
+		Warper.locked = true
+	},
+	mousedown: function(event) {
+	        Map.x_old = Map.x
+	        Map.y_old = Map.y
+		Map.zoom_old = Map.zoom
+	        Map.rotate_old = Map.rotate
+	}.bindAsEventListener(Tool.Pan),
+	mouseup: function() {
+		if(Landmark.mode == 'dragging'){
+			Tool.change('Warp')
+		}
+	}.bindAsEventListener(Tool.Pan),
+	mousemove: function() {
+		var lon = Projection.x_to_lon(-1*Map.pointer_x())
+		var lat = Projection.y_to_lat(Map.pointer_y())
+		var features = Geohash.get_current_features_upward(encodeGeoHash(lat, lon))
+		if (features) features.reverse().concat(Mouse.hovered_features).invoke('style')
+	}.bindAsEventListener(Tool.Pan),
+	/*
+	 * Handles drags. Should rewrite this as an event listener rather than passing from Event > Tool > here
+	 */
+	drag: function() {
+		if (Keyboard.keys.get("r")) { // rotating
+			Map.rotate = Map.rotate_old + (-1*Mouse.drag_y/Glop.height)
+		} else if (Keyboard.keys.get("z")) {
+			if (Map.zoom > 0) {
+				Map.zoom = Math.abs(Map.zoom - (Mouse.drag_y/Glop.height))
+			} else {
+				Map.zoom = 0
+			}
+		} else {
+			var d_x = Math.cos(Map.rotate)*Mouse.drag_x+Math.sin(Map.rotate)*Mouse.drag_y
+			var d_y = Math.cos(Map.rotate)*Mouse.drag_y-Math.sin(Map.rotate)*Mouse.drag_x
+			Map.x = Map.x_old+(d_x/Map.zoom)
+			Map.y = Map.y_old+(d_y/Map.zoom)
+		}
+	},
+	dblclick: function() {
+		$l('Pan dblclick')
+	}.bindAsEventListener(Tool.Pan)
+}
+Tool.Warp = {
+	mode: 'default', //'rotate','drag','scale'
+	add_image_tools: function(){
+		if(!$('tool_specific')){
+		$('toolbars').insert('<div class=\'toolbar\' id=\'tool_specific\'></div>')
+		$('tool_specific').insert('<a name=\'Delete this image\' class=\'first silk\' id=\'tool_warp_delete\'  href=\'javascript:void(0);\'><img src=\'images/silk-grey/delete.png\' /></a>')
+			$('tool_warp_delete').observe('mouseup',Tool.Warp.delete_image)
+		$('tool_specific').insert('<a name=\'Lock this image\' class=\'silk\' id=\'tool_warp_lock\' href=\'javascript:void(0);\'><img src=\'images/silk-grey/lock.png\' /></a>')
+			$('tool_warp_lock').observe('mouseup',Tool.Warp.lock_image)
+			if (Warper.active_image){
+				if (Warper.active_image.locked){
+					$('tool_warp_lock').addClassName('down')
+				}
+			}
+		$('tool_specific').insert('<a name=\'Rotate/scale this image (r)\' class=\'\' id=\'tool_warp_rotate\' href=\'javascript:void(0);\'><img src=\'images/tools/stock-tool-rotate-22.png\' /></a>')
+			$('tool_warp_rotate').observe('mouseup',function(){Tool.Warp.mode = 'rotate'})
+		$('tool_specific').insert('<a name=\'Revert this image to natural size\' class=\'silk\' id=\'tool_warp_revert\' href=\'javascript:void(0);\'><img src=\'images/silk-grey/arrow_undo.png\' /></a>')
+			$('tool_warp_revert').observe('mouseup',function(){Warper.active_image.set_to_natural_size();})
+		$('tool_specific').insert('<a name=\'Distort this image by dragging corners (w)\' class=\'last\' id=\'tool_warp_default\' href=\'javascript:void(0);\'><img src=\'images/tools/stock-tool-perspective-22.png\' /></a>')
+			$('tool_warp_default').observe('mouseup',function(){Tool.Warp.mode = 'default'})
+		}
+	},
+	activate: function() {
+		if(location.search.toQueryParams().locked != 'true') // might be a variable in config?
+			Warper.locked = false
+	},
+	deactivate: function() {
+		if($('tool_specific'))
+			$('tool_specific').remove()
+		Tool.Warp.mode = 'default'
+		if(Warper.active_image){
+			Warper.active_image.save()
+			Warper.active_image.active = false
+		}
+	},
+	delete_image: function() {
+		if (confirm('Are you sure you want to delete this image? You cannot undo this action.')) {
+			Warper.images.each(function(image,index) {
+				if (image.active && Warper.active_image == image) {
+					Warper.images.splice(index,1)
+					image.cleanup()
+					new Ajax.Request('cartagen/php/editlandmark.php',{
+						method:'post',
+						parameters: {remove: image.id}
+					})
+				}
+			})
+		}
+	},
+	lock_image: function() {
+		if (!Warper.active_image.locked) $('tool_warp_lock').addClassName('down')
+		else $('tool_warp_lock').removeClassName('down')
+		Warper.active_image.locked = !Warper.active_image.locked
+		Warper.active_image.save()
+	},
+	drag: function() {
+	},
+	mousedown: function() {
+	}.bindAsEventListener(Tool.Warp),
+	mouseup: function() {
+		if (Warper.active_image) {
+			Tool.Warp.add_image_tools()
+			Warper.active_image.active = true
+			if (Warper.active_image.active_point) {
+				Warper.active_image.active_point.cancel_drag()
+			} else {
+				Warper.active_image.cancel_drag()
+			}
+		}
+		else{
+			if($('tool_specific'))
+				$('tool_specific').remove()
+		}
+		$C.cursor('auto')
+		if(Landmark.over||Landmark.over_point){
+			if(Landmark.dragged == true){
+				LandmarkEditor.move()
+			}
+		}
+		Landmark.over = false
+		Landmark.over_point = false
+		Tool.Ellipse.currentX = null // clean
+		Tool.Ellipse.currentY = null // clean
+		if(Landmark.obj != null){
+			if(!(Landmark.obj instanceof ControlPoint) && Landmark.dragged == false){
+				LandmarkEditor.edit()
+			}
+		}
+		Landmark.obj = null
+		Landmark.dragged = false
+	}.bindAsEventListener(Tool.Warp),
+	mousemove: function() {
+		if (Mouse.down){
+			if (Warper.active_image) {
+				if (Warper.active_image.active_point) {
+					Warper.active_image.active_point.drag()
+				} else {
+					Warper.active_image.drag()
+				}
+			}
+			if(Landmark.over || Landmark.over_point){
+				Landmark.obj.drag()
+				Landmark.dragged = true
+			}
+		}
+	}.bindAsEventListener(Tool.Warp),
+	dblclick: function() {
+
+	}.bindAsEventListener(Tool.Warp)
+}
+Tool.Path = {
+	mode: 'inactive', //'draw','inactive','drag'
+	current_poly: null,
+	current_shape: null,
+	over_point: false,
+	over_shape: false,
+	drag: function() {
+		console.log('Path dragging')
+	},
+	activate: function() {
+		$l('Path activated')
+		Landmark.shape_created = false
+		Tool.Path.mode = 'draw'
+		Landmark.temp_shape = new Path()
+	},
+	deactivate: function() {
+		Landmark.remove_temp_shape()
+		$l('Path deactivated')
+	},
+	mousedown: function() {
+		console.log('mousedown in Path')
+		LandmarkEditor.showButtons('pathdiv', "LandmarkEditor.create(2)")
+		Landmark.temp_shape.points.each(function(point){
+			if (point.mouse_inside()) {
+				Tool.Path.over_point = true
+				Tool.Path.obj = point
+				throw $break
+			}
+		})
+		if(!Tool.Path.over_point){
+			Tool.Path.over_shape = Landmark.temp_shape.mouse_inside()
+			Tool.Path.obj = Landmark.temp_shape
+		}
+		if (!Tool.Path.over_point && !Tool.Path.over_shape) {
+			Landmark.temp_shape.new_point(Map.pointer_x(), Map.pointer_y())
+			Landmark.temp_shape.active = true
+			console.log('creating new point')
+		}
+		/*
+		else if (Landmark.temp_shape.points[0].mouse_inside()){
+			console.log('clicked first point')
+			Landmark.temp_shape.points.push(Landmark.temp_shape.points[0])
+		}
+		*/
+	}.bindAsEventListener(Tool.Path),
+	mouseup: function() {
+		$l('Path mouseup')
+		Landmark.obj = null
+		Tool.Path.over_point = false
+		Tool.Path.over_shape = false
+		Landmark.temp_shape.dragging = false
+		Tool.Path.obj = null
+	}.bindAsEventListener(Tool.Path),
+	mousemove: function() {
+		$l('Path mousemove')
+		/*
+		var hovering_over_first_point = false
+		if (Landmark.temp_shape != null){
+			if (Landmark.temp_shape.points.length > 0){
+				if (Landmark.temp_shape.points[0].mouse_inside()){
+					hovering_over_first_point = true
+				}
+			}
+		}
+		if(hovering_over_first_point){
+			$('main').style.cursor = 'pointer'
+		}
+		else{
+			$('main').style.cursor = 'default'
+		}
+		*/
+		/*
+		if(Mouse.down){
+			if(Tool.Path.over_point){
+				Landmark.obj.drag()
+			}
+			else if(Landmark.temp_shape.mouse_inside()){
+				Landmark.temp_shape.drag()
+			}
+		}
+		*/
+		if(Mouse.down){
+			if(Tool.Path.over_point){
+				Landmark.obj.drag()
+				console.log('dragging stuff here')
+				console.log(Landmark.obj)
+			}
+			else if (Tool.Path.over_shape){
+				console.log('moving a point?')
+				Landmark.obj.drag()
+			}
+		}
+	}.bindAsEventListener(Tool.Path),
+	dblclick: function() {
+		$l('Path dblclick')
+		/*
+		alert('saving')
+		if (true) {
+			Tool.Path.mode = 'inactive'
+			Tool.change('Pan')
+		}
+
+		var logger = ''
+		Tool.Paths.last().points.each(function(p){
+			logger += p.y + ','
+		})
+		console.log(logger)
+
+		*/
+		console.log(Landmark.obj)
+	}.bindAsEventListener(Tool.Path),
+	new_shape: function() {
+		Tool.change("Path")
+		Tool.Path.mode='draw'
+		Landmark.temp_shape = new Path()
+	},
+}
 Tool.Region = {
 	mode: 'inactive', //'draw','inactive','drag'
 	current_shape: null,
@@ -10299,314 +10513,59 @@ Tool.Region = {
 
 	},
 }
-Tool.Pan = {
-	mousedown: function(event) {
-	        Map.x_old = Map.x
-	        Map.y_old = Map.y
-		Map.zoom_old = Map.zoom
-	        Map.rotate_old = Map.rotate
-	}.bindAsEventListener(Tool.Pan),
-	mouseup: function() {
-		if(Landmark.mode == 'dragging'){
-			Tool.change('Warp')
-		}
-	}.bindAsEventListener(Tool.Pan),
-	mousemove: function() {
-		var lon = Projection.x_to_lon(-1*Map.pointer_x())
-		var lat = Projection.y_to_lat(Map.pointer_y())
-		var features = Geohash.get_current_features_upward(encodeGeoHash(lat, lon))
-		if (features) features.reverse().concat(Mouse.hovered_features).invoke('style')
-	}.bindAsEventListener(Tool.Pan),
-	/*
-	 * Handles drags. Should rewrite this as an event listener rather than passing from Event > Tool > here
-	 */
+
+Tool.Point = {
+	mode: 'create',
 	drag: function() {
-		if (Keyboard.keys.get("r")) { // rotating
-			Map.rotate = Map.rotate_old + (-1*Mouse.drag_y/Glop.height)
-		} else if (Keyboard.keys.get("z")) {
-			if (Map.zoom > 0) {
-				Map.zoom = Math.abs(Map.zoom - (Mouse.drag_y/Glop.height))
-			} else {
-				Map.zoom = 0
-			}
-		} else {
-			var d_x = Math.cos(Map.rotate)*Mouse.drag_x+Math.sin(Map.rotate)*Mouse.drag_y
-			var d_y = Math.cos(Map.rotate)*Mouse.drag_y-Math.sin(Map.rotate)*Mouse.drag_x
-			Map.x = Map.x_old+(d_x/Map.zoom)
-			Map.y = Map.y_old+(d_y/Map.zoom)
-		}
-	},
-	dblclick: function() {
-		$l('Pan dblclick')
-	}.bindAsEventListener(Tool.Pan)
-}
-Tool.Path = {
-	mode: 'inactive', //'draw','inactive','drag'
-	current_poly: null,
-	current_shape: null,
-	over_point: false,
-	over_shape: false,
-	drag: function() {
-		console.log('Path dragging')
+		$l('Landmark dragging')
 	},
 	activate: function() {
-		$l('Path activated')
-		Landmark.shape_created = false
-		Tool.Path.mode = 'draw'
-		Landmark.temp_shape = new Path()
+		$l('Landmark activated')
 	},
 	deactivate: function() {
-		Landmark.remove_temp_shape()
-		$l('Path deactivated')
+
+		$l('Landmark deactivated')
 	},
 	mousedown: function() {
-		console.log('mousedown in Path')
-		LandmarkEditor.showButtons('pathdiv', "LandmarkEditor.create(2)")
-		Landmark.temp_shape.points.each(function(point){
-			if (point.mouse_inside()) {
-				Tool.Path.over_point = true
-				Tool.Path.obj = point
-				throw $break
-			}
-		})
-		if(!Tool.Path.over_point){
-			Tool.Path.over_shape = Landmark.temp_shape.mouse_inside()
-			Tool.Path.obj = Landmark.temp_shape
-		}
-		if (!Tool.Path.over_point && !Tool.Path.over_shape) {
-			Landmark.temp_shape.new_point(Map.pointer_x(), Map.pointer_y())
-			Landmark.temp_shape.active = true
-			console.log('creating new point')
-		}
-		/*
-		else if (Landmark.temp_shape.points[0].mouse_inside()){
-			console.log('clicked first point')
-			Landmark.temp_shape.points.push(Landmark.temp_shape.points[0])
-		}
-		*/
-	}.bindAsEventListener(Tool.Path),
+	}.bindAsEventListener(Tool.Point),
 	mouseup: function() {
-		$l('Path mouseup')
-		Tool.Editor.obj = null
-		Tool.Path.over_point = false
-		Tool.Path.over_shape = false
-		Landmark.temp_shape.dragging = false
-		Tool.Path.obj = null
-	}.bindAsEventListener(Tool.Path),
-	mousemove: function() {
-		$l('Path mousemove')
-		/*
-		var hovering_over_first_point = false
-		if (Landmark.temp_shape != null){
-			if (Landmark.temp_shape.points.length > 0){
-				if (Landmark.temp_shape.points[0].mouse_inside()){
-					hovering_over_first_point = true
+		$l('Landmark mouseup')
+		LandmarkEditor.create(3)
+			/*
+			var over_point = false
+			var over_text = false
+			Landmark.landmarks.each(function(point){
+				if (point.value.mouse_inside()) {
+					over_point = true
+					throw $break
 				}
+				if (point.value.mouse_inside_text()) {
+					over_text = true
+					throw $break
+				}
+				console.log(over_point)
+			})
+			if (!over_point && !over_text && Landmark.mode != 'dragging') { // if you didn't click on an existing landmark
+				LandmarkEditor.create(3)
 			}
-		}
-		if(hovering_over_first_point){
-			$('main').style.cursor = 'pointer'
-		}
-		else{
-			$('main').style.cursor = 'default'
-		}
-		*/
-		/*
-		if(Mouse.down){
-			if(Tool.Path.over_point){
-				Tool.Editor.obj.drag()
-			}
-			else if(Landmark.temp_shape.mouse_inside()){
-				Landmark.temp_shape.drag()
-			}
-		}
-		*/
-		if(Mouse.down){
-			if(Tool.Path.over_point){
-				Tool.Editor.obj.drag()
-				console.log('dragging stuff here')
-				console.log(Tool.Editor.obj)
-			}
-			else if (Tool.Path.over_shape){
-				console.log('moving a point?')
-				Tool.Editor.obj.drag()
-			}
-		}
-	}.bindAsEventListener(Tool.Path),
-	dblclick: function() {
-		$l('Path dblclick')
-		/*
-		alert('saving')
-		if (true) {
-			Tool.Path.mode = 'inactive'
-			Tool.change('Pan')
-		}
+			*/
 
-		var logger = ''
-		Tool.Paths.last().points.each(function(p){
-			logger += p.y + ','
-		})
-		console.log(logger)
-
-		*/
-		console.log(Tool.Editor.obj)
-	}.bindAsEventListener(Tool.Path),
-	new_shape: function() {
-		Tool.change("Path")
-		Tool.Path.mode='draw'
-		Landmark.temp_shape = new Path()
-	},
-}
-Tool.Editor = {
-	mode: 'default', //'rotate','drag','scale'
-	over: false,
-	obj: null,
-	dragged: false, // if not dragged, will edit data; will otherwise drag
-	activate: function() {
-		Warper.active_image = null
-		Warper.active_object = false
-	},
-	deactivate: function() {
-		Landmark.stopMoving()
-		if($('tool_specific')){
-			$('tool_specific').remove()
-		}
-		Tool.Editor.mode = 'default'
-		Warper.active_object = false
-	},
-	drag: function() {
-		if(!Tool.Editor.over&&!Tool.Editor.over_point){
-			var d_x = Math.cos(Map.rotate)*Mouse.drag_x+Math.sin(Map.rotate)*Mouse.drag_y
-			var d_y = Math.cos(Map.rotate)*Mouse.drag_y-Math.sin(Map.rotate)*Mouse.drag_x
-			Map.x = Map.x_old+(d_x/Map.zoom)
-			Map.y = Map.y_old+(d_y/Map.zoom)
-		}
-	},
-	mousedown: function() {
-	}.bindAsEventListener(Tool.Editor),
-	mouseup: function() {
-		if(Tool.Editor.over||Tool.Editor.over_point){
-			if(Tool.Editor.dragged == true){
+			/*
+			else if (Landmark.mode == 'dragging') { // done dragging the point elsewhere
 				LandmarkEditor.move()
 			}
-			/*
-			if (Warper.active_image) {
-				if (Warper.active_image.active_point) {
-					Warper.active_image.active_point.cancel_drag()
-				} else {
-					Warper.active_image.cancel_drag()
-				}
-			}
-			$C.cursor('auto')
 			*/
-		}
-		Tool.Editor.over = false
-		Tool.Editor.over_point = false
-		Tool.Ellipse.currentX = null
-		Tool.Ellipse.currentY = null
-		if(Tool.Editor.obj != null){
-			if(!(Tool.Editor.obj instanceof ControlPoint) && Tool.Editor.dragged == false){
-				LandmarkEditor.edit()
-			}
-		}
-		Tool.Editor.obj = null
-		Tool.Editor.dragged = false
-	}.bindAsEventListener(Tool.Editor),
+	}.bindAsEventListener(Tool.Point),
 	mousemove: function() {
-		$l('Warp mousemove')
-		if (Mouse.down){
-			if (Warper.active_image) {
-				if (Warper.active_image.active_point) {
-					Warper.active_image.active_point.drag()
-				} else {
-					Warper.active_image.drag()
-				}
-			}
-
-			if(Tool.Editor.over || Tool.Editor.over_point){
-				Tool.Editor.obj.drag()
-				console.log('dragging stuff')
-				console.log(Tool.Editor.obj)
-				Tool.Editor.dragged = true
-			}
-		}
-	}.bindAsEventListener(Tool.Editor),
+		$l('Landmark mousemove')
+	}.bindAsEventListener(Tool.Point),
 	dblclick: function() {
-		$l('Warp dblclick')
+		$l('Landmark dblclick')
+		if (true) {
+		}
 
-	}.bindAsEventListener(Tool.Editor)
-}
-Tool.Warp = {
-	mode: 'default', //'rotate','drag','scale'
-	activate: function() {
-		$('toolbars').insert('<div class=\'toolbar\' id=\'tool_specific\'></div>')
-		$('tool_specific').insert('<a name=\'Delete this image\' class=\'first silk\' id=\'tool_warp_delete\'  href=\'javascript:void(0);\'><img src=\'images/silk-grey/delete.png\' /></a>')
-			$('tool_warp_delete').observe('mouseup',Tool.Warp.delete_image)
-		$('tool_specific').insert('<a name=\'Lock this image\' class=\'silk\' id=\'tool_warp_lock\' href=\'javascript:void(0);\'><img src=\'images/silk-grey/lock.png\' /></a>')
-			$('tool_warp_lock').observe('mouseup',Tool.Warp.lock_image)
-			if (Warper.active_image.locked) $('tool_warp_lock').addClassName('down')
-		$('tool_specific').insert('<a name=\'Rotate/scale this image (r)\' class=\'\' id=\'tool_warp_rotate\' href=\'javascript:void(0);\'><img src=\'images/tools/stock-tool-rotate-22.png\' /></a>')
-			$('tool_warp_rotate').observe('mouseup',function(){Tool.Warp.mode = 'rotate'})
-		$('tool_specific').insert('<a name=\'Revert this image to natural size\' class=\'silk\' id=\'tool_warp_revert\' href=\'javascript:void(0);\'><img src=\'images/silk-grey/arrow_undo.png\' /></a>')
-			$('tool_warp_revert').observe('mouseup',function(){Warper.active_image.set_to_natural_size();})
-		$('tool_specific').insert('<a name=\'Distort this image by dragging corners (w)\' class=\'last\' id=\'tool_warp_default\' href=\'javascript:void(0);\'><img src=\'images/tools/stock-tool-perspective-22.png\' /></a>')
-			$('tool_warp_default').observe('mouseup',function(){Tool.Warp.mode = 'default'})
-	},
-	deactivate: function() {
-		$('tool_specific').remove()
-		Tool.Warp.mode = 'default'
-		Warper.active_image.save() // maybe
-		Warper.active_object = false
-	},
-	delete_image: function() {
-		if (confirm('Are you sure you want to delete this image? You cannot undo this action.')) {
-			Warper.images.each(function(image,index) {
-				if (image.active && Warper.active_image == image) {
-					Warper.images.splice(index,1)
-					image.cleanup()
-					new Ajax.Request('cartagen/php/editlandmark.php',{
-						method:'post',
-						parameters: {remove: image.id}
-					})
-				}
-			})
-			Tool.change('Pan')
-		}
-	},
-	lock_image: function() {
-		if (!Warper.active_image.locked) $('tool_warp_lock').addClassName('down')
-		else $('tool_warp_lock').removeClassName('down')
-		Warper.active_image.locked = !Warper.active_image.locked
-		Warper.active_image.save()
-	},
-	drag: function() {
-	},
-	mousedown: function() {
-	}.bindAsEventListener(Tool.Warp),
-	mouseup: function() {
-		if (Warper.active_image) {
-			if (Warper.active_image.active_point) {
-				Warper.active_image.active_point.cancel_drag()
-			} else {
-				Warper.active_image.cancel_drag()
-			}
-		}
-		$C.cursor('auto')
-	}.bindAsEventListener(Tool.Warp),
-	mousemove: function() {
-		if (Mouse.down){
-			if (Warper.active_image) {
-				if (Warper.active_image.active_point) {
-					Warper.active_image.active_point.drag()
-				} else {
-					Warper.active_image.drag()
-				}
-			}
-		}
-	}.bindAsEventListener(Tool.Warp),
-	dblclick: function() {
+	}.bindAsEventListener(Tool.Point),
 
-	}.bindAsEventListener(Tool.Warp)
 }
 Tool.Measure = {
 	current_shape: null,
@@ -10798,14 +10757,14 @@ Tool.Rectangle = {
 	}.bindAsEventListener(Tool.Rectangle),
 	mouseup: function() {
 		$l('Rectangle mouseup')
-		if(Tool.Editor.obj instanceof ControlPoint){
-			if(Tool.Editor.obj.parent_shape.finished){
+		if(Landmark.obj instanceof ControlPoint){
+			if(Landmark.obj.parent_shape.finished){
 			}
 		}
 		Landmark.temp_shape.active = true
-		Tool.Editor.obj = null
-		Tool.Editor.over = false
-		Tool.Editor.over_point = false
+		Landmark.obj = null
+		Landmark.over = false
+		Landmark.over_point = false
 		Landmark.temp_shape.points.each(function(p){
 			p.hidden = false
 		})
@@ -10823,8 +10782,6 @@ Tool.Rectangle = {
 }
 Tool.Ellipse = {
 	mode: 'inactive', //'draw','inactive','drag'
-	currentX: null, // these two are temp variables
-	currentY: null,
 	which_pt: null,
 	drag: function() {
 		$l('Ellipse dragging')
@@ -10856,9 +10813,9 @@ Tool.Ellipse = {
 			Landmark.temp_shape.points.each(function(point, i){
 				if (point.mouse_inside()) {
 					over_point = true
-					Tool.Ellipse.which_pt = i
-					Tool.Ellipse.currentX = point.x
-					Tool.Ellipse.currentY = point.y
+					Landmark.temp_shape.which_pt = i
+					Landmark.temp_shape.currentX = point.x
+					Landmark.temp_shape.currentY = point.y
 					throw $break
 				}
 
@@ -10870,14 +10827,14 @@ Tool.Ellipse = {
 
 	}.bindAsEventListener(Tool.Ellipse),
 	mouseup: function() {
-		Tool.Editor.over = false
-		Tool.Editor.over_point = false
+		Landmark.over = false
+		Landmark.over_point = false
 		$l('Ellipse mouseup')
-		Tool.Ellipse.which_pt = null
+		Landmark.temp_shape.which_pt = null
 		Landmark.temp_shape.active = true
-		Tool.Editor.obj = null
-		Tool.Ellipse.currentX = null
-		Tool.Ellipse.currentY = null
+		Landmark.obj = null
+		Landmark.temp_shape.currentX = null
+		Landmark.temp_shape.currentY = null
 	}.bindAsEventListener(Tool.Ellipse),
 	mousemove: function() {
 		$l('Ellipse mousemove')
@@ -10934,15 +10891,15 @@ Tool.Textnote = {
 	}.bindAsEventListener(Tool.Textnote),
 	mouseup: function() {
 		$l('Textnote mouseup')
-		if(Tool.Editor.obj instanceof ControlPoint){
-			if(Tool.Editor.obj.parent_shape.finished){
-				Tool.Editor.obj.parent_shape.pt = null
+		if(Landmark.obj instanceof ControlPoint){
+			if(Landmark.obj.parent_shape.finished){
+				Landmark.obj.parent_shape.pt = null
 			}
 		}
 		Landmark.temp_shape.active = true
-		Tool.Editor.obj = null
-		Tool.Editor.over = false
-		Tool.Editor.over_point = false
+		Landmark.obj = null
+		Landmark.over = false
+		Landmark.over_point = false
 		Landmark.temp_shape.points.each(function(p){
 			p.hidden = false
 		})
@@ -11036,40 +10993,44 @@ Zoombar.leftSpace = 19; // how far left zoombar should be
 Zoombar.step = 11; // how many pixels the slider moves between distinct levels
 Zoombar.buttonHeight = 18; // height of zoom in/out buttons
 Zoombar.height = 264; // height of zoombar itself
-Zoombar.sliderHeight = 9;
+Zoombar.sliderHeight = 9; // height of slider
 Zoombar.topBound = Zoombar.topSpace + Zoombar.buttonHeight + 1;
 Zoombar.bottomBound = Zoombar.topBound + Zoombar.height + Zoombar.step;
 Zoombar.pos = Zoombar.topBound;
 Zoombar.mouseDown = false;
 Zoombar.item = null;
-Zoombar.increment = 0.1;
+Zoombar.increment = 0.1; // how much the zoom increases/decreases when pressing the +/- buttons
+/*
+ * Calculates zoom level for map; i is the position of the indicator
+ */
 Zoombar.zoomLevel = function(i){
 	return ((Zoombar.bottomBound-i)/Zoombar.step - 2)*Zoombar.increment + Config.zoom_out_limit;
 }
+/*
+ * Sets the slider to the appropriate level based on the map zoom level
+ */
 Zoombar.setPosition = function(){
 	Zoombar.pos = Zoombar.bottomBound - ((Map.zoom - Config.zoom_out_limit)/Zoombar.increment + 2) * Zoombar.step;
 	$('indicator').style.top = Zoombar.pos + 'px';
 }
+/*
+ * Called when mouse is down over the zoombar itself
+ */
 Zoombar.zoombarIsDown = function(e){
 	Zoombar.mouseDown = true;
-	if(e.pageY > Zoombar.bottomBound){
-		console.log('got zoom out');
-		Zoombar.pos = Math.min(Zoombar.pos+Zoombar.step, Zoombar.bottomBound-2*Zoombar.step);
-	}
-	else if(e.pageY < Zoombar.topBound){
-		console.log('got zoom in');
-		Zoombar.pos = Math.max(Zoombar.pos-Zoombar.step, Zoombar.topBound);
-	}
-	else{
-		Zoombar.mouseDown = true;
-		Zoombar.item = 'zoombar';
-		Zoombar.pos = Zoombar.snapTo(e.pageY);
-	}
+	Zoombar.item = 'zoombar';
+	Zoombar.pos = Zoombar.snapTo(e.pageY);
 }
+/*
+ * Called when mouse is down over slider
+ */
 Zoombar.indicatorIsDown = function(){
 	Zoombar.mouseDown = true;
 	Zoombar.item = 'indicator';
 }
+/*
+ * Called when mouse is released; sets the map zoom and puts the slider in a snapped position
+ */
 Zoombar.mouseIsUp = function(){
 	if(Zoombar.mouseDown){
 		Zoombar.mouseDown = false;
@@ -11083,7 +11044,10 @@ Zoombar.mouseIsUp = function(){
 		Glop.trigger_draw();
 	}
 }
-Zoombar.moveIndicator = function(e,offset){
+/*
+ * Called when the slider is being moved
+ */
+Zoombar.moveIndicator = function(e){
 	if(e.pageY < Zoombar.topBound + Zoombar.sliderHeight/2){
 		Zoombar.pos = Zoombar.topBound;
 	}
@@ -11095,6 +11059,9 @@ Zoombar.moveIndicator = function(e,offset){
 	}
 	$('indicator').style.top = Zoombar.pos + 'px';
 }
+/*
+ * Returns the value of where the slider should be based on interaction; places it in the preset rectangles of zoombar
+ */
 Zoombar.snapTo = function(n){
 	var offset = (n - Zoombar.topBound) % Zoombar.step;
 	if(offset < Zoombar.step/2 || Zoombar.item == 'zoombar'){
@@ -11104,35 +11071,52 @@ Zoombar.snapTo = function(n){
 		return n + (Zoombar.step - offset);
 	}
 }
+/*
+ * Keeps track of position
+ */
 Zoombar.moveZoombar = function(e){
 	Zoombar.pos = e.pageY;
 }
+/*
+ * Called on mousemove
+ */
 Zoombar.adjust = function(e){
-	if (Zoombar.mouseDown && Zoombar.item == 'indicator'){
-		Zoombar.moveIndicator(e);
-	}
-	else if (Zoombar.mouseDown && Zoombar.item == 'zoombar'){
-		Zoombar.moveZoombar(e);
+	if(Zoombar.mouseDown){
+		if (Zoombar.item == 'indicator'){
+			Zoombar.moveIndicator(e);
+		}
+		else if (Zoombar.item == 'zoombar'){
+			Zoombar.moveZoombar(e);
+		}
 	}
 }
+/*
+ * Called when pressing the + button
+ */
 Zoombar.zoomIn = function(){
 	if(Zoombar.item == null){
-	Map.zoom += Zoombar.increment
-	Map.zoom = Math.min(Config.zoom_in_limit, Math.round(Map.zoom*100)/100)
-	Zoombar.setPosition()
-	console.log(Map.zoom)
-	Glop.trigger_draw()
+		Map.zoom += Zoombar.increment
+		Map.zoom = Math.min(Config.zoom_in_limit, Math.round(Map.zoom*100)/100)
+		Zoombar.setPosition()
+		console.log(Map.zoom)
+		Glop.trigger_draw()
 	}
 }
+/*
+ * Called when pressing the - button
+ */
 Zoombar.zoomOut = function(){
 	if(Zoombar.item == null){
-	Map.zoom -= Zoombar.increment
-	Map.zoom = Math.max(Config.zoom_out_limit, Math.round(Map.zoom*100)/100)
-	Zoombar.setPosition()
-	console.log(Map.zoom)
-	Glop.trigger_draw()
+		Map.zoom -= Zoombar.increment
+		Map.zoom = Math.max(Config.zoom_out_limit, Math.round(Map.zoom*100)/100)
+		Zoombar.setPosition()
+		console.log(Map.zoom)
+		Glop.trigger_draw()
 	}
 }
+/*
+ * Moves the map in direction of dir
+ */
 Zoombar.pan = function(dir){
 	switch(dir){
 		case 'left': Map.x -= 100/Map.zoom;break;
@@ -11142,6 +11126,9 @@ Zoombar.pan = function(dir){
 	}
 	Glop.trigger_draw()
 }
+/*
+ * Moves the map to the default location
+ */
 Zoombar.reset = function(){
 	if(Landmark.mapX && Landmark.mapY && Landmark.mapZoom){
 		Map.x = Landmark.mapX
@@ -11179,28 +11166,32 @@ document.observe("dom:loaded", function() {
 	$('indicator').observe('mousedown', Zoombar.indicatorIsDown);
 	document.body.observe('mousemove', Zoombar.adjust);
 	document.body.observe('mouseup', Zoombar.mouseIsUp);
-	Map.zoom = 0.52;
+	Map.zoom = 0.52; // default
 	Zoombar.setPosition();
 })
 /*
- * Contains methods for searching the landmarks in the map.
+ * Contains methods for searching the landmarks in the map. Does not search images at this point.
 */
 var Search = {
-	toggle: function(){
-		if($('searchresults').style.display == 'inline'){
-			$('searchresults').style.display = 'none'
-			Landmark.unhighlight()
-			Glop.trigger_draw()
-		}
-		else if($('searchresults').style.display == 'none'){
-			Search.openBar()
-		}
-	},
-	openBar: function(){
+	/*
+	 * Shows the search results
+	 */
+	openResults: function(){
 		$('searchresults').style.display = 'inline'
 	},
+	/*
+	 * Hides the search results and unhighlights any highlighted landmarks
+	 */
+	closeResults: function(){
+		$('searchresults').style.display = 'none'
+		Landmark.unhighlight()
+		Glop.trigger_draw()
+	},
+	/*
+	 * Displays results for a search query in upper right
+	 */
 	searchLandmarks: function(){
-		Search.openBar()
+		Search.openResults()
 		Search.clear()
 		var found = false
 		var color = 'rgb(245, 245, 245)'
@@ -11217,6 +11208,9 @@ var Search = {
 			$('holder').insert('Sorry, no results found')
 		}
 	},
+	/*
+	 * Resets the search results
+	 */
 	clear: function(){
 		if($('holder') != null){
 			$('holder').remove()
@@ -11225,8 +11219,11 @@ var Search = {
 	},
 }
 document.observe("dom:loaded", function(){
-	document.body.insert('<div id="searchresults" style="position: absolute; display: none; z-index: 2; top: 47px; width: 200px; bottom: 0px; background-color: white; overflow:auto; right: 0px; left: auto; border-left:3px solid rgb(60, 60, 60)"><div style="position: relative; margin-left: auto; margin-right: 5px; top: 3px; width:7px;"><span style="cursor: pointer;" onclick="Search.toggle()">X</span></div></div>');
+	document.body.insert('<div id="searchresults" style="position: absolute; display: none; z-index: 2; top: 47px; width: 200px; bottom: 0px; background-color: white; overflow:auto; right: 0px; left: auto; border-left:3px solid rgb(60, 60, 60)"><div style="position: relative; margin-left: auto; margin-right: 5px; top: 3px; width:7px;"><span style="cursor: pointer;" onclick="Search.closeResults()">X</span></div></div>');
 })
+/*
+ * Provides a scale on the left in meters
+ */
 var Scale = {
 	last_zoom: null,
 	scale: null,
@@ -11360,7 +11357,7 @@ var Interface = {
 	}
 }
 document.observe('mousemove',Interface.mousemove)
-
+Tooltips = {}
 var Geohash = {}
 
 Object.extend(Geohash, Enumerable)
@@ -11785,7 +11782,7 @@ var Warper = {
 		Glop.observe('dblclick', this.dblclick.bindAsEventListener(this))
 	},
 	images: [],
-	locked: false,
+	locked: true,
 	active_image: false,
 	/*
  	 * Sorts the Warper.images by polygon area; largest polygons at the bottom
@@ -11807,44 +11804,49 @@ var Warper = {
 	},
 	mousedown: function() {
 		if (!Warper.locked) {
-		Map.x_old = Map.x
-		Map.y_old = Map.y
-		var inside_image = false, same_image = false
-		for (i=Warper.images.length-1;i>=0;i--){
-			var image = Warper.images[i]
-			if (image.is_inside()) {
-				if (!inside_image) {
-					same_image = (Warper.active_image == image)
-					Warper.active_image = image
-					image.select()
-					image.points.each(function(point){point.mousedown()})
-					inside_image = true
-				}
-			} else {
-				if (image.active && (image.coordinates() != image.old_coordinates)) {
-					image.save()
-				}
-				if (image.active && !Tool.hover) {
-					image.deselect()
+			Map.x_old = Map.x
+			Map.y_old = Map.y
+			var inside_image = false, same_image = false
+			for (i=Warper.images.length-1;i>=0;i--){
+				var image = Warper.images[i]
+				if (image.is_inside()) {
+					if (!inside_image) {
+						same_image = (Warper.active_image == image)
+						Warper.active_image = image
+						image.select()
+						image.points.each(function(point){point.mousedown()})
+						inside_image = true
+					}
+				} else {
+					if (image.active && (image.coordinates() != image.old_coordinates)) {
+						image.save()
+					}
+					if (image.active && !Tool.hover) {
+						image.deselect()
+					}
 				}
 			}
-		}
-		if (Warper.active_image) {
-			var point_clicked = false
-			Warper.active_image.points.each(function(point) {
-				if (point.is_inside()) {
-					Warper.active_image.select_point(point)
-					point_clicked = true
-				}
-			})
-			if (!point_clicked && Warper.active_image.active_point) {
-				Warper.active_image.active_point.deselect()
+			if (!inside_image){
+				Warper.active_image = null
 			}
-		}
-		if (inside_image) {
-			Tool.change('Warp',!same_image)
-		} else if (!Tool.hover && Tool.active == 'Warp') {
-		}
+			if (Warper.active_image) {
+				var point_clicked = false
+				Warper.active_image.points.each(function(point) {
+					if (point.is_inside()) {
+						Warper.active_image.select_point(point)
+						point_clicked = true
+					}
+				})
+				if (!point_clicked && Warper.active_image.active_point) {
+					Warper.active_image.active_point.deselect()
+				}
+				console.log('gotcha')
+			}
+			if (inside_image) {
+				Tool.change('Warp',!same_image)
+				Warper.active_image.select()
+			} else if (!Tool.hover && Tool.active == 'Warp') {
+			}
 		}
 	},
 	dblclick: function() {

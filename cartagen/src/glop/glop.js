@@ -144,10 +144,10 @@ var Glop = {
 		 * Fired at the end of each frame, after features are drawn.
 		 */
 		Glop.fire('glop:postdraw')
-		Glop.fire('glop:points')
-		Glop.fire('glop:descriptions')
+		Glop.fire('glop:points') // points go above shapes, which are called in postdraw
+		Glop.fire('glop:descriptions') // descriptions should be above everything else
 		Glop.fire('glop:dragging') // for textnotes and clipart landmarks etc...
-		Scale.show()
+		Scale.show() // update the map scale
 	},
 	/**
 	 * Adjusts size of canvas element to match browser window size

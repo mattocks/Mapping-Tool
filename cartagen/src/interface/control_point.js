@@ -6,18 +6,6 @@ ControlPoint = Class.create({
 		this.parent_shape = parent
 		this.color = '#200'
 		this.dragging = false
-		if(parent instanceof Region){
-			this.tool = 'Region'
-		}
-		else if (parent instanceof Path){
-			this.tool = 'Path'
-		}
-		else if (parent instanceof Ellipse){
-			this.tool = 'Ellipse'
-		}
-		else if (parent instanceof Rectangle){
-			this.tool = 'Rectangle'
-		}
 		this.eventA = this.draw.bindAsEventListener(this)
 		this.eventB = this.click.bindAsEventListener(this)
 		Glop.observe('glop:postdraw', this.eventA)
@@ -74,14 +62,14 @@ ControlPoint = Class.create({
 		this.dragging = false
 	},
 	click: function() {
-		if (this.mouse_inside() /*&& Tool.active!=this.tool*/) {
+		if (this.mouse_inside()) {
 			this.color = '#f00'
 			this.parent_shape.active = true
 			Landmark.current = this.parent_shape.id
-			Tool.Editor.over_point = true
+			Landmark.over_point = true
 			this.parent_shape.inside_point = true
 			//LandmarkEditor.setCurrent(this)
-			Tool.Editor.obj = this
+			Landmark.obj = this
 		}
 	},
 	hover: function() {
@@ -89,8 +77,7 @@ ControlPoint = Class.create({
 		this.dragging = false
 	},
 	drag: function() {
-		//console.log(Tool.Editor.obj)
-		if (this.parent_shape.active && Tool.Editor.obj == this) {
+		if (this.parent_shape.active && Landmark.obj == this) {
 			if (!this.dragging) {
 				this.dragging = true
 				this.drag_offset_x = Map.pointer_x() - this.x

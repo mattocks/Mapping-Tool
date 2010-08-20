@@ -1,6 +1,6 @@
 <?php
 /**
- * Processes uploaded images and creates a landmark
+ * Processes uploaded images and creates a landmark. This has a resize function and is no longer used.
  */
 include("connection.php");
 $img = $_FILES['image'];

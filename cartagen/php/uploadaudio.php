@@ -1,4 +1,8 @@
 <?php
+/*
+ * Saves an audio file to the server and creates a database entry
+ * Make sure that audio directory has proper permissions to write
+ */
 include("connection.php");
 // Check validity of file upload
 if (!is_uploaded_file($_FILES['voicefile']['tmp_name'])) die("<script>alert('voicefile not found')</script>");

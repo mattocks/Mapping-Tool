@@ -1,22 +1,26 @@
 /*
- * Contains methods for searching the landmarks in the map.
+ * Contains methods for searching the landmarks in the map. Does not search images at this point.
 */
 var Search = {
-	toggle: function(){
-		if($('searchresults').style.display == 'inline'){
-			$('searchresults').style.display = 'none'
-			Landmark.unhighlight()
-			Glop.trigger_draw()
-		}
-		else if($('searchresults').style.display == 'none'){
-			Search.openBar()
-		}
-	},
-	openBar: function(){
+	/*
+	 * Shows the search results
+	 */
+	openResults: function(){
 		$('searchresults').style.display = 'inline'
 	},
+	/*
+	 * Hides the search results and unhighlights any highlighted landmarks
+	 */
+	closeResults: function(){
+		$('searchresults').style.display = 'none'
+		Landmark.unhighlight()
+		Glop.trigger_draw()
+	},
+	/*
+	 * Displays results for a search query in upper right
+	 */
 	searchLandmarks: function(){
-		Search.openBar()
+		Search.openResults()
 		Search.clear()
 		var found = false
 		var color = 'rgb(245, 245, 245)'
@@ -33,6 +37,9 @@ var Search = {
 			$('holder').insert('Sorry, no results found')
 		}
 	},
+	/*
+	 * Resets the search results
+	 */
 	clear: function(){
 		if($('holder') != null){
 			$('holder').remove()
@@ -40,6 +47,7 @@ var Search = {
 		$('searchresults').insert('<div id="holder"></div>')
 	},
 }
+// set up the search results window (initially hidden)
 document.observe("dom:loaded", function(){
-	document.body.insert('<div id="searchresults" style="position: absolute; display: none; z-index: 2; top: 47px; width: 200px; bottom: 0px; background-color: white; overflow:auto; right: 0px; left: auto; border-left:3px solid rgb(60, 60, 60)"><div style="position: relative; margin-left: auto; margin-right: 5px; top: 3px; width:7px;"><span style="cursor: pointer;" onclick="Search.toggle()">X</span></div></div>');
+	document.body.insert('<div id="searchresults" style="position: absolute; display: none; z-index: 2; top: 47px; width: 200px; bottom: 0px; background-color: white; overflow:auto; right: 0px; left: auto; border-left:3px solid rgb(60, 60, 60)"><div style="position: relative; margin-left: auto; margin-right: 5px; top: 3px; width:7px;"><span style="cursor: pointer;" onclick="Search.closeResults()">X</span></div></div>');
 })

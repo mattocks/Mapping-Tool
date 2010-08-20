@@ -1,6 +1,7 @@
 <?php
 /**
- * Processes uploaded images and creates a landmark
+ * Processes uploaded images and saves into the database.
+ * Make sure that upload directory has proper permissions for writing
  */
 include("connection.php");
 $img = $_FILES['image'];
@@ -29,11 +30,11 @@ if(mysql_query("INSERT INTO `landmarks` (`map`, `type`, `label`) VALUES ($map, 7
 		echo "<script type=\"text/javascript\">parent.Modalbox.hide();parent.Warper.new_image('upload/$id$ext',$id,true);console.log('yay');parent.Warper.images.last().save();</script>";
 	}
 	else{
-		echo "<script>alert('Upload failed, DB entry created...')</script>";
+		echo "<script type=\"text/javascript\">alert('Upload failed, DB entry created...')</script>";
 	}
 }
 else {
-	echo "<script>alert('Could not insert values into database')</script>Could not insert values into database";
+	echo "<script type=\"text/javascript\">alert('Could not insert values into database')</script>Could not insert values into database";
 	echo mysql_error();
 }
 ?>

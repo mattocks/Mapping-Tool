@@ -1,6 +1,6 @@
 <?php
 /**
- * Creates a map.
+ * Creates a map
  */
 include("connection.php");
 $title = mysql_real_escape_string(stripslashes($_GET['title']));

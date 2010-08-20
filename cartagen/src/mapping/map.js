@@ -33,26 +33,6 @@ var Map = {
 		this.resolution = Math.round(Math.abs(Math.log(Map.zoom)))
 	},
 	/**
-	 * Allows map to be zoomed in
-	 */
-	zoom_in: function() {
-		if (Map.zoom <= 1.92){
-			Map.zoom+=0.1
-			console.log(Map.zoom)
-			Glop.trigger_draw()
-		}
-	},
-	/**
-	 * Allows map to be zoomed out
-	 */
-	zoom_out: function() {
-		if (Map.zoom >= 0.18){
-			Map.zoom-=0.1
-			console.log(Map.zoom)
-			Glop.trigger_draw()
-		}
-	},
-	/**
 	 * Mouse's x-coordinate, in the map's coordinate system
 	 * @type Number
 	 */

@@ -2,6 +2,9 @@
  * @namespace The 'Pan' tool and associated methods.
  */
 Tool.Pan = {
+	activate: function(){
+		Warper.locked = true
+	},
 	mousedown: function(event) {
 	        Map.x_old = Map.x
 	        Map.y_old = Map.y

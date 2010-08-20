@@ -1,4 +1,7 @@
 <?php
+/*
+ * Calls load_landmark for IDs separated by comma in querystring parameter ids
+ */
 header("Content-type: text/javascript");
 include("connection.php");
 $ids = explode(",", trim($_GET['ids'], ","));

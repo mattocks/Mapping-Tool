@@ -1,4 +1,8 @@
 <?php
+/*
+ * Reads the Cartagen page to get the latitude and longitude of a location typed into the 
+ * location page of the creation box. The variables are stored as $lat and $lon.
+ */
 header("Content-type: text/plain");
 $url = "http://cartagen.org/find/" . str_replace(" ", "-", $_GET["location"]);
 $handle = fopen($url, "r");

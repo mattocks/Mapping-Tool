@@ -262,6 +262,7 @@ var Cartagen = {
 		})
 		this.feature_queue = []
 		
+
 		if (Prototype.Browser.MobileSafari || window.PhoneGap) User.mark()
 	},
     /**

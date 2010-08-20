@@ -1,6 +1,7 @@
 <?php
 /**
- * Stores the last changed states of landmarks. Session is cleared when someone navigates away from the open map.
+ * Stores the last changed states of landmarks. Session is cleared when someone navigates away from the open map; 
+ * request is sent to the server.
  */
 ERROR_REPORTING(E_NONE);
 session_start();
@@ -17,7 +18,7 @@ if($_GET['undo'] == 'true'){
 	$id = $last_action['id'];
 	$update_query = '';
 	foreach ($last_action as $property => $value){
-		if($property != 'timestamp'){
+		if($property != 'timestamp'){ // preserve all values except for timestamp
 			$update_query .= "`$property` = '".mysql_real_escape_string($value)."', ";
 		}
 	}
@@ -25,7 +26,7 @@ if($_GET['undo'] == 'true'){
 	$update_action = "UPDATE `landmarks` SET $update_query WHERE `id` = $id";
 	//$created = false;
 	mysql_query($update_action); // assume it exists
-	if(mysql_affected_rows() == 0){
+	if(mysql_affected_rows() == 0){ // doesn't exist, now recreate
 		$create_query_keys = '';
 		$create_query_values = '';
 		foreach ($last_action as $property => $value){

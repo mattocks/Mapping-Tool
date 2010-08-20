@@ -13,7 +13,7 @@ $desc = mysql_real_escape_string($orig_desc);
 $icon = mysql_real_escape_string($_POST['icon']);
 $map = $_POST['mapid'];
 $color = $_POST['color'];
-if($_FILES['image']){
+if($_FILES['image']){ // use the separate image upload script
 	include("upload.php");
 }
 else if(mysql_query("INSERT INTO `landmarks` (`map`, `type`, `points`, `label`, `desc`, `icon`, `color`) VALUES ($map, $type, '$points', '$label', '$desc', '$icon', '$color')", $con)){

@@ -36,7 +36,7 @@ while ($row = mysql_fetch_array($result2)) {
 	}
 }
 
-// load icons
+// load available icons
 $dir = '../../icons';
 $files = scandir($dir);
 $output = "[";

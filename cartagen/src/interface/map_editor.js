@@ -1,17 +1,12 @@
+/**
+ * Contains methods for handling maps
+ */
 MapEditor = {
-	create: function(){
-		Modalbox.show('Enter a title<br /><form id="lndmrkfrm" onsubmit="MapEditor.newMap();Modalbox.hide();return false"><input type="text" id="maptitle" /><br /><br />Description<br /><textarea id="desc" name="desc" style="height: 200px; width: 400px;"></textarea><br /><input type="submit" value="Make" /><input type="button" value="Cancel" onclick="Modalbox.hide()" /></form>', {title: 'Create a new map'})
-	},
+	/**
+	 * Shows the map loading window. For now, goes back to the listing homepage.
+	 */
 	showLoad: function(){
 		window.location = './'
-		/*
-		new Ajax.Request('landmark.php', {
-		 	method: 'get',
-		  	parameters: {
-				map: 'list',
-		  	},
-		})
-		*/
 	},
 	newMap: function(){
 		new Ajax.Request('cartagen/php/createmap.php', {
@@ -27,12 +22,10 @@ MapEditor = {
 			}
 		})
 	},
+	/*
+	 * Loads a user-created map into the window.
+	 */
 	load: function(map, no_auto_locate){
-		/*
-		if($('holder') != null){
-			$('holder').remove()
-		}
-		*/
 		Landmark.current = null
 		Landmark.landmarks.each(function(l){
 			var lndmrk = l.value
@@ -58,15 +51,20 @@ MapEditor = {
 		//$('mapper').insert('<div id=\'holder\'></div>')
 		Glop.trigger_draw(2)
 	},
+	/**
+	 * Called to update the map if it's changed
+	 */
 	refresh: function(){
 		new Ajax.Request('cartagen/php/refresh.php', {
 			method: 'get',
 			parameters: {
 				map: Landmark.map,
 			},
-			//onSuccess
 		})
 	},
+	/**
+	 * Saves the default location and zoom for the map
+	 */
 	center: function(){
 		new Ajax.Request('cartagen/php/editmap.php', {
 		 	method: 'get',
@@ -82,14 +80,20 @@ MapEditor = {
 			}
 		})
 	},
+	/**
+	 * Shows a window for editing map information.
+	 */
 	edit: function(){
 		Modalbox.show('Title<br /><form id="lndmrkfrm" onsubmit="MapEditor.editData();Modalbox.hide();return false"><input type="text" id="maptitle" value="'+Landmark.mapTitle+'"/><br /><br /><textarea id="desc" name="desc" style="height: 200px; width: 400px;">'+Landmark.mapDesc+'</textarea><br /><input type="submit" value="Edit" /><input type="button" value="Cancel" onclick="Modalbox.hide()" /></form>', {title: 'Edit this map'})
 	},
+	/**
+	 * Sends new map information to the server.
+	 */
 	editData: function(){
 		var title = $('maptitle').value
 		var desc = $('desc').value
 		new Ajax.Request('cartagen/php/editmap.php', {
-		 	method: 'get',
+		 	method: 'post',
 		  	parameters: {
 				mapid: Landmark.map,
 				title: title,
@@ -102,21 +106,8 @@ MapEditor = {
 			}
 		})
 	},
-	/*
-	remove: function(id){
-		if(confirm('Are you sure you want to delete this map entirely? Press OK to continue or Cancel to stop.')){
-			new Ajax.Request('cartagen/php/editmap.php', {
-			 	method: 'get',
-			  	parameters: {
-					removemap: id,
-			  	},
-				onSuccess: function(r){
-				}
-			})
-		}
-	}
-	*/
 }
+// load a map if specified and refreshes it every 10 seconds
 document.observe("dom:loaded", function() {
 	if(location.search.toQueryParams().map){
 		MapEditor.load(location.search.toQueryParams().map)
@@ -134,6 +125,7 @@ document.observe("dom:loaded", function() {
 		}
 	}	
 })
+// clear out the undo session
 window.onbeforeunload = function(){
 	new Ajax.Request('cartagen/php/undo.php?destroy=true');
 }
