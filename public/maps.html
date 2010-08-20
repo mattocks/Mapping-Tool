@@ -100,14 +100,10 @@
 		document.observe('cartagen:init', setup)
 		// load in the landmarks
 		document.observe("dom:loaded", function() {
-			var lang = 'pt'
-			if(location.search.toQueryParams().language){
-				lang = location.search.toQueryParams().language
-			}
 			new Ajax.Request('cartagen/php/tooltips.php', {
 				method: 'get',
 				parameters: {
-					language: lang,
+					lang: 'en',
 				}
 			})
 			/*

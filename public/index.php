@@ -1,14 +1,3 @@
-<?php
-session_start();
-// set up the language: default language is in settings.php
-include("cartagen/php/settings.php");
-if(!isset($_SESSION['language'])){
-	$_SESSION['language'] = $default_language;
-}
-if($_GET['language']){
-	$_SESSION['language'] = $_GET['language'];
-}
-?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -52,6 +41,7 @@ The following is a list of user-submitted maps. To create a new map, use the for
 </div>
 	<?php
 	include("cartagen/php/connection.php");
+	$odd = false;
 	$result = mysql_query("SELECT * FROM `maps`", $con);
 	include("mapinfo.php");
 	show_map_list($result);
@@ -81,12 +71,6 @@ The following is a list of user-submitted maps. To create a new map, use the for
 		<input type="hidden" name="redirect" value="true" />
 		<p><input type="submit" value="Save" /></p> 
 </form> 
-</div>
-<div>
-<p>
-<a href="?language=en">English</a><br />
-<a href="?language=pt">Portuguese</a>
-</p>
 </div>
 </td></tr></table>
 </body>

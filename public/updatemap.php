@@ -48,7 +48,7 @@ while ($row = mysql_fetch_array($result)) {
 <p><a href="maps.html?map=<?php echo $map; ?>&locked=true">View this map</a></p>
 <p>Edit this map</p>
 <?php if ($_GET['saved'] == 'true'){ echo '<p><span style="background-color: rgb(0,240,0)">Map saved</span></p>'; } ?>
-<form action="cartagen/php/editmap.php" method="post">
+<form action="cartagen/php/editmap.php" method="get">
 		<input type="hidden" name="mapid" value="<?php echo $map; ?>" />
 		<label for="title">Name</label><br /> 
 		<input class="text" type="text" name="title" value="<?php echo $name; ?>" id="title"><br /> 
